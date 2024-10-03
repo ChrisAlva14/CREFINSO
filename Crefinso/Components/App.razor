@@ -5,76 +5,41 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+
+    <!-- Estilos -->
     <link rel="stylesheet" href="app.min.css" />
     <link rel="stylesheet" href="Crefinso.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
+    <!-- HeadOutlet (Blazor-specific) -->
     <HeadOutlet />
 
-    <style>
-        /* Estilos por defecto */
-        body {
-            background-color: white;
-            color: black;
-        }
-
-        header, aside, .bg-white {
-            background-color: white;
-            color: black;
-        }
-
-        /* Estilos para el modo oscuro */
-        .dark-mode body {
-            background-color: #121212;
-            color: #ffffff;
-        }
-
-        .dark-mode header,
-        .dark-mode aside, 
-        .dark-mode nav,
-        .dark-mode .bg-white {
-            background-color: #1e1e1e;
-            color: #ffffff;
-        }
-
-        /* added styles to target labels in dark mode */
-        .dark-mode h1,
-        .dark-mode a{
-            color: #ffffff; /* white color for labels in dark mode */
-        }
-
-        .dark-mode a:hover{
-            background-color: green;
-
-        }
-
-        .dark-mode .perfil:hover{
-            color: #000;
-        }
-    </style>
 </head>
 
-<body>
+<body class="bg-background  transition-opacity duration-300" >
+    <!-- Enrutamiento para Blazor -->
     <Routes />
+
+    <!-- Scripts -->
     <script src="_framework/blazor.web.js"></script>
     <script>
-        // Alternar el modo oscuro y guardar en localStorage
+        // Alternar el modo oscuro y guardar la preferencia en localStorage
         function toggleDarkMode() {
             const isDarkMode = document.documentElement.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
         }
 
-        // Al cargar la página, verificar el valor guardado en localStorage
-        document.addEventListener('DOMContentLoaded', (event) => {
+        // Al cargar la página, aplicar el modo oscuro si está habilitado en localStorage
+        document.addEventListener('DOMContentLoaded', () => {
             const darkMode = localStorage.getItem('darkMode');
             if (darkMode === 'enabled') {
                 document.documentElement.classList.add('dark-mode');
             }
         });
-
     </script>
-
 </body>
 
 </html>
