@@ -58,13 +58,13 @@ aside,
 
 /* Texto adicional en modo oscuro */
 .dark-mode h1,
-.dark-mode a {
+.dark-mode a{
     color: #ffffff;
 }
 
-    .dark-mode a:hover {
-        background-color: green;
-    }
+.dark-mode a:hover {
+    background-color: green;
+}
 
 .dark-mode .perfil:hover {
     color: #000000;
@@ -93,4 +93,16 @@ aside,
 }
 .dark-mode .bg-red-100 {
     background-color: rgb(153 27 27);
+}
+
+.dark-mode .text-green-800{
+    color: white;
+}
+
+.dark-mode .text-yellow-800 {
+    color: white;
+}
+
+.dark-mode .text-red-800 {
+    color: white;
 }
