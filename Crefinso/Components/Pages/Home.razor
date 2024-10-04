@@ -59,13 +59,151 @@
             <h2 class="text-gray-700 text-lg font-semibold">Pagos Atrasados</h2>
             <p class="text-4xl font-bold">34</p>
         </div>
+        <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md w-72 m-4">
+            <h2 class="text-gray-700 text-lg font-semibold">Tasa de Morosidad</h2>
+            <p class="text-4xl font-bold">2.4%</p>
+        </div>
     </section>
 
-    <!-- Gráficos (Placeholder) -->
-    <div class="mt-8 bg-white rounded-lg shadow p-6 m-5">
-        <h3 class="text-lg font-semibold mb-4">Gráfico de Actividad</h3>
-        <div class="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+
+    <div class="grid gap-6 md:grid-cols-2 mt-6 p-6">
+        <!-- Créditos Recientes -->
+        <div class="rounded-lg border bg-white shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-2xl font-semibold leading-none">Créditos Recientes</h3>
+            </div>
+            <div class="p-6">
+                <div class="relative w-full overflow-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b">
+                            <tr>
+                                <th class="h-12 px-4 text-left font-medium text-gray-500">Cliente</th>
+                                <th class="h-12 px-4 text-left font-medium text-gray-500">Monto</th>
+                                <th class="h-12 px-4 text-left font-medium text-gray-500">Fecha</th>
+                                <th class="h-12 px-4 text-left font-medium text-gray-500">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-4">Juan Pérez</td>
+                                <td class="p-4">$5,000</td>
+                                <td class="p-4">2023-06-15</td>
+                                <td class="p-4">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-4">María González</td>
+                                <td class="p-4">$3,500</td>
+                                <td class="p-4">2023-06-14</td>
+                                <td class="p-4">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-4">Carlos Rodríguez</td>
+                                <td class="p-4">$7,200</td>
+                                <td class="p-4">2023-06-13</td>
+                                <td class="p-4">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-4">Ana Martínez</td>
+                                <td class="p-4">$4,800</td>
+                                <td class="p-4">2023-06-12</td>
+                                <td class="p-4">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-4">Luis Sánchez</td>
+                                <td class="p-4">$6,300</td>
+                                <td class="p-4">2023-06-11</td>
+                                <td class="p-4">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
+                    Ver todos los créditos
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Próximos Pagos -->
+        <div class="rounded-lg border bg-white shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-2xl font-semibold leading-none">Próximos Pagos</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Pagos individuales -->
+                <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+                    <div class="flex items-center space-x-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">ER</span>
+                        <div>
+                            <p class="font-medium">Elena Ramírez</p>
+                            <p class="text-sm text-gray-500">$2,500</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">2023-06-20</div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+                    <div class="flex items-center space-x-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">RG</span>
+                        <div>
+                            <p class="font-medium">Roberto Gómez</p>
+                            <p class="text-sm text-gray-500">$4,800</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">2023-06-22</div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+                    <div class="flex items-center space-x-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">ST</span>
+                        <div>
+                            <p class="font-medium">Sofía Torres</p>
+                            <p class="text-sm text-gray-500">$3,200</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">2023-06-25</div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+                    <div class="flex items-center space-x-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">JM</span>
+                        <div>
+                            <p class="font-medium">Javier Mendoza</p>
+                            <p class="text-sm text-gray-500">$6,100</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">2023-06-28</div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+                    <div class="flex items-center space-x-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">CO</span>
+                        <div>
+                            <p class="font-medium">Carmen Ortiz</p>
+                            <p class="text-sm text-gray-500">$1,900</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">2023-06-30</div>
+                </div>
+
+                <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
+                    Ver todos los pagos
+                </button>
+            </div>
+            
+        </div>
     </div>
+
 </div>
 
 <script>

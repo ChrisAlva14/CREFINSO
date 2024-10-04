@@ -1,0 +1,96 @@
+﻿/* DARK MODE */
+
+body {
+    background-color: #ffffff;
+    /* Blanco */
+    color: #000000;
+    /* Negro */
+}
+
+header,
+aside,
+.bg-white {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Estilos para el modo oscuro */
+.dark-mode body {
+    color: #ffffff;
+    background-color: rgb(17 24 39);
+    /* Fondo principal oscuro */
+}
+
+.dark-mode header,
+.dark-mode aside,
+.dark-mode nav,
+.dark-mode .bg-white {
+    background-color: rgb(31 41 55);
+    /* Fondo de elementos oscuros */
+    color: #ffffff;
+}
+
+/* Estilos para las tarjetas */
+.dark-mode .clientes-activos {
+    background-color: #2050d6;
+    /* Azul para Clientes Activos */
+    color: #ffffff;
+}
+
+.dark-mode .prestamos-activos {
+    background-color: #1f9640;
+    /* Verde para Préstamos Activos */
+    color: #ffffff;
+}
+
+.dark-mode .pagos-atrasados {
+    background-color: #b96317;
+    /* Naranja/marrón para Pagos Atrasados */
+    color: #ffffff;
+}
+
+/* Fondo del gráfico de actividad */
+.dark-mode .grafico-actividad {
+    background-color: #2c3a4b;
+    /* Fondo gris oscuro del gráfico */
+    color: #ffffff;
+}
+
+/* Texto adicional en modo oscuro */
+.dark-mode h1,
+.dark-mode a {
+    color: #ffffff;
+}
+
+    .dark-mode a:hover {
+        background-color: green;
+    }
+
+.dark-mode .perfil:hover {
+    color: #000000;
+}
+
+/* Estilos del panel lateral (menú) */
+.dark-mode aside {
+    color: #7b8592;
+    /* Gris claro para texto en el panel lateral */
+}
+
+.dark-mode .stat-card h2 {
+    color: #fff;
+}
+
+.dark-mode .bg-blue-100 {
+    background-color: rgb(30 64 175);
+}
+
+.dark-mode .bg-green-100 {
+    background-color: rgb(22 101 52);
+}
+
+.dark-mode .bg-yellow-100 {
+    background-color: rgb(133 77 14);
+}
+.dark-mode .bg-red-100 {
+    background-color: rgb(153 27 27);
+}
