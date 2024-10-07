@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="app.min.css" />
     <link rel="stylesheet" href="Crefinso.styles.css" />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/png" href="logoCrefinsodark.png" />
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,20 +27,34 @@
     <!-- Scripts -->
     <script src="_framework/blazor.web.js"></script>
     <script>
-        // Alternar el modo oscuro y guardar la preferencia en localStorage
+        // Alternar el modo oscuro y cambiar el logo
         function toggleDarkMode() {
             const isDarkMode = document.documentElement.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+
+            // Obtener el logo y cambiar el src
+            const logo = document.getElementById('logo');
+            if (isDarkMode) {
+                logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+            } else {
+                logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+            }
         }
 
         // Al cargar la página, aplicar el modo oscuro si está habilitado en localStorage
         document.addEventListener('DOMContentLoaded', () => {
             const darkMode = localStorage.getItem('darkMode');
+            const logo = document.getElementById('logo');
+
             if (darkMode === 'enabled') {
                 document.documentElement.classList.add('dark-mode');
+                logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+            } else {
+                logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
             }
         });
     </script>
+
 </body>
 
 </html>
