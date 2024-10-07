@@ -30,25 +30,6 @@ aside,
     color: #ffffff;
 }
 
-/* Estilos para las tarjetas */
-.dark-mode .clientes-activos {
-    background-color: #2050d6;
-    /* Azul para Clientes Activos */
-    color: #ffffff;
-}
-
-.dark-mode .prestamos-activos {
-    background-color: #1f9640;
-    /* Verde para Préstamos Activos */
-    color: #ffffff;
-}
-
-.dark-mode .pagos-atrasados {
-    background-color: #b96317;
-    /* Naranja/marrón para Pagos Atrasados */
-    color: #ffffff;
-}
-
 /* Fondo del gráfico de actividad */
 .dark-mode .grafico-actividad {
     background-color: #2c3a4b;
@@ -95,14 +76,17 @@ aside,
     background-color: rgb(153 27 27);
 }
 
-.dark-mode .text-green-800{
-    color: white;
-}
-
-.dark-mode .text-yellow-800 {
-    color: white;
-}
-
+.dark-mode .text-green-800,
+.dark-mode .text-yellow-800,
 .dark-mode .text-red-800 {
     color: white;
+}
+
+.dark-mode .bg-black{
+    background-color:rgb(255,255,255);
+    color: #000;
+}
+
+.dark-mode #buscar{
+    color: #000;
 }
