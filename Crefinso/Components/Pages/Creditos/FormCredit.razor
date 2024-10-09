@@ -1,18 +1,20 @@
 ﻿@page "/formCredit"
 
+
+
 <div class=" mx-auto p-4">
     <div class="!visible transition-opacity duration-150 bg-background text-foreground !opacity-100" style="visibility:hidden;opacity:0">
         <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full mx-auto">
             <div class="flex flex-col space-y-1.5 p-6">
                 <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Solicitud de Préstamo</h3>
-                <p class="text-sm text-muted-foreground">Por favor, complete todos los campos requeridos.</p>
+                <p class="text-sm text-muted-foreground">Por medio de la presente hago llegar ante ustedes una solicitud de Préstamo de manera urgente, por lo cual comparto mi información personal para que sea sometida a análisis del Comité de Créditos:</p>
             </div>
             <form>
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="name">Nombre</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" required="" value="" name="name">
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="name">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="birthdate">Fecha de Nacimiento</label>
@@ -33,41 +35,41 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone"">No. de Teléfono (Fijo/Celular)</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="phone" required="" value="" name="phone">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone">No. de Teléfono (Fijo/Celular)</label>
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="phone">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="workplace">Lugar de Trabajo</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="workplace" required="" value="" name="workplace">
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="workplace">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="position"">Cargo que desempeña</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="position" required="" value="" name="position">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="position">Cargo que desempeña</label>
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="position">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="salary"">Sueldo Base</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="salary" required="" type="number" value="" name="salary">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="salary">Sueldo Base</label>
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" type="number" name="salary">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="startDate"">Fecha de Ingreso</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="startDate" required="" type="date" value="" name="startDate">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="startDate">Fecha de Ingreso</label>
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" type="date" name="startDate">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="workPhone">No. de Teléfono Trabajo</label>
-                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="workPhone" required="" value="" name="workPhone">
+                            <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="workPhone">
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="workAddress">Dirección del Trabajo</label>
-                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="workAddress" required="" value="" name="workAddress">
+                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="workAddress">
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="loanAmount">Cantidad Solicitada</label>
-                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="loanAmount" required="" type="number" value="" name="loanAmount">
+                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="buscar" name="loanAmount">
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Préstamo destinado para:</label>
@@ -76,35 +78,35 @@
                                 <input type="checkbox" id="purpose1" name="purpose" value="Adquisición, reparación, remodelación y alquiler de vivienda" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose1">Adquisición, reparación, remodelación y alquiler de vivienda</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose2" name="purpose" value="Adquisición de muebles y enseres necesarios para el hogar" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose2">Adquisición de muebles y enseres necesarios para el hogar</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose3" name="purpose" value="Consolidación de deudas" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose3">Consolidación de deudas</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose4" name="purpose" value="Pago por servicios de educación" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose4">Pago por servicios de educación</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose5" name="purpose" value="Inversiones en pequeños negocios" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose5">Inversiones en pequeños negocios</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose6" name="purpose" value="Gastos personales, imprevistos" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose6">Gastos personales, imprevistos</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose7" name="purpose" value="Gastos médicos y de hospitalización" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose7">Gastos médicos y de hospitalización</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose8" name="purpose" value="Servicios funerales del cónyuge, padres e hijos" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose8">Servicios funerales del cónyuge, padres e hijos</label>
                             </div>
-                            <div class="flex items-center space-x-2"">
+                            <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="purpose9" name="purpose" value="Viajes al exterior con fines culturales o de salud" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                                 <label for="purpose9">Viajes al exterior con fines culturales o de salud</label>
                             </div>
@@ -112,7 +114,7 @@
                     </div>
                 </div>
                 <div class="flex items-center p-6">
-                    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full" type="submit">Enviar Solicitud</button>
+                    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-danger text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"  type="submit">Enviar Solicitud</button>
                 </div>
             </form>
         </div>
