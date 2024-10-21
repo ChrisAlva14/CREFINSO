@@ -1,0 +1,100 @@
+﻿@page "/"
+
+@using Crefinso.DTOs
+@using Crefinso.Services
+
+@inject AuthServices authServices
+@inject NavigationManager navigationManager
+
+@code {
+    private UserSession userSession = new UserSession();
+    private string errorMessage;
+
+    private bool isAuthenticated;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticated();
+
+            if (isAuthenticated)
+            {
+                navigationManager.NavigateTo("/dashboard");
+            }   
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task Login()
+    {
+        var token = await authServices.Login(userSession);
+
+        if (string.IsNullOrEmpty(token))
+        {
+            errorMessage = "CREDENCIALES INCORRECTAS";
+
+            return;
+        }
+
+        await authServices.SetToken(token);
+        navigationManager.NavigateTo("/dashboard", true);
+    }
+}
+
+<div class="flex h-screen">
+    <!-- Sección de la imagen -->
+    <div class="hidden lg:block lg:w-1/2">
+        <img src="https://cdn.pixabay.com/photo/2024/01/06/02/44/ai-generated-8490532_1280.png" alt="Imagen decorativa" class="object-cover w-full h-full">
+    </div>
+
+    <!-- Sección del formulario -->
+    <div class="flex w-full lg:w-1/2 min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <img class="mx-auto h-15 w-auto" id="logo" src="logoCrefinsowhite.png" alt="CREFINSO">
+            <p class="mt-2 text-center text-md text-gray-600">
+                Inicia sesión en tu cuenta
+            </p>
+        </div>
+
+
+        <EditForm Model="userSession" OnValidSubmit="Login">
+
+            <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nombre de Usuario</label>
+                        <div class="mt-1">
+                            <InputText @bind-Value="userSession.UserName" type="text" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <div class="mt-1">
+                            <InputText @bind-Value="userSession.UserPassword" type="password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end">
+                        <div class="text-sm">
+                            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">¿Olvidaste tu contraseña?</a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Iniciar sesión
+                    </button>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 " role="alert">
+                            @errorMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>

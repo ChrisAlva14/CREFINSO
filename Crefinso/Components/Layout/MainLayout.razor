@@ -1,16 +1,26 @@
-﻿@inherits LayoutComponentBase
+﻿@using Crefinso.Services
+@inherits LayoutComponentBase
 
-<div class="page flex">
-    <!-- Sidebar -->
+    <div class="page flex">
+    @if (isAuthenticated)
+    {
         <NavMenu />
-    <!-- Main content -->
-    <div class="ml-64 flex flex-col w-screen">
-        <Header />
-        <main>
+
+        <div class="ml-64 flex flex-col w-screen">
+            <Header />
+            <main>
+                @Body
+            </main>
+        </div>
+    }
+    else
+    {
+        <main class="w-full h-full">
             @Body
         </main>
+    }
+        
     </div>
-</div>
 
 <!-- Error UI -->
 <div id="blazor-error-ui">
@@ -18,3 +28,20 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@inject AuthServices authServices
+@inject NavigationManager navigationManager
+
+@code {
+    private bool isAuthenticated;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticated();
+
+            StateHasChanged();
+        }
+    }
+}
