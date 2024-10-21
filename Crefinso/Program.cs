@@ -1,10 +1,18 @@
 using Crefinso.Components;
+using Crefinso.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+builder.Services.AddScoped(o => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7146/"),
+});
+
+builder.Services.AddScoped<AuthServices>();
+
 
 var app = builder.Build();
 
@@ -21,7 +29,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
