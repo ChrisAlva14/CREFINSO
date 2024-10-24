@@ -30,13 +30,6 @@ aside,
     color: #ffffff;
 }
 
-/* Fondo del gráfico de actividad */
-.dark-mode .grafico-actividad {
-    background-color: #2c3a4b;
-    /* Fondo gris oscuro del gráfico */
-    color: #ffffff;
-}
-
 /* Texto adicional en modo oscuro */
 .dark-mode h1,
 .dark-mode a{
@@ -90,3 +83,8 @@ aside,
 .dark-mode #buscar{
     color: #000;
 }
+
+.dark-mode .userWhite {
+    color: #fff;
+}
+
