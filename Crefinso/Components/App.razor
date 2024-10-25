@@ -15,10 +15,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-
     <!-- HeadOutlet (Blazor-specific) -->
     <HeadOutlet @rendermode="InteractiveServer" />
-
 </head>
 
 <body>
@@ -37,10 +35,12 @@
 
             // Obtener el logo y cambiar el src
             const logo = document.getElementById('logo');
-            if (isDarkMode) {
-                logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
-            } else {
-                logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+            if (logo) {
+                if (isDarkMode) {
+                    logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                } else {
+                    logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                }
             }
         }
 
@@ -51,13 +51,39 @@
 
             if (darkMode === 'enabled') {
                 document.documentElement.classList.add('dark-mode');
-                logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                if (logo) {
+                    logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                }
             } else {
-                logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                if (logo) {
+                    logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                }
             }
         });
+
+        // Observar cambios en el DOM para asegurarse de que el logo se actualice si se carga dinámicamente
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    const darkMode = localStorage.getItem('darkMode');
+                    const logo = document.getElementById('logo');
+
+                    if (darkMode === 'enabled') {
+                        document.documentElement.classList.add('dark-mode');
+                        if (logo) {
+                            logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                        }
+                    } else {
+                        if (logo) {
+                            logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                        }
+                    }
+                }
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
     </script>
 </body>
 
 </html>
-

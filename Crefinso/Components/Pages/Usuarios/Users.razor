@@ -11,6 +11,8 @@
     private string errorMessage;
     private bool isLoading = true; // Variable para controlar el estado de carga
     private UserRequest newUser = new UserRequest();
+    private UserResponse editingUser = null;
+    private bool isEditModalVisible = false; // Propiedad para controlar la visibilidad del modal
 
 
     protected override async Task OnInitializedAsync()
@@ -33,6 +35,7 @@
         }
     }
 
+    //CREAR USUARIO
     private async Task HandleCreateUser()
     {
         try
@@ -59,6 +62,82 @@
         }
     }
 
+    //MODIFICAR USUARIO
+    private void StartEditUser(UserResponse user)
+    {
+        editingUser = user;
+        isEditModalVisible = true; // Mostrar el modal
+    }
+
+    private async Task HandleEditUser()
+    {
+        try
+        {
+            bool success = await userService.UpdateUser(editingUser);
+            if (success)
+            {
+                users = await userService.GetUsers(); // Actualizar la lista de usuarios
+                CloseEditModal(); // Cerrar el modal
+                await Swal.FireAsync("Éxito", "Usuario actualizado correctamente", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo actualizar el usuario", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Error", $"Hubo un error al actualizar el usuario: {ex.Message}", SweetAlertIcon.Error);
+        }
+    }
+
+    private void CloseEditModal()
+    {
+        editingUser = null;
+        isEditModalVisible = false; // Ocultar el modal
+    }
+
+
+    //ELIMINAR USUARIO
+    private async Task ConfirmDeleteUser(int userId)
+    {
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Esta acción no se puede deshacer",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Sí, eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (result.IsConfirmed)
+        {
+            await DeleteUser(userId);
+        }
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        try
+        {
+            bool success = await userService.DisableUser(userId);
+            if (success)
+            {
+                users = await userService.GetUsers(); // Actualiza la lista
+                await Swal.FireAsync("Éxito", "Usuario eliminado correctamente", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo eliminar el usuario", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "Hubo un error al eliminar el usuario", SweetAlertIcon.Error);
+        }
+    }
 }
 
 @if (users == null)
@@ -67,17 +146,16 @@
 }
 else
 {
-
     <div class="container mx-auto p-6 min-h-screen">
         <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-white rounded-lg shadow-md p-6 border">
                 <h2 class="text-2xl font-bold mb-4">Gestión de Usuarios</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
                             <tr>
                                 <th class="p-2 text-left">Código</th>
-                                <th class="p-2 text-left">Nombre</th>
+                                <th class="p-2 text-left">Usuario</th>
                                 <th class="p-2 text-left">Rol</th>
                                 <th class="p-2 text-left">Acciones</th>
                             </tr>
@@ -90,17 +168,20 @@ else
                                     <td class="p-4">@user.UserName</td>
                                     <td class="p-4">@user.UserRole</td>
                                     <td>
-                                        <button class="text-blue-500">
+                                        <!-- Botón de edición -->
+                                        <button class="text-blue-500" @onclick="() => StartEditUser(user)">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                             </svg>
-
                                         </button>
-                                        <button class="text-red-500">
+
+                                        <!-- Botón de eliminación -->
+                                        <button class="text-red-500" @onclick="() => ConfirmDeleteUser(user.UserId)">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                             </svg>
                                         </button>
+
                                     </td>
 
                                 </tr>
@@ -112,7 +193,7 @@ else
 
             @* AÑDIR UN USUARIO *@
             <EditForm Model="newUser" OnValidSubmit="HandleCreateUser">
-                <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="bg-white rounded-lg shadow-md p-6 border">
                     <h2 class="text-2xl font-bold mb-4">Añadir Usuario</h2>
 
                     <div class="mb-4">
@@ -136,4 +217,36 @@ else
         </div>
     </div>
 
+}
+
+
+@if (isEditModalVisible && editingUser != null)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-auto">
+            <h2 class="text-2xl font-bold mb-4">Editar Usuario</h2>
+
+            <EditForm Model="editingUser" OnValidSubmit="HandleEditUser">
+                <div class="mb-4">
+                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <InputText type="text" id="nombre" name="nombre" @bind-Value="editingUser.UserName" class="bg-white border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="nombre" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <InputText type="password" id="password" name="password" @bind-Value="editingUser.UserPassword" class="bg-white border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="rol" class="block text-sm font-medium text-gray-700">Rol</label>
+                    <InputSelect id="rol" name="rol" @bind-Value="editingUser.UserRole" class="bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2">
+                        <option value="Administrador">Administrador</option>
+                        <option value="Empleado">Empleado</option>
+                    </InputSelect>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Guardar Cambios</button>
+                <button type="button" class="w-full bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mt-2" @onclick="() => CloseEditModal()">Cancelar</button>
+            </EditForm>
+        </div>
+    </div>
 }
