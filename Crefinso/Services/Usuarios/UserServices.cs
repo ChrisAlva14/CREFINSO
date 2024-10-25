@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
+using Crefinso.Components.Pages.Usuarios;
 using Crefinso.DTOs;
 
 namespace Crefinso.Services.Usuarios
@@ -38,9 +40,35 @@ namespace Crefinso.Services.Usuarios
             {
                 throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS USUARIOS, POR FAVOR REINICIAR EL SISTEMA");
             }
-        
+
         }
 
+        //OBETENER USARIO POR ID
+        public async Task<UserResponse> GetUserById(int userId)
+        {
+            try
+            {
+                var token = await _authServices.GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetFromJsonAsync<UserResponse>($"api/users/{userId}");
+
+                return response;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL USUARIO, POR FAVOR REINICIAR EL SISTEMA");
+            }
+        }
+
+        //CREAR UN USUARIO
         public async Task<bool> PostUser(UserRequest newUser)
         {
             try
@@ -77,6 +105,85 @@ namespace Crefinso.Services.Usuarios
             catch (Exception ex)
             {
                 throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+            }
+        }
+
+        //MODIFICAR UN USUARIO
+
+        public async Task<bool> UpdateUser(UserResponse user)
+        {
+            try
+            {
+                var token = await _authServices.GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Construir el contenido a enviar en la solicitud
+                var data = new
+                {
+                    user.UserId,
+                    user.UserName,
+                    user.UserRole,
+                    UserPassword = string.IsNullOrEmpty(user.UserPassword) ? null : user.UserPassword
+                };
+
+                var response = await _httpClient.PutAsJsonAsync($"api/users/{user.UserId}", data);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al actualizar el usuario. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception("ERROR EN LA SOLICITUD HTTP: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+            }
+        }
+
+
+        //DESHABILITAR USUARIO
+        public async Task<bool> DisableUser(int userId)
+        {
+            try
+            {
+                var token = await _authServices.GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.DeleteAsync($"api/users/{userId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al deshabilitar el usuario. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception("ERROR EN LA SOLICITUD HTTP: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
             }
         }
 
