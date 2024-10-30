@@ -1,24 +1,12 @@
 ﻿/* DARK MODE */
 
-body {
-    background-color: #ffffff;
-    /* Blanco */
-    color: #000000;
-    /* Negro */
-}
-
-header,
-aside,
-.bg-white {
-    background-color: #ffffff;
-    color: #000000;
-}
 
 /* Estilos para el modo oscuro */
 .dark-mode body {
     color: #ffffff;
+}
+.dark-mode .bg-gray-100 {
     background-color: rgb(17 24 39);
-    /* Fondo principal oscuro */
 }
 
 .dark-mode header,
