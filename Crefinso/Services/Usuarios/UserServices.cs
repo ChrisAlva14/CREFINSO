@@ -1,7 +1,5 @@
-﻿using System.Net.Http;
+﻿using Crefinso.DTOs;
 using System.Net.Http.Headers;
-using Crefinso.Components.Pages.Usuarios;
-using Crefinso.DTOs;
 
 namespace Crefinso.Services.Usuarios
 {
@@ -16,7 +14,7 @@ namespace Crefinso.Services.Usuarios
             _authServices = authServices;
         }
 
-        public async Task<List<UserResponse>> GetUsers() 
+        public async Task<List<UserResponse>> GetUsers()
         {
             try
             {

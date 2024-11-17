@@ -28,6 +28,8 @@
     background-color: green;
 }
 
+
+
 .dark-mode .perfil:hover {
     color: #000000;
 }
@@ -68,11 +70,6 @@
     color: #000;
 }
 
-.dark-mode #buscar{
-    color: #000;
-}
-
 .dark-mode .userWhite {
     color: #fff;
 }
-

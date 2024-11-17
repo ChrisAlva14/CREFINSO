@@ -1,7 +1,33 @@
-﻿@using Crefinso.Services
+﻿@using Crefinso.DTOs
+@using Crefinso.Services
 @inherits LayoutComponentBase
 
-    <div>
+@inject AuthServices authServices
+@inject NavigationManager navigationManager
+
+@code {
+    private bool isAuthenticated;
+    private UserSession userSession = new UserSession();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticated();
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task Logout()
+    {
+        await authServices.Logout();
+        navigationManager.NavigateTo("/", true);
+    }
+}
+
+<div>
     @if (isAuthenticated)
     {
         <div>
@@ -17,6 +43,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                             </svg>
                             <span>Dashboard</span>
+                        </NavLink>
+
+                        <NavLink href="clients" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-100 hover:text-primary rounded-lg transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                            </svg>
+
+                            <span>Clientes</span>
                         </NavLink>
 
                         <NavLink href="credits" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-100 hover:text-primary rounded-lg transition-colors duration-200">
@@ -35,13 +69,7 @@
                             <span>Pagos</span>
                         </NavLink>
 
-                        <NavLink href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-100 hover:text-primary rounded-lg transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                            </svg>
-
-                            <span>Clientes</span>
-                        </NavLink>
+                        
 
                         <NavLink href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-100 hover:text-primary rounded-lg transition-colors duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-3">
@@ -60,10 +88,8 @@
                     </nav>
 
                     <!-- Sección inferior del menú -->
-                    @if (isAuthenticated)
-                    {
                         <div class="px-4 py-4 border-t mt-auto">
-                            <NavLink href="#" @onclick=Logout class="flex items-center px-4 py-3 text-gray-700 hover:bg-red-100 hover:text-primary rounded-lg transition-colors duration-200">
+                            <NavLink href="#" @onclick=Logout class="logout flex items-center px-4 py-3 text-gray-700 hover:bg-red-100 hover:text-primary rounded-lg transition-colors duration-200">
                                 <!-- Icono de logout -->
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 size-6 mr-3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
@@ -71,7 +97,6 @@
                                 <span>Cerrar Sesión</span>
                             </NavLink>
                         </div>
-                    }
                 </aside>
 
                 <section class="flex-1 lg:ml-64">
@@ -84,15 +109,9 @@
                                     <line x1="4" x2="20" y1="18" y2="18"></line>
                                 </svg>
                             </button>
-                            <h1 class="text-2xl font-semibold" data-id="35">Dashboard</h1>
+                            <h1 class="text-2xl font-semibold" data-id="35">Dashboard Financiero</h1>
                         </div>
                         <div class="flex items-center gap-4" data-id="36">
-                            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-gray-100 hover:text-gray-900 h-10 w-10" data-id="37">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell h-4 w-4" data-id="38">
-                                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-                                </svg>
-                            </button>
                             <button onclick="toggleDarkMode()" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-gray-100 hover:text-gray-900 h-10 w-10" data-id="39">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun h-4 w-4" data-id="41">
                                     <circle cx="12" cy="12" r="4"></circle>
@@ -109,26 +128,25 @@
                             <div class="relative">
                                 <button onclick="toggleMenu()" class="justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-gray-100 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2" data-id="44" type="button" id="radix-:r3:" aria-haspopup="menu" aria-expanded="true" data-state="open" aria-controls="radix-:r4:">
                                     <span class="relative flex shrink-0 overflow-hidden rounded-full h-6 w-6" data-id="45">
-                                        <img class="aspect-square h-full w-full" data-id="46" alt="User avatar" src="https://g-qomtlv46v3n.vusercontent.net/placeholder-user.jpg">
+                                        <img class="aspect-square h-full w-full" alt="User avatar" src="https://g-qomtlv46v3n.vusercontent.net/placeholder-user.jpg">
                                     </span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4" data-id="48">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4" >
                                         <path d="m6 9 6 6 6-6"></path>
                                     </svg>
                                 </button>
+
+                                <!-- Menú desplegable -->
                                 <div id="menu-dropdown" class="absolute right-0 mt-2 w-56 z-50 bg-white border border-gray-200 rounded-md shadow-lg hidden">
                                     <div class="px-2 py-1.5 text-sm font-normal">
                                         <div class="flex flex-col space-y-1">
-                                            <p class="text-sm font-medium">Usuario</p>
-                                            <p class="text-xs text-gray-500">usuario@crefinso.com</p>
+                                            <div class="mt-2">
+                                                <p class="text-sm font-medium mb-1">Usuario: @userSession.UserName</p>
+                                                <p class="text-xs text-gray-500 mb-1">Rol: @userSession.UserRole</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div role="separator" class="border-t my-1"></div>
-                                    <div class="perfil cursor-pointer px-4 py-3 text-sm hover:bg-gray-100">Perfil</div>
-                                    <div class="perfil cursor-pointer px-4 py-3 text-sm hover:bg-gray-100">Configuración</div>
                                 </div>
                             </div>
-                            
-                            
                         </div>
                     </header>
                     
@@ -147,7 +165,7 @@
         </main>
     }
         
-    </div>
+</div>
 
 <!-- Error UI -->
 <div id="blazor-error-ui">
@@ -155,26 +173,3 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
-
-@inject AuthServices authServices
-@inject NavigationManager navigationManager
-
-@code {
-    private bool isAuthenticated;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            isAuthenticated = await authServices.IsAuthenticated();
-
-            StateHasChanged();
-        }
-    }
-
-    private async Task Logout()
-    {
-        await authServices.Logout();
-        navigationManager.NavigateTo("/", true);
-    }
-}
