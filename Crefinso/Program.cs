@@ -1,5 +1,6 @@
 using Crefinso.Components;
 using Crefinso.Services;
+using Crefinso.Services.Clientes;
 using Crefinso.Services.Usuarios;
 using CurrieTechnologies.Razor.SweetAlert2;
 
@@ -10,12 +11,13 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddScoped(o => new HttpClient
 {
-    BaseAddress = new Uri("https://localhost:7146/"),
+    BaseAddress = new Uri("https://localhost:7083/"),
 });
 
 builder.Services.AddSweetAlert2();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<UserServices>();
+builder.Services.AddScoped<ClientServices>();
 
 
 var app = builder.Build();
