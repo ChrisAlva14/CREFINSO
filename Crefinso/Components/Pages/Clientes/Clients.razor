@@ -2,17 +2,33 @@
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
 @inject ClientServices clienteService
-@using Crefinso.DTOs
-@using Crefinso.Services.Clientes
+@inject AuthServices authServices
 
+@using Crefinso.DTOs
+@using Crefinso.Services
+@using Crefinso.Services.Clientes
 
 @code{
     private List<ClienteResponse> clientes;
     private string errorMessage;
     private bool isLoading = true; // Variable para controlar el estado de carga
+    private bool isAuthenticated;
+    private UserSession userSession = new UserSession();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticated();
+
+            StateHasChanged();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
+
         try
         {
             // Muestra la alerta de "Cargando..."
@@ -36,11 +52,11 @@
 @if (clientes == null)
 {
 }
-else
+else if(isAuthenticated)
 {
     <div class="flex flex-wrap justify-between m-5">
         <h1 class="text-4xl font-bold">Gestión de Clientes</h1>
-        <a href="formCredit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Crear Cliente</a>
+        <a href="createClient" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Nuevo Cliente</a>
     </div>
 
     <!-- Dashboard Stats -->
@@ -66,13 +82,13 @@ else
             <table class="w-full">
                 <thead class="">
                     <tr class="">
-                        <th class="p-2 text-left">Código</th>
-                        <th class="p-2 text-left">Nombre</th>
-                        <th class="p-2 text-left">DUI</th>
-                        <th class="p-2 text-left">NIT</th>
-                        <th class="p-2 text-left">Dirección</th>
-                        <th class="p-2 text-left">Celular</th>
-                        <th class="p-2 text-left">Acciones</th>
+                        <th class="p-2 text-center">Código</th>
+                        <th class="p-2 text-center">Nombre</th>
+                        <th class="p-2 text-center">DUI</th>
+                        <th class="p-2 text-center">NIT</th>
+                        <th class="p-2 text-center">Dirección</th>
+                        <th class="p-2 text-center">Celular</th>
+                        <th class="p-2 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
