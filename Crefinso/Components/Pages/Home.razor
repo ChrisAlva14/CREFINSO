@@ -26,19 +26,19 @@
 
 <div class="grid gap-6 md:grid-cols-2 mt-6 p-6">
     <!-- Créditos Recientes -->
-    <div class="bg-white rounded-lg shadow-md border">
+    <div class="border bg-white rounded-lg shadow-md">
         <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="text-2xl font-semibold leading-none">Créditos Recientes</h3>
+            <h3 class="text-2xl font-semibold leading-none">Préstamos Recientes</h3>
         </div>
         <div class="p-6">
             <div class="relative w-full overflow-auto">
-                <table class="w-full text-sm">
-                    <thead class="border-b">
+                <table class="w-full">
+                    <thead>
                         <tr>
-                            <th class="h-12 px-4 text-left font-medium text-gray-500">Cliente</th>
-                            <th class="h-12 px-4 text-left font-medium text-gray-500">Monto</th>
-                            <th class="h-12 px-4 text-left font-medium text-gray-500">Fecha</th>
-                            <th class="h-12 px-4 text-left font-medium text-gray-500">Estado</th>
+                            <th class="h-12 px-4 text-left font-medium">Cliente</th>
+                            <th class="h-12 px-4 text-left font-medium ">Monto</th>
+                            <th class="h-12 px-4 text-left font-medium">Fecha</th>
+                            <th class="h-12 px-4 text-left font-medium">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,78 +85,76 @@
                     </tbody>
                 </table>
             </div>
-            <a href="credits" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
-                Ver todos los créditos
+            <a href="loans" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
+                Ver todos los Préstamos
             </a>
 
         </div>
     </div>
 
     <!-- Próximos Pagos -->
-    <div class="rounded-lg border bg-white shadow-sm">
+    <div class="border bg-white rounded-lg shadow-md">
         <div class="flex flex-col space-y-1.5 p-6">
             <h3 class="text-2xl font-semibold leading-none">Próximos Pagos</h3>
         </div>
         <div class="p-6 space-y-4">
             <!-- Pagos individuales -->
-            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow border dark:shadow-white">
                 <div class="flex items-center space-x-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">ER</span>
                     <div>
                         <p class="font-medium">Elena Ramírez</p>
-                        <p class="text-sm text-gray-500">$2,500</p>
+                        <p class="text-sm">$2,500</p>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500">2023-06-20</div>
+                <div class="text-sm">2023-06-20</div>
             </div>
 
-            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow border dark:shadow-white">
                 <div class="flex items-center space-x-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">RG</span>
                     <div>
                         <p class="font-medium">Roberto Gómez</p>
-                        <p class="text-sm text-gray-500">$4,800</p>
+                        <p class="text-sm ">$4,800</p>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500">2023-06-22</div>
+                <div class="text-sm ">2023-06-22</div>
             </div>
 
-            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow border dark:shadow-white">
                 <div class="flex items-center space-x-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">ST</span>
+                    
                     <div>
                         <p class="font-medium">Sofía Torres</p>
-                        <p class="text-sm text-gray-500">$3,200</p>
+                        <p class="text-sm ">$3,200</p>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500">2023-06-25</div>
+                <div class="text-sm ">2023-06-25</div>
             </div>
 
-            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow border dark:shadow-white">
                 <div class="flex items-center space-x-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">JM</span>
+                   
                     <div>
                         <p class="font-medium">Javier Mendoza</p>
-                        <p class="text-sm text-gray-500">$6,100</p>
+                        <p class="text-sm ">$6,100</p>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500">2023-06-28</div>
+                <div class="text-sm ">2023-06-28</div>
             </div>
 
-            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow border dark:shadow-white">
                 <div class="flex items-center space-x-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">CO</span>
+                   
                     <div>
                         <p class="font-medium">Carmen Ortiz</p>
-                        <p class="text-sm text-gray-500">$1,900</p>
+                        <p class="text-sm ">$1,900</p>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500">2023-06-30</div>
+                <div class="text-sm ">2023-06-30</div>
             </div>
 
-            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
-                Ver todos los pagos
-            </button>
+            <a href="payments" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
+                Ver todos los Pagos
+            </a>
         </div>
 
     </div>
