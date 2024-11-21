@@ -1286,6 +1286,11 @@ video {
     background-color: rgb(220 38 38 / var(--tw-bg-opacity));
   }
 
+  .dark\:shadow-white {
+    --tw-shadow-color: #fff;
+    --tw-shadow: var(--tw-shadow-colored);
+  }
+
   .dark\:hover\:bg-red-700:hover {
     --tw-bg-opacity: 1;
     background-color: rgb(185 28 28 / var(--tw-bg-opacity));
