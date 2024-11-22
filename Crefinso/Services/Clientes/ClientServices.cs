@@ -81,5 +81,87 @@ namespace Crefinso.Services.Clientes
                 throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
             }
         }
+
+        //MODIFICAR UN CLIENTE
+        public async Task<bool> UpdateClient(ClienteResponse client)
+        {
+            try
+            {
+                var token = await _authServices.GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Construir el contenido a enviar en la solicitud
+                var data = new
+                {
+                    client.ClienteId,
+                    client.Nombre,
+                    client.FechaNacimiento,
+                    client.DUI,
+                    client.NIT,
+                    client.Direccion,
+                    client.TelefonoCelular,
+                    client.TelefonoFijo,
+                    client.UserID
+                };
+
+                var response = await _httpClient.PutAsJsonAsync($"api/clientes/{client.ClienteId}", data);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al actualizar el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception("ERROR EN LA SOLICITUD HTTP: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+            }
+        }
+
+        //ELIMINAR UN CLIENTE
+        public async Task<bool> DeleteCliente(int clienteId)
+        {
+            try
+            {
+                var token = await _authServices.GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.DeleteAsync($"api/clientes/{clienteId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al eliminar el cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception("ERROR EN LA SOLICITUD HTTP: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+            }
+        }
     }
 }
