@@ -19,6 +19,8 @@
         public string TelefonoFijo { get; set; } = null!;
 
         public int UserID { get; set; }
+
+        public string Estado { get; set; } = null!;
     }
 
     public class ClienteRequest
@@ -40,5 +42,7 @@
         public string TelefonoFijo { get; set; } = null!;
 
         public int UserID { get; set; }
+
+        public string Estado { get; set; } = null!;
     }
 }

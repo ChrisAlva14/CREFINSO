@@ -42,6 +42,31 @@ namespace Crefinso.Services.Clientes
 
         }
 
+        //OBETENER CLIENTE POR ID POR ID
+        public async Task<ClienteResponse> GetClienteById(int clienteId)
+        {
+            try
+            {
+                var token = await _authServices.GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetFromJsonAsync<ClienteResponse>($"api/clientes/{clienteId}");
+
+                return response;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA");
+            }
+        }
+
         //CREAR NUEVO CLIENTE
         public async Task<bool> PostClient(ClienteRequest newClient)
         {
@@ -106,7 +131,8 @@ namespace Crefinso.Services.Clientes
                     client.Direccion,
                     client.TelefonoCelular,
                     client.TelefonoFijo,
-                    client.UserID
+                    client.UserID,
+                    client.Estado
                 };
 
                 var response = await _httpClient.PutAsJsonAsync($"api/clientes/{client.ClienteId}", data);
