@@ -18,7 +18,6 @@
     private bool isEditModalVisible = false;
     private ClienteResponse detailsCliente = null;
     private bool isDetailsModalVisible = false;
-    private List<string> estados = new List<string> { "Activo", "Inactivo" };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -180,10 +179,6 @@ else if(isAuthenticated)
             <h2 class="text-gray-700 text-lg font-semibold">Clientes Inactivos</h2>
             <p class="text-4xl font-bold">6</p>
         </div>
-        <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
-            <h2 class="text-gray-700 text-lg font-semibold">Clientes Desactivados</h2>
-            <p class="text-4xl font-bold">6</p>
-        </div>
     </section>
 
     <div class="p-6 m-5 border bg-white rounded-lg shadow-md">
@@ -240,20 +235,6 @@ else if(isAuthenticated)
                     }
                 </tbody>
             </table>
-        </div>
-
-        <!-- Pagination at the bottom -->
-        <div class="mt-4">
-            <div aria-label="pagination" class="flex justify-center">
-                <ul class="flex gap-1">
-                    <li><a class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 gap-1" aria-label="Previous page" href="#">Anterior</a></li>
-                    <li><a class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 w-10 border" href="#">1</a></li>
-                    <li><a class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 w-10" href="#">2</a></li>
-                    <li><a class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 w-10" href="#">3</a></li>
-                    <li><a class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 w-10" href="#">4</a></li>
-                    <li><a class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 gap-1" aria-label="Next page" href="#">Siguiente</a></li>
-                </ul>
-            </div>
         </div>
     </div>
 }
@@ -354,10 +335,8 @@ else if(isAuthenticated)
                                 Estado Cliente
                             </label>
                             <InputSelect @bind-Value="editingCliente.Estado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="Estado" required name="Estado">
-                                @foreach (var estado in estados)
-                                {
-                                    <option value="@estado">@estado</option>
-                                }
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
                             </InputSelect>
                         </div>
                     </div>
