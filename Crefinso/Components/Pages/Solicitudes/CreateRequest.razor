@@ -1,7 +1,62 @@
 ﻿@page "/createRequest"
+@using Crefinso.Services.Solicitudes
+@using Crefinso.DTOs
+@inject IJSRuntime JS
+@inject SweetAlertService Swal
+@inject NavigationManager NavigationManager
+@inject RequestServices requestService
+
 
 @code {
+    private string errorMessage;
+    private SolicitudRequest newSolicitud = new SolicitudRequest();
 
+    // Propiedad auxiliar para la conversión de ClienteID a string
+    private string ClienteIDString
+    {
+        get => newSolicitud.ClienteID.ToString();
+        set
+        {
+            if (int.TryParse(value, out int id))
+            {
+                newSolicitud.ClienteID = id;
+            }
+        }
+    }
+
+    //CREAR CLIENTE NUEVO
+    private async Task HandleCreateRequest()
+    {
+        try
+        {
+            bool success = await requestService.PostSolicitud(newSolicitud);
+            if (success)
+            {
+                // Limpia el formulario
+                newSolicitud = new SolicitudRequest();
+                // Muestra una alerta de éxito
+                await Swal.FireAsync("Éxito", "Solicitud creada correctamente", SweetAlertIcon.Success);
+
+                // Redirige a la página de clientes
+                NavigationManager.NavigateTo("/request");
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo crear la solicitud", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "Hubo un error al crear la solicitud", SweetAlertIcon.Error);
+        }
+    }
+
+    // Método para manejar el clic en el botón "Cancelar"
+    private void HandleCancel()
+    {
+        NavigationManager.NavigateTo("/request");
+    }
 }
 
 <section class="w-full flex items-center justify-center p-6">
@@ -10,31 +65,37 @@
                 <h3 class="tracking-tight text-3xl font-bold text-center">Nueva Solicitud de Préstamo</h3>
                 <p class="text-sm text-gray-500 text-center">Ingrese los detalles de la nueva solicitud de préstamo</p>
             </div>
-            <form class="p-6 pt-0 space-y-6">
+        <EditForm class="p-6 pt-0 space-y-6" Model="newSolicitud" OnValidSubmit="HandleCreateRequest">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium flex items-center gap-2" for="SolicitudId">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
-                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                                <path d="M10 9H8"></path>
-                                <path d="M16 13H8"></path>
-                                <path d="M16 17H8"></path>
-                            </svg>
-                            ID de Solicitud
-                        </label>
-                    <input id="SolicitudId" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" min="1" value="1" name="SolicitudId">
-                    </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="ClienteID">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4">
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            ID de Cliente
+                            Código Cliente
                         </label>
-                    <input id="ClienteID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" min="1" value="1" name="ClienteID">
+                    <InputText @bind-Value="ClienteIDString" id="ClienteID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" min="1" name="ClienteID" />
                     </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="Estado">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                            <path d="M10 9H8"></path>
+                            <path d="M16 13H8"></path>
+                            <path d="M16 17H8"></path>
+                            </svg>
+                            Estado
+                        </label>
+                    <InputSelect @bind-Value="newSolicitud.Estado" id="Estado" name="Estado" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="">Seleccione un estado</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Aprobado">Aprobado</option>
+                        <option value="Rechazado">Rechazado</option>
+                    </InputSelect>
+                </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="FechaSolicitud">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
@@ -45,7 +106,7 @@
                             </svg>
                             Fecha de Solicitud
                         </label>
-                        <input id="FechaSolicitud" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="date" value="" name="FechaSolicitud">
+                        <InputDate @bind-Value="newSolicitud.FechaSolicitud" id="FechaSolicitud" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required name="FechaSolicitud" />
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="CantidadSolicitada">
@@ -55,7 +116,7 @@
                             </svg>
                             Cantidad Solicitada
                         </label>
-                        <input id="CantidadSolicitada" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" value="10" min="1" name="CantidadSolicitada">
+                        <InputNumber id="CantidadSolicitada" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" @bind-Value="newSolicitud.CantidadSolicitada" min="1" name="CantidadSolicitada" />
                     </div>
                     <div class="space-y-2 md:col-span-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="DestinoPrestamo">
@@ -70,24 +131,7 @@
                         </label>
                         <input id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="text" value="" name="DestinoPrestamo">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium flex items-center gap-2" for="Estado">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
-                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                                <path d="M10 9H8"></path>
-                                <path d="M16 13H8"></path>
-                                <path d="M16 17H8"></path>
-                            </svg>
-                            Estado
-                        </label>
-                        <select id="Estado" name="Estado" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                            <option value="">Seleccione un estado</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Aprobado">Aprobado</option>
-                            <option value="Rechazado">Rechazado</option>
-                        </select>
-                    </div>
+                    
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="FechaAnalisis">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
@@ -112,9 +156,9 @@
                     </div>
                 </div>
                 <div class="flex justify-end space-x-4">
-                    <button type="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white hover:bg-gray-200 h-10 px-4 py-2">Cancelar</button>
-                    <button type="submit" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2">Guardar Solicitud</button>
+                <button type="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white hover:bg-gray-200 h-10 px-4 py-2" @onclick="HandleCancel">Cancelar</button>
+                 <button type="submit" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2">Guardar Solicitud</button>
                 </div>
-            </form>
+            </EditForm>
         </div>
     </section>

@@ -1,6 +1,7 @@
 using Crefinso.Components;
 using Crefinso.Services;
 using Crefinso.Services.Clientes;
+using Crefinso.Services.Solicitudes;
 using Crefinso.Services.Usuarios;
 using CurrieTechnologies.Razor.SweetAlert2;
 
@@ -18,6 +19,7 @@ builder.Services.AddSweetAlert2();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<ClientServices>();
+builder.Services.AddScoped<RequestServices>();
 
 
 var app = builder.Build();
