@@ -26,9 +26,13 @@
     <Routes @rendermode="InteractiveServer" />
 
     <!-- Scripts -->
-    <script src="_framework/blazor.web.js"></script>
-    
-    <script src="js/site.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="js/site.js" defer></script>
+    <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="_framework/blazor.web.js" defer></script>
+
     <script>
         // Alternar el modo oscuro y cambiar el logo
         function toggleDarkMode() {

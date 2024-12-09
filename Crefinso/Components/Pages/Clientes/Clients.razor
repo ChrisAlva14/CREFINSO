@@ -10,13 +10,14 @@
 
 @code{
     private List<ClienteResponse> clientes;
-    private string errorMessage;
-    private bool isLoading = true; // Variable para controlar el estado de carga
-    private bool isAuthenticated;
     private UserSession userSession = new UserSession();
     private ClienteResponse editingCliente = null;
-    private bool isEditModalVisible = false;
     private ClienteResponse detailsCliente = null;
+
+    private string errorMessage;
+    private bool isLoading = true;
+    private bool isAuthenticated;
+    private bool isEditModalVisible = false;
     private bool isDetailsModalVisible = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -35,14 +36,12 @@
 
         try
         {
-            // Muestra la alerta de "Cargando..."
             await JS.InvokeVoidAsync("mostrarAlertaCargando");
 
             await Task.Delay(1125);
 
             clientes = await clienteService.GetClientes();
 
-            // Indica que la carga ha finalizado
             isLoading = false;
         }
         catch (Exception ex)

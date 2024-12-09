@@ -1,0 +1,461 @@
+﻿@page "/request"
+@inject IJSRuntime JS
+@inject SweetAlertService Swal
+@inject RequestServices requestService
+@inject AuthServices authServices
+
+@using Crefinso.DTOs
+@using Crefinso.Services
+@using Crefinso.Services.Solicitudes
+
+@code{
+    private List<SolicitudResponse> solicitudes;
+    private SolicitudResponse detailsRequest = null;
+    private UserSession userSession = new UserSession();
+    private SolicitudResponse editingRequest = null;
+
+    private bool isLoading = true;
+    private string errorMessage;
+    private bool isAuthenticated;
+    private bool isDetailsModalVisible = false;
+    private bool isEditModalVisible = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticated();
+
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        try
+        {
+            await JS.InvokeVoidAsync("mostrarAlertaCargando");
+
+            await Task.Delay(1125);
+
+            solicitudes = await requestService.GetSolicitudes();
+
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    // VER DETALLES DEL CLIENTE
+    private async Task DetailsSolicitud(int solicitudId)
+    {
+        try
+        {
+            detailsRequest = await requestService.GetSolicitudById(solicitudId);
+
+            isDetailsModalVisible = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles de la solicitud", SweetAlertIcon.Error);
+        }
+    }
+
+    private void CloseDetailsModal()
+    {
+        detailsRequest = null;
+        isDetailsModalVisible = false;
+    }
+
+    //MODIFICAR SOLICITUD
+    private void StartEditSolicitud(SolicitudResponse solicitud)
+    {
+        editingRequest = solicitud;
+        isEditModalVisible = true;
+    }
+
+    //MODIFICAR UNA SOLICITUD
+
+    private async Task HandleEditRequest()
+    {
+        try
+        {
+            bool success = await requestService.UpdateSolicitud(editingRequest);
+            if (success)
+            {
+                solicitudes = await requestService.GetSolicitudes();
+                CloseEditModal();
+                await Swal.FireAsync("Éxito", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo actualizar la Solicitud", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Error", $"Hubo un error al actualizar la solicitud: {ex.Message}", SweetAlertIcon.Error);
+        }
+    }
+
+    private void CloseEditModal()
+    {
+        editingRequest = null;
+        isEditModalVisible = false;
+    }
+
+    //ELIMINAR USUARIO
+    private async Task ConfirmDeleteRequest(int solicitudId)
+    {
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Esta acción no se puede deshacer",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Sí, eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (result.IsConfirmed)
+        {
+            await DeleteSolicitud(solicitudId);
+        }
+    }
+
+    private async Task DeleteSolicitud(int solicitudId)
+    {
+        try
+        {
+            bool success = await requestService.DeleteSolicitud(solicitudId);
+            if (success)
+            {
+                solicitudes = await requestService.GetSolicitudes();
+                await Swal.FireAsync("Éxito", "Solicitud eliminado correctamente", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo eliminar la Solicitud", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "Hubo un error al eliminar la Solicitud", SweetAlertIcon.Error);
+        }
+    }
+}
+
+@if (solicitudes == null)
+{
+}
+else if(isAuthenticated)
+{
+    <div class="flex flex-wrap justify-between m-5">
+        <h1 class="text-4xl font-bold">Gestión de Solicitudes</h1>
+        <a href="createRequest" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Generar Solicitud</a>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <section class="flex flex-wrap justify-around">
+        <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
+            <h2 class="text-gray-700 text-lg font-semibold">Total de Solicitudes</h2>
+            <p class="text-4xl font-bold">11</p>
+        </div>
+        <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
+            <h2 class="text-gray-700 text-lg font-semibold">Solcitudes Activos</h2>
+            <p class="text-4xl font-bold">5</p>
+        </div>
+        <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
+            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Pendientes</h2>
+            <p class="text-4xl font-bold">4</p>
+        </div>
+        <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md w-72 m-4">
+            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Rechazadas</h2>
+            <p class="text-4xl font-bold">15</p>
+        </div>
+    </section>
+
+    <div class="p-6 m-5 border bg-white rounded-lg shadow-md">
+
+        <!-- Table displaying the credit list -->
+        <div class="relative w-full overflow-auto">
+            <table class="w-full">
+                <thead class="">
+                    <tr class="">
+                        <th class="p-2 text-center">Código</th>
+                        <th class="p-2 text-center">Cliente</th>
+                        <th class="p-2 text-center">Fecha Solicitud</th>
+                        <th class="p-2 text-center">Cantidad Solicitada</th>
+                        <th class="p-2 text-center">Destino Préstamo</th>
+                        <th class="p-2 text-center">Estado</th>
+                        <th class="p-2 text-center">Fecha Análisis</th>
+                        <th class="p-2 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var solicitud in solicitudes)
+                    {
+                        <tr class="border-b">
+                            <td class="p-4 font-medium">@solicitud.SolicitudId</td>
+                            <td class="p-4">@solicitud.NombreCliente</td>
+                            <td class="p-4">@solicitud.FechaSolicitud</td>
+                            <td class="p-4">@solicitud.CantidadSolicitada</td>
+                            <td class="p-4">@solicitud.DestinoPrestamo</td>
+                            <td class="p-4">@solicitud.Estado</td>
+                            <td class="p-4">@solicitud.FechaAnalisis</td>
+
+                            <td class="p-4 flex justify-around">
+                                @* VER DETALLES SOLICITUD *@
+                                <button class="text-green-500" @onclick="() => DetailsSolicitud(solicitud.SolicitudId)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
+                                    </svg>
+                                </button>
+
+                                @* MODIFICAR UNA SOLICITUD *@
+                                <button class="text-blue-500" @onclick="() => StartEditSolicitud(solicitud)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                    </svg>
+                                </button>
+
+                                @* ELIMINAR UN CLIENTE *@
+                                <button class="text-red-500" @onclick="() => ConfirmDeleteRequest(solicitud.SolicitudId)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+}
+@* EDITAR UNA SOLICITUD *@
+@if (isEditModalVisible && editingRequest != null)
+{
+    <section class="w-full flex items-center justify-center p-6">
+        <div class="rounded-lg border bg-white shadow-xl w-full max-w-4xl">
+            <div class="flex flex-col p-6 space-y-1">
+                <h3 class="tracking-tight text-3xl font-bold text-center">Nueva Solicitud de Préstamo</h3>
+                <p class="text-sm text-gray-500 text-center">Ingrese los detalles de la nueva solicitud de préstamo</p>
+            </div>
+            <EditForm class="p-6 pt-0 space-y-6" Model="editingRequest" OnValidSubmit="HandleEditRequest">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="ClienteID">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Código Cliente
+                        </label>
+                        <p id="ClienteID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" readonly name="ClienteID"> @editingRequest.ClienteID </p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="Estado">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            Estado
+                        </label>
+                        <InputSelect @bind-Value="editingRequest.Estado" id="Estado" name="Estado" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                            <option value="">Seleccione un estado</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Aprobado">Aprobado</option>
+                            <option value="Rechazado">Rechazado</option>
+                        </InputSelect>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="FechaSolicitud">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            Fecha de Solicitud
+                        </label>
+                        <InputDate @bind-Value="editingRequest.FechaSolicitud" id="FechaSolicitud" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required name="FechaSolicitud" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="CantidadSolicitada">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4">
+                                <line x1="12" x2="12" y1="2" y2="22"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Cantidad Solicitada
+                        </label>
+                        <InputNumber id="CantidadSolicitada" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" @bind-Value="editingRequest.CantidadSolicitada" min="1" name="CantidadSolicitada" />
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="DestinoPrestamo">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            Destino del Préstamo
+                        </label>
+                        <InputText id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="text" name="DestinoPrestamo" @bind-Value="editingRequest.DestinoPrestamo" />
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="FechaAnalisis">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            Fecha de Análisis
+                        </label>
+                        <input id="FechaAnalisis" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="date" value="" name="FechaAnalisis">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="UserID">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Codigo Empleado
+                        </label>
+                        <input id="UserID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" min="1" value="1" name="UserID">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white hover:bg-gray-200 h-10 px-4 py-2" @onclick="() => CloseEditModal()">Cancelar</button>
+                    <button type="submit" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2">Guardar Solicitud</button>
+                </div>
+            </EditForm>
+        </div>
+    </section>
+}
+
+@* VER DETALLES DE LA SOLICITUD *@
+@if (isDetailsModalVisible && detailsRequest != null)
+{
+    <section class="w-full flex items-center justify-center p-6">
+        <div class="rounded-lg border bg-white shadow-xl w-full max-w-4xl">
+            <div class="flex flex-col p-6 space-y-1">
+                <h3 class="tracking-tight text-3xl font-bold text-center">Nueva Solicitud de Préstamo</h3>
+                <p class="text-sm text-gray-500 text-center">Ingrese los detalles de la nueva solicitud de préstamo</p>
+            </div>
+            <div class="p-6 pt-0 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="ClienteID">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Código Cliente
+                        </label>
+                        <p id="ClienteID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="ClienteID">
+                            @detailsRequest.SolicitudId
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="Estado">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            Estado
+                        </label>
+                        <p id="Estado" name="Estado" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            @detailsRequest.Estado
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="FechaSolicitud">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            Fecha de Solicitud
+                        </label>
+                        <p id="FechaSolicitud" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="FechaSolicitud">
+                            @detailsRequest.FechaSolicitud.ToShortDateString()
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="CantidadSolicitada">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4">
+                                <line x1="12" x2="12" y1="2" y2="22"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Cantidad Solicitada
+                        </label>
+                        <p id="CantidadSolicitada" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="CantidadSolicitada"> @detailsRequest.CantidadSolicitada</p>
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="DestinoPrestamo">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            Destino del Préstamo
+                        </label>
+                        <p id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="text" value="" name="DestinoPrestamo">@detailsRequest.DestinoPrestamo</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="FechaAnalisis">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            Fecha de Análisis
+                        </label>
+                        <p id="FechaAnalisis" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="date" value="" name="FechaAnalisis">
+                            @detailsRequest.FechaAnalisis.ToShortDateString()
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="UserID">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Codigo Empleado
+                        </label>
+                        <p id="UserID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="number" min="1" value="1" name="UserID">
+                            @detailsRequest.UserID
+                        </p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white hover:bg-gray-200 h-10 px-4 py-2" @onclick="() => CloseDetailsModal()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+}
