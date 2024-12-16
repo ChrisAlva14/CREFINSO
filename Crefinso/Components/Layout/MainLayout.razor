@@ -8,6 +8,8 @@
 @code {
     private bool isAuthenticated;
     private UserSession userSession = new UserSession();
+    private bool isMenuOpen = false;
+    private string menuClass => isMenuOpen ? "" : "hidden";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -24,6 +26,11 @@
     {
         await authServices.Logout();
         navigationManager.NavigateTo("/", true);
+    }
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
     }
 }
 
@@ -125,9 +132,9 @@
                                     <line x1="4" x2="20" y1="18" y2="18"></line>
                                 </svg>
                             </button>
-                            <h1 class="text-2xl font-semibold" data-id="35">Dashboard Financiero</h1>
+                            <h1 class="text-2xl font-semibold">Dashboard Financiero</h1>
                         </div>
-                        <div class="flex items-center gap-4" data-id="36">
+                        <div class="flex items-center gap-4" >
                             <button onclick="toggleDarkMode()" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-gray-100 hover:text-gray-900 h-10 w-10" data-id="39">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun h-4 w-4" data-id="41">
                                     <circle cx="12" cy="12" r="4"></circle>
@@ -142,26 +149,27 @@
                                 </svg>
                             </button>
                             <div class="relative">
-                                <button onclick="toggleMenu()" class="justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-gray-100 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2" data-id="44" type="button" id="radix-:r3:" aria-haspopup="menu" aria-expanded="true" data-state="open" aria-controls="radix-:r4:">
-                                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-6 w-6" data-id="45">
+                                <!-- Botón para abrir/cerrar el menú desplegable -->
+                                <button @onclick="ToggleMenu" class="justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-gray-100 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2">
+                                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-6 w-6">
                                         <img class="aspect-square h-full w-full" alt="User avatar" src="https://g-qomtlv46v3n.vusercontent.net/placeholder-user.jpg">
                                     </span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4" >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4">
                                         <path d="m6 9 6 6 6-6"></path>
                                     </svg>
                                 </button>
 
                                 <!-- Menú desplegable -->
-                                <div id="menu-dropdown" class="absolute right-0 mt-2 w-56 z-50 bg-white border border-gray-200 rounded-md shadow-lg hidden">
-                                    <div class="px-2 py-1.5 text-sm font-normal">
-                                        <div class="flex flex-col space-y-1">
-                                            <div class="mt-2">
-                                                <p class="text-sm font-medium mb-1">Usuario: @userSession.UserName</p>
-                                                <p class="text-xs text-gray-500 mb-1">Rol: @userSession.UserRole</p>
+                                    <div class="@menuClass absolute right-0 mt-2 w-56 z-50 bg-white border border-gray-200 rounded-md shadow-lg">
+                                        <div class="px-2 py-1.5 text-sm font-normal">
+                                            <div class="flex flex-col space-y-1">
+                                                <div class="mt-2">
+                                                    <p class="text-sm font-medium mb-1">Usuario: @userSession.UserName</p>
+                                                    <p class="text-xs text-gray-500 mb-1">Rol: @userSession.UserRole</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                             </div>
                         </div>
                     </header>
@@ -181,11 +189,4 @@
         </main>
     }
         
-</div>
-
-<!-- Error UI -->
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
 </div>

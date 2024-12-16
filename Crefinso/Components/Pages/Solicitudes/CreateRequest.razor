@@ -24,6 +24,18 @@
         }
     }
 
+    private string UserIDString
+    {
+        get => newSolicitud.UserID.ToString();
+        set
+        {
+            if (int.TryParse(value, out int id))
+            {
+                newSolicitud.UserID = id;
+            }
+        }
+    }
+
     //CREAR CLIENTE NUEVO
     private async Task HandleCreateRequest()
     {
@@ -129,7 +141,7 @@
                             </svg>
                             Destino del Préstamo
                         </label>
-                        <input id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="text" value="" name="DestinoPrestamo">
+                    <InputText @bind-Value="newSolicitud.DestinoPrestamo" id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="text" name="DestinoPrestamo" />
                     </div>
                     
                     <div class="space-y-2">
@@ -142,7 +154,7 @@
                             </svg>
                             Fecha de Análisis
                         </label>
-                        <input id="FechaAnalisis" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="date" value="" name="FechaAnalisis">
+                    <InputDate @bind-Value="newSolicitud.FechaAnalisis" id="FechaAnalisis" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="FechaAnalisis" />
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="UserID">
@@ -152,7 +164,7 @@
                             </svg>
                             Codigo Empleado
                         </label>
-                    <input id="UserID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" min="1" value="1" name="UserID">
+                    <InputText @bind-Value="UserIDString" id="UserID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" name="UserID" />
                     </div>
                 </div>
                 <div class="flex justify-end space-x-4">

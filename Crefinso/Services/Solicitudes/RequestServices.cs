@@ -1,5 +1,4 @@
-﻿using Crefinso.Components.Pages.Clientes;
-using Crefinso.DTOs;
+﻿using Crefinso.DTOs;
 using System.Net.Http.Headers;
 
 namespace Crefinso.Services.Solicitudes
@@ -52,9 +51,6 @@ namespace Crefinso.Services.Solicitudes
         // METODO PARA LLAMAR AL NOMBRE DEL CLIENTE
         private async Task<string> GetClienteNombre(int clienteID)
         {
-            // Aquí deberías implementar la lógica para obtener el nombre del cliente
-            // Esto podría ser una llamada a otra API o un método en tu servicio
-            // Ejemplo:
             var cliente = await _httpClient.GetFromJsonAsync<ClienteResponse>($"api/clientes/{clienteID}");
             return cliente?.Nombre ?? "Desconocido";
         }
