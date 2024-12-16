@@ -149,6 +149,18 @@
             await Swal.FireAsync("Error", "Hubo un error al eliminar la Solicitud", SweetAlertIcon.Error);
         }
     }
+
+    //CAMBIO DE ESTADO
+    private MarkupString EstadoBadge(string estado)
+    {
+        return estado switch
+        {
+            "Rechazado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>Rechazado</span>"),
+            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800'>Pendiente</span>"),
+            "Aprobado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Aprobado</span>"),
+            _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'>ERROR!</span>")
+        };
+    }
 }
 
 @if (solicitudes == null)
@@ -172,7 +184,7 @@ else if(isAuthenticated)
                 </div>
 
                 <!-- Dashboard Stats -->
-                <section class="flex flex-wrap justify-around">
+                <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Total de Solicitudes</h2>
                         <p class="text-4xl font-bold">11</p>
@@ -217,14 +229,14 @@ else if(isAuthenticated)
                         <table class="w-full caption-bottom text-sm">
                             <thead class="[&_tr]:border-b">
                                 <tr class="border-b transition-colors">
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Cliente</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha Solicitud</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Cantidad Solicitada</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Destino Préstamo</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha Análisis</th>
-                                    <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Código</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Cliente</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha Solicitud</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Cantidad Solicitada</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Destino Préstamo</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha Análisis</th>
+                                    <th class="h-12 px-4 align-middle font-medium text-gray-500 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="[&_tr:last-child]:border-0">
@@ -237,7 +249,7 @@ else if(isAuthenticated)
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.CantidadSolicitada</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.DestinoPrestamo</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                            @EstadoBadge(solicitud.Estado)
                                         </td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.FechaAnalisis</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
@@ -344,7 +356,7 @@ else if(isAuthenticated)
                             </svg>
                             Destino del Préstamo
                         </label>
-                        <InputText id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="text" name="DestinoPrestamo" @bind-Value="editingRequest.DestinoPrestamo" />
+                        <InputText @bind-Value="editingRequest.DestinoPrestamo" id="DestinoPrestamo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="text" name="DestinoPrestamo" />
                     </div>
 
                     <div class="space-y-2">
@@ -357,7 +369,7 @@ else if(isAuthenticated)
                             </svg>
                             Fecha de Análisis
                         </label>
-                        <input id="FechaAnalisis" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="date" value="" name="FechaAnalisis">
+                        <InputDate @bind-Value="editingRequest.FechaAnalisis" id="FechaAnalisis" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="FechaAnalisis" />
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="UserID">
@@ -367,7 +379,7 @@ else if(isAuthenticated)
                             </svg>
                             Codigo Empleado
                         </label>
-                        <input id="UserID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required type="number" min="1" value="1" name="UserID">
+                        <p id="UserID" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required name="UserID"> @editingRequest.UserID </p>
                     </div>
                 </div>
                 <div class="flex justify-end space-x-4">
