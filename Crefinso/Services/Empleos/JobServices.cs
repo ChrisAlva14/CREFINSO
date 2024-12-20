@@ -1,21 +1,21 @@
 ﻿using Crefinso.DTOs;
 using System.Net.Http.Headers;
 
-namespace Crefinso.Services.Pagos
+namespace Crefinso.Services.Empleos
 {
-    public class PaymentServices
+    public class JobServices
     {
         private readonly HttpClient _httpClient;
         private readonly AuthServices _authServices;
 
-        public PaymentServices(HttpClient httpClient, AuthServices authServices)
+        public JobServices(HttpClient httpClient, AuthServices authServices)
         {
             _httpClient = httpClient;
             _authServices = authServices;
         }
 
-        // OBTENER TODOS LOS PAGOS
-        public async Task<List<PagoResponse>> GetPayments()
+        // OBTENER TODOS LOS EMPLEOS
+        public async Task<List<EmpleoResponse>> GetJobs()
         {
             try
             {
@@ -25,7 +25,13 @@ namespace Crefinso.Services.Pagos
                     throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
                 }
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
+                var response = await _httpClient.GetFromJsonAsync<List<EmpleoResponse>>("api/empleos");
+
+                // SE LLAMA AL NOMBRE DEL CLIENTE PARA CADA EMPLEO
+                foreach (var empleo in response)
+                {
+                    empleo.NombreCliente = await GetClienteNombre(empleo.ClienteID);
+                }
 
                 return response;
             }
@@ -35,12 +41,27 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS EMPLEOS, POR FAVOR REINICIAR EL SISTEMA");
             }
         }
 
-        // OBTENER PAGO POR ID
-        public async Task<PagoResponse> GetPaymentById(int paymentId)
+        // METODO PARA LLAMAR AL NOMBRE DEL CLIENTE
+        private async Task<string> GetClienteNombre(int clienteID)
+        {
+            try
+            {
+                var cliente = await _httpClient.GetFromJsonAsync<ClienteResponse>($"api/clientes/{clienteID}");
+                return cliente?.Nombre ?? "Desconocido";
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores al obtener el nombre del cliente
+                return "Error al obtener el nombre del cliente";
+            }
+        }
+
+        // OBTENER EMPLEO POR ID
+        public async Task<EmpleoResponse> GetJobById(int jobId)
         {
             try
             {
@@ -50,7 +71,7 @@ namespace Crefinso.Services.Pagos
                     throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
                 }
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<PagoResponse>($"api/pagos/{paymentId}");
+                var response = await _httpClient.GetFromJsonAsync<EmpleoResponse>($"api/empleos/{jobId}");
 
                 return response;
             }
@@ -60,12 +81,12 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL PAGO, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA");
             }
         }
 
-        // CREAR NUEVO PAGO
-        public async Task<bool> PostPayment(PagoRequest newPayment)
+        // CREAR NUEVO EMPLEO
+        public async Task<bool> PostJob(EmpleoRequest newJob)
         {
             try
             {
@@ -79,8 +100,8 @@ namespace Crefinso.Services.Pagos
                 // Agregar el token al encabezado de autorización
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                // Enviar la solicitud POST con los datos del nuevo pago
-                var response = await _httpClient.PostAsJsonAsync("api/pagos", newPayment);
+                // Enviar la solicitud POST con los datos del nuevo empleo
+                var response = await _httpClient.PostAsJsonAsync("api/empleos", newJob);
 
                 // Verificar si la respuesta fue exitosa
                 if (response.IsSuccessStatusCode)
@@ -91,7 +112,7 @@ namespace Crefinso.Services.Pagos
                 {
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al crear el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception($"Error al crear el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
                 }
             }
             catch (HttpRequestException ex)
@@ -100,12 +121,12 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
             }
         }
 
-        // MODIFICAR UN PAGO
-        public async Task<bool> UpdatePayment(PagoResponse payment)
+        // MODIFICAR UN EMPLEO
+        public async Task<bool> UpdateJob(EmpleoResponse job)
         {
             try
             {
@@ -120,14 +141,17 @@ namespace Crefinso.Services.Pagos
                 // Construir el contenido a enviar en la solicitud
                 var data = new
                 {
-                    payment.PagoId,
-                    payment.PrestamoId,
-                    payment.FechaPago,
-                    payment.MontoPagado,
-                    payment.SaldoAcumulado
+                    job.EmpleoId,
+                    job.ClienteID,
+                    job.LugarTrabajo,
+                    job.Cargo,
+                    job.SueldoBase,
+                    job.FechaIngreso,
+                    job.TelefonoTrabajo,
+                    job.DireccionTrabajo
                 };
 
-                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{payment.PagoId}", data);
+                var response = await _httpClient.PutAsJsonAsync($"api/empleos/{job.EmpleoId}", data);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -136,7 +160,7 @@ namespace Crefinso.Services.Pagos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al actualizar el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception($"Error al actualizar el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
                 }
             }
             catch (HttpRequestException ex)
@@ -145,12 +169,12 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
             }
         }
 
-        // ELIMINAR UN PAGO
-        public async Task<bool> DeletePayment(int paymentId)
+        // ELIMINAR UN EMPLEO
+        public async Task<bool> DeleteJob(int jobId)
         {
             try
             {
@@ -160,7 +184,7 @@ namespace Crefinso.Services.Pagos
                     throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
                 }
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.DeleteAsync($"api/pagos/{paymentId}");
+                var response = await _httpClient.DeleteAsync($"api/empleos/{jobId}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -169,7 +193,7 @@ namespace Crefinso.Services.Pagos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al eliminar el pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception($"Error al eliminar el empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
                 }
             }
             catch (HttpRequestException ex)
@@ -178,7 +202,7 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
             }
         }
     }

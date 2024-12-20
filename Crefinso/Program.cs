@@ -3,7 +3,10 @@ using Crefinso.Services;
 using Crefinso.Services.Clientes;
 using Crefinso.Services.Solicitudes;
 using Crefinso.Services.Usuarios;
+using Crefinso.Services.Empleos;
 using CurrieTechnologies.Razor.SweetAlert2;
+using Crefinso.Services.Pagos;
+using Crefinso.Services.Prestamos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +23,9 @@ builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<ClientServices>();
 builder.Services.AddScoped<RequestServices>();
-
+builder.Services.AddScoped<JobServices>();
+builder.Services.AddScoped<PaymentServices>();
+builder.Services.AddScoped<LoanServices>();
 
 var app = builder.Build();
 
