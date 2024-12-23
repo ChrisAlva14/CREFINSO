@@ -6,8 +6,6 @@
 
         public int SolicitudId { get; set; }
 
-        public int ClienteId { get; set; }
-
         public string? MontoAprobado { get; set; }
 
         public string? TasaInteres { get; set; }
@@ -24,8 +22,6 @@
         public int PrestamoId { get; set; }
 
         public int SolicitudId { get; set; }
-
-        public int ClienteId { get; set; }
 
         public string? MontoAprobado { get; set; }
 
