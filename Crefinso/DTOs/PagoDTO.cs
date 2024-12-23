@@ -11,6 +11,8 @@
         public string? MontoPagado { get; set; }
 
         public string? SaldoAcumulado { get; set; }
+
+        public string? Estado { get; set; }
     }
 
     public class PagoRequest
@@ -24,5 +26,7 @@
         public string? MontoPagado { get; set; }
 
         public string? SaldoAcumulado { get; set; }
+
+        public string? Estado { get; set; }
     }
 }

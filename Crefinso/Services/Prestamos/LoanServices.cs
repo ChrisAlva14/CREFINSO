@@ -1,5 +1,4 @@
 ﻿using Crefinso.DTOs;
-using Microsoft.AspNetCore.Identity.Data;
 using System.Net.Http.Headers;
 
 namespace Crefinso.Services.Prestamos
@@ -15,7 +14,7 @@ namespace Crefinso.Services.Prestamos
             _authServices = authServices;
         }
 
-        // OBTENER TODOS LOS PRÉSTAMOS
+        //OBTENER TODOS LOS PRESTAMOS
         public async Task<List<PrestamoResponse>> GetLoans()
         {
             try
@@ -23,21 +22,24 @@ namespace Crefinso.Services.Prestamos
                 var token = await _authServices.GetToken();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
+                    throw new InvalidOperationException("El token es nulo o invalido.Iniciar sesion");
                 }
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
 
                 return response;
             }
+
             catch (HttpRequestException ex)
             {
+
                 throw;
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PRÉSTAMOS, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PRESTAMOS, POR FAVOR REINICIAR EL SISTEMA");
             }
+
         }
 
         // OBTENER PRÉSTAMO POR ID
@@ -123,7 +125,6 @@ namespace Crefinso.Services.Prestamos
                 {
                     loan.PrestamoId,
                     loan.SolicitudId,
-                    loan.ClienteId,
                     loan.MontoAprobado,
                     loan.TasaInteres,
                     loan.FechaInicio,

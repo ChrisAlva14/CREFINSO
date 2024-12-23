@@ -124,7 +124,8 @@ namespace Crefinso.Services.Pagos
                     payment.PrestamoId,
                     payment.FechaPago,
                     payment.MontoPagado,
-                    payment.SaldoAcumulado
+                    payment.SaldoAcumulado,
+                    payment.Estado
                 };
 
                 var response = await _httpClient.PutAsJsonAsync($"api/pagos/{payment.PagoId}", data);

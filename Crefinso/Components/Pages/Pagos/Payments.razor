@@ -1,6 +1,438 @@
 ﻿@page "/payments"
-<h3>Pagos</h3>
+@inject IJSRuntime JS
+@inject SweetAlertService Swal
+@inject PaymentServices paymentService
+@inject AuthServices authServices
+
+@using Crefinso.DTOs
+@using Crefinso.Services
+@using Crefinso.Services.Pagos
 
 @code {
+    private List<PagoResponse> pagos;
+    private UserSession userSession = new UserSession();
+    private PagoResponse editingPago = null;
+    private PagoResponse detailsPago = null;
 
+    private string errorMessage;
+    private bool isLoading = true;
+    private bool isAuthenticated;
+    private bool isEditModalVisible = false;
+    private bool isDetailsModalVisible = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticated();
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("mostrarAlertaCargando");
+            await Task.Delay(1125);
+
+            pagos = await paymentService.GetPayments();
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    // MODIFICAR PAGO
+    private void StartEditPago(PagoResponse pago)
+    {
+        editingPago = pago;
+        isEditModalVisible = true;
+    }
+
+    private async Task HandleEditPago()
+    {
+        try
+        {
+            bool success = await paymentService.UpdatePayment(editingPago);
+            if (success)
+            {
+                pagos = await paymentService.GetPayments();
+                CloseEditModal();
+                await Swal.FireAsync("Éxito", "Pago actualizado correctamente", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo actualizar el pago", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Error", $"Hubo un error al actualizar el pago: {ex.Message}", SweetAlertIcon.Error);
+        }
+    }
+
+    private void CloseEditModal()
+    {
+        editingPago = null;
+        isEditModalVisible = false;
+    }
+
+    // ELIMINAR PAGO
+    private async Task ConfirmDeletePago(int pagoId)
+    {
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Esta acción no se puede deshacer",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Sí, eliminar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (result.IsConfirmed)
+        {
+            await DeletePago(pagoId);
+        }
+    }
+
+    private async Task DeletePago(int pagoId)
+    {
+        try
+        {
+            bool success = await paymentService.DeletePayment(pagoId);
+            if (success)
+            {
+                pagos = await paymentService.GetPayments();
+                await Swal.FireAsync("Éxito", "Pago eliminado correctamente", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo eliminar el pago", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "Hubo un error al eliminar el pago", SweetAlertIcon.Error);
+        }
+    }
+
+    // VER DETALLES DEL PAGO
+    private async Task DetailsPago(int pagoId)
+    {
+        try
+        {
+            detailsPago = await paymentService.GetPaymentById(pagoId);
+            isDetailsModalVisible = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles del pago", SweetAlertIcon.Error);
+        }
+    }
+
+    private void CloseDetailsModal()
+    {
+        detailsPago = null;
+        isDetailsModalVisible = false;
+    }
+
+    //CAMBIO DE ESTADO
+    private MarkupString EstadoBadge(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800'>Pendiente</span>"),
+            "Realizado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Realizado</span>"),
+            _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>ERROR!</span>")
+        };
+    }
+}
+
+@if (pagos == null)
+{
+}
+else if (isAuthenticated)
+{
+    <div class="container mx-auto p-6">
+        <div class="rounded-lg border bg-white shadow-md">
+            <div class="p-6 flex flex-col gap-6">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-4xl font-bold">Gestión de Pagos</h1>
+                    <a href="createPayment" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-plus mr-2 h-4 w-4">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 12h8"></path>
+                            <path d="M12 8v8"></path>
+                        </svg>
+                        Nuevo Pago
+                    </a>
+                </div>
+
+                <!-- Dashboard Stats -->
+                <section class="flex flex-wrap justify-around">
+                    <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
+                        <h2 class="text-gray-700 text-lg font-semibold">Total de Pagos</h2>
+                        <p class="text-4xl font-bold">@pagos.Count</p>
+                    </div>
+                    <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
+                        <h2 class="text-gray-700 text-lg font-semibold">Pagos Realizados</h2>
+                        <p class="text-4xl font-bold">2</p>
+                    </div>
+                    <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
+                        <h2 class="text-gray-700 text-lg font-semibold">Pagos Pendientes</h2>
+                        <p class="text-4xl font-bold">2</p>
+                    </div>
+                </section>
+
+                <!-- Barra de búsqueda y filtrado por fecha -->
+                <div class="flex items-center gap-4">
+                    <div class="relative flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2 top-2.5 h-4 w-4 text-gray-400">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar pago...">
+                    </div>
+                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
+                            <path d="M8 2v4"></path>
+                            <path d="M16 2v4"></path>
+                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                            <path d="M3 10h18"></path>
+                        </svg>
+                        <span>Filtrar por fecha</span>
+                    </button>
+                </div>
+
+                <div class="p-6 border bg-white rounded-lg shadow-md">
+                    <!-- Table displaying the payment list -->
+                    <div class="relative w-full overflow-auto">
+                        <table class="w-full caption-bottom text-sm">
+                            <thead class="[&_tr]:border-b">
+                                <tr class="border-b transition-colors">
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Prestamo</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha de Pago</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Pagado</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Saldo Acumulado</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
+                                    <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="[&_tr:last-child]:border-0">
+                                @foreach (var pago in pagos)
+                                {
+                                    <tr class="border-b transition-colors">
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PagoId</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PrestamoId</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.FechaPago.ToShortDateString()</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.MontoPagado</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.SaldoAcumulado</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            @EstadoBadge(pago.Estado)
+                                            </td>
+
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                                            <!-- VER DETALLES DEL PAGO -->
+                                            <button class="text-green-500" @onclick="() => DetailsPago(pago.PagoId)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
+                                                </svg>
+                                            </button>
+
+                                            <!-- MODIFICAR UN PAGO -->
+                                            <button class="text-blue-500" @onclick="() => StartEditPago(pago)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                                </svg>
+                                            </button>
+
+                                            <!-- ELIMINAR UN PAGO -->
+                                            <button class="text-red-500" @onclick="() => ConfirmDeletePago(pago.PagoId)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* EDITAR UN PAGO *@
+@if (isEditModalVisible && editingPago != null)
+{
+    <section class="fixed inset-0 bg-black bg-opacity-50 z-50 w-full flex items-center justify-center p-6">
+        <div class="rounded-lg border bg-white text-gray-900 w-full max-w-4xl shadow-xl">
+            <div class="flex flex-col p-6 space-y-1">
+                <h3 class="tracking-tight text-3xl font-bold text-center">Modificar Pago</h3>
+                <p class="text-sm text-gray-500 text-center">Ingrese los detalles del pago a Modificar</p>
+            </div>
+            <div class="p-6 pt-0">
+                <EditForm class="space-y-6" Model="editingPago" OnValidSubmit="HandleEditPago">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium flex items-center gap-2" for="FechaPago">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
+                                    <path d="M8 2v4"></path>
+                                    <path d="M16 2v4"></path>
+                                    <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                    <path d="M3 10h18"></path>
+                                </svg>
+                                Fecha de Pago
+                            </label>
+                            <InputDate @bind-Value="editingPago.FechaPago" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="FechaPago" required name="FechaPago" />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium flex items-center gap-2" for="MontoPagado">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4">
+                                    <line x1="12" x2="12" y1="1" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Monto Pagado
+                            </label>
+                            <InputText @bind-Value="editingPago.MontoPagado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="MontoPagado" required name="MontoPagado" />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium flex items-center gap-2" for="SaldoAcumulado">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4">
+                                    <line x1="12" x2="12" y1="1" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Saldo Acumulado
+                            </label>
+                            <InputText @bind-Value="editingPago.SaldoAcumulado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SaldoAcumulado" required name="SaldoAcumulado" />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium flex items-center gap-2" for="Estado">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                    <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                    <path d="M10 9H8"></path>
+                                    <path d="M16 13H8"></path>
+                                    <path d="M16 17H8"></path>
+                                </svg>
+                                Estado
+                            </label>
+                            <InputSelect @bind-Value="editingPago.Estado" id="Estado" name="Estado" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="">Seleccione un estado</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Realizado">Realizado</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border border-red-300 bg-white hover:bg-red-500 text-black-900 h-10 px-4 py-2" type="button" @onclick="() => CloseEditModal()">
+                            Cancelar
+                        </button>
+                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none bg-green-500 text-white hover:bg-green-600 h-10 px-4 py-2" type="submit">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </section>
+}
+
+@* VER DETALLES DEL PAGO *@
+@if (isDetailsModalVisible && detailsPago != null)
+{
+    <section class="fixed inset-0 bg-black bg-opacity-50 z-50 w-full flex items-center justify-center p-6">
+        <div class="rounded-lg border bg-white text-gray-900 w-full max-w-4xl shadow-xl">
+            <div class="flex flex-col p-6 space-y-1">
+                <h3 class="tracking-tight text-3xl font-bold text-center">Detalles del Pago</h3>
+            </div>
+            <div class="p-6 pt-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card w-4 h-4">
+                                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                <line x1="2" x2="22" y1="10" y2="10"></line>
+                            </svg>
+                            Pago ID
+                        </label>
+                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.PagoId</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hash w-4 h-4">
+                                <line x1="4" x2="20" y1="9" y2="9"></line>
+                                <line x1="4" x2="20" y1="15" y2="15"></line>
+                                <line x1="10" x2="8" y1="3" y2="21"></line>
+                                <line x1="16" x2="14" y1="3" y2="21"></line>
+                            </svg>
+                            Prestamo ID
+                        </label>
+                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.PrestamoId</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar w-4 h-4">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            Fecha de Pago
+                        </label>
+                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.FechaPago.ToShortDateString()</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4">
+                                <line x1="12" x2="12" y1="1" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Monto Pagado
+                        </label>
+                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.MontoPagado</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4">
+                                <line x1="12" x2="12" y1="1" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Saldo Acumulado
+                        </label>
+                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.SaldoAcumulado</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium flex items-center gap-2" for="Estado">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            Estado
+                        </label>
+                        <p id="Estado" name="Estado" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            @detailsPago.Estado
+                        </p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border border-red-300 bg-white hover:bg-red-500 text-black-900 h-10 px-4 py-2" type="button" @onclick="() => CloseDetailsModal()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
 }

@@ -141,6 +141,17 @@
         detailsLoan = null;
         isDetailsModalVisible = false;
     }
+
+    //CAMBIO DE ESTADO
+    private MarkupString EstadoBadge(string estado)
+    {
+        return estado switch
+        {
+            "Inactivo" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800'>Inactivo</span>"),
+            "Activo" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Activo</span>"),
+            _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>ERROR!</span>")
+        };
+    }
 }
 
 @if (loans == null)
@@ -206,6 +217,7 @@ else if (isAuthenticated)
                             <thead class="[&_tr]:border-b">
                                 <tr class="border-b transition-colors">
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Solicitud</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Aprobado</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Tasa de Interés</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha Inicio</th>
@@ -219,11 +231,14 @@ else if (isAuthenticated)
                                 {
                                     <tr class="border-b transition-colors">
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.PrestamoId</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.SolicitudId</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.MontoAprobado</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.TasaInteres</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.FechaInicio.ToShortDateString()</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.FechaVencimiento.ToShortDateString()</td>
-                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.Estado</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            @EstadoBadge(loan.Estado)
+                                        </td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
                                             <!-- VER DETALLES DEL PRÉSTAMO -->
                                             <button class="text-green-500" @onclick="() => DetailsLoan(loan.PrestamoId)">

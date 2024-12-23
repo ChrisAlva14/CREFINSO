@@ -1,6 +1,78 @@
 ﻿@page "/reports"
-<h3>Reportes</h3>
 
-@code {
+<div class="container mx-auto p-6">
+    <div class="rounded-lg border bg-white shadow-md">
+        <div class="p-6 flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+                <h1 class="text-4xl font-bold">Reportes por Financiera</h1>
+            </div>
 
-}
+            <!-- Filtro por financiera -->
+            <div class="flex items-center gap-4">
+                <label for="financieraFilter" class="text-sm font-medium">Filtrar por Financiera:</label>
+                <select id="financieraFilter" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">
+                    <option value="0">Todas las Financieras</option>
+                    <option value="1">Financiera A</option>
+                    <option value="2">Financiera B</option>
+                    <option value="3">Financiera C</option>
+                </select>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <section class="flex flex-wrap justify-around">
+                <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
+                    <h2 class="text-gray-700 text-lg font-semibold">Total de Reportes</h2>
+                    <p class="text-4xl font-bold">100</p>
+                </div>
+                <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
+                    <h2 class="text-gray-700 text-lg font-semibold">Reportes Completados</h2>
+                    <p class="text-4xl font-bold">80</p>
+                </div>
+                <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
+                    <h2 class="text-gray-700 text-lg font-semibold">Reportes Pendientes</h2>
+                    <p class="text-4xl font-bold">20</p>
+                </div>
+            </section>
+
+            <!-- Tabla de reportes -->
+            <div class="p-6 border bg-white rounded-lg shadow-md">
+                <div class="relative w-full overflow-auto">
+                    <table class="w-full caption-bottom text-sm">
+                        <thead class="[&_tr]:border-b">
+                            <tr class="border-b transition-colors">
+                                <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Reporte ID</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Financiera</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha de Reporte</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="[&_tr:last-child]:border-0">
+                            <tr class="border-b transition-colors">
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">1</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">Financiera A</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">2023-10-01</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">Completado</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">$10,000.00</td>
+                            </tr>
+                            <tr class="border-b transition-colors">
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">2</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">Financiera B</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">2023-10-05</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">Pendiente</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">$5,000.00</td>
+                            </tr>
+                            <tr class="border-b transition-colors">
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">3</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">Financiera C</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">2023-10-10</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">Completado</td>
+                                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">$15,000.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
