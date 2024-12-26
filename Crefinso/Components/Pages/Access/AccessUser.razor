@@ -11,19 +11,19 @@
 
 @code {
     private UserSession userSession = new UserSession();
-
     private bool isAuthenticated;
+    private bool isLoading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            isAuthenticated = await authServices.IsAuthenticated();
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
 
             if (isAuthenticated)
             {
                 navigationManager.NavigateTo("/dashboard");
-            }   
+            }
 
             StateHasChanged();
         }
@@ -31,87 +31,119 @@
 
     private async Task Login()
     {
-        var token = await authServices.Login(userSession);
+        isLoading = true;
+        StateHasChanged();
 
-        if (string.IsNullOrEmpty(token))
+        try
         {
-            SweetAlertResult resultFail = await Swal.FireAsync(new SweetAlertOptions
+            var token = await authServices.LoginAsync(userSession);
+
+            if (string.IsNullOrEmpty(token))
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                    {
+                        Title = "ACCESO AL SISTEMA",
+                        Text = "CREDENCIALES INCORRECTAS!",
+                        Icon = "error",
+                        ConfirmButtonText = "OK"
+                    });
+            }
+            else
+            {
+                await Swal.FireAsync(new SweetAlertOptions
+                    {
+                        Title = "ACCESO CONCEDIDO",
+                        Icon = "success",
+                        ConfirmButtonText = "OK"
+                    });
+
+                await authServices.SetTokenAsync(token);
+                navigationManager.NavigateTo("/dashboard", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync(new SweetAlertOptions
                 {
-                    Title = "ACCESO AL SISTEMA",
-                    Text = "CREDENCIALES INCORRECTAS!",
+                    Title = "ERROR",
+                    Text = ex.Message,
                     Icon = "error",
                     ConfirmButtonText = "OK"
-
                 });
-
-            return;
         }
-        else{
-
-            SweetAlertResult resultSuccess = await Swal.FireAsync(new SweetAlertOptions
-                {
-                    Title = "ACCESO CONCEDIDO",
-                    Icon = "success",
-                    ConfirmButtonText = "OK"
-            });
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
         }
-
-        await authServices.SetToken(token);
-        navigationManager.NavigateTo("/dashboard", true);
     }
 }
 
-<style>
-    .dark-mode .userWhite {
-        color: #fff;
-    }
-</style>
+<link rel="stylesheet" href="styles.css" />
 
-<div class="flex h-screen">
-    <!-- Sección de la imagen -->
-    <div class="hidden lg:block lg:w-1/2">
-        <img src="https://cdn.pixabay.com/photo/2024/01/06/02/44/ai-generated-8490532_1280.png" alt="Imagen decorativa" class="object-cover w-full h-full">
+<section class="min-h-screen relative flex items-center justify-center p-4 bg-[#1a1f2b]">
+    <!-- Background Image and Overlay -->
+    <div class="absolute inset-0">
+        <img alt="Office Background"
+             class="object-cover object-center w-full h-full"
+             src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/authentication/background.jpg">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
     </div>
 
-    <!-- Sección del formulario -->
-    <div class="flex w-full lg:w-1/2 min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <img class="mx-auto h-15 w-auto" id="logo" src="logoCrefinsowhite.png" alt="CREFINSO">
-            <p class="mt-2 text-center text-md text-gray-600 userWhite">
-                Inicia sesión en tu cuenta
-            </p>
+    <!-- Content -->
+    <div class="w-full max-w-md space-y-8 relative z-10">
+        <!-- Logo -->
+        <div class="flex flex-col items-center space-y-4">
+            <img alt="CREFINSO"
+                 class="w-auto h-15"
+                 src="/logoCrefinsodark.png">
         </div>
 
+        <!-- Form Container -->
+        <div class="bg-[#212936]/95 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-gray-800">
+            <!-- Title -->
+            <h1 class="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h1>
 
-        <EditForm Model="userSession" OnValidSubmit="Login">
-
-            <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div class="space-y-6">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 userWhite">Nombre de Usuario</label>
-                        <div class="mt-1">
-                            <InputText @bind-Value="userSession.UserName" type="text" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 userWhite">Contraseña</label>
-                        <div class="mt-1">
-                            <InputText @bind-Value="userSession.UserPassword" type="password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black" />
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end">
-                        <div class="text-sm">
-                            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">¿Olvidaste tu contraseña?</a>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Iniciar sesión
-                    </button>
+            <!-- Form -->
+            <EditForm class="space-y-6" Model="userSession" OnValidSubmit="Login">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <!-- Username Input -->
+                <div class="space-y-2">
+                    <label for="username" class="block text-sm font-medium text-gray-200">Usuario:</label>
+                    <InputText @bind-Value="userSession.UserName" id="username"
+                               type="text"
+                               placeholder="juanperez"
+                               required
+                               class="w-full h-11 rounded-lg bg-[#2a3441] border border-[#374151] text-white placeholder:text-gray-400 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
                 </div>
-            </div>
-        </EditForm>
+
+                <!-- Password Input -->
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm font-medium text-gray-200">Contraseña:</label>
+                    <div class="relative">
+                        <InputText @bind-Value="userSession.UserPassword" id="password"
+                                   type="password"
+                                   placeholder="••••••••"
+                                   required
+                                   class="w-full h-11 rounded-lg bg-[#2a3441] border border-[#374151] text-white placeholder:text-gray-400 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="w-full h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#212936] transition-colors">
+
+                    @if (isLoading)
+                    {
+                        <span class="loading-spinner"></span>
+                    }
+                    else
+                    {
+                        <span>Iniciar sesión</span>
+                    }
+                </button>
+            </EditForm>
+        </div>
     </div>
-</div>
+</section>

@@ -20,6 +20,7 @@ builder.Services.AddScoped(o => new HttpClient
 
 builder.Services.AddSweetAlert2();
 builder.Services.AddScoped<AuthServices>();
+builder.Services.AddScoped<DashboardServices>();
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<ClientServices>();
 builder.Services.AddScoped<RequestServices>();

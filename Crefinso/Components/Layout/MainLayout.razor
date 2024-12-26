@@ -16,7 +16,7 @@
         
         if (firstRender)
         {
-            isAuthenticated = await authServices.IsAuthenticated();
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
 
             StateHasChanged();
         }
@@ -24,7 +24,7 @@
 
     private async Task Logout()
     {
-        await authServices.Logout();
+        await authServices.LogoutAsync();
         navigationManager.NavigateTo("/", true);
     }
 

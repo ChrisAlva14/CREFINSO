@@ -25,7 +25,7 @@
 
         if (firstRender)
         {
-            isAuthenticated = await authServices.IsAuthenticated();
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
 
             StateHasChanged();
         }
@@ -185,21 +185,21 @@ else if(isAuthenticated)
 
                 <!-- Dashboard Stats -->
                 <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
+                    <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Total de Solicitudes</h2>
-                        <p class="text-4xl font-bold">11</p>
+                        <p class="text-3xl sm:text-4xl font-bold">@solicitudes.Count</p>
                     </div>
-                    <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
-                        <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Activas</h2>
-                        <p class="text-4xl font-bold">5</p>
+                    <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
+                        <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Activos</h2>
+                        <p class="text-3xl sm:text-4xl font-bold">$1,000</p>
                     </div>
-                    <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
+                    <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Pendientes</h2>
-                        <p class="text-4xl font-bold">4</p>
+                        <p class="text-3xl sm:text-4xl font-bold">34</p>
                     </div>
-                    <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md w-72 m-4">
+                    <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Rechazadas</h2>
-                        <p class="text-4xl font-bold">15</p>
+                        <p class="text-3xl sm:text-4xl font-bold">2.4%</p>
                     </div>
                 </section>
 
