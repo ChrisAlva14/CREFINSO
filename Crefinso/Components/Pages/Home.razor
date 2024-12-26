@@ -4,68 +4,66 @@
 @inject SweetAlertService Swal
 @inject AuthServices authServices
 
-@code{
+@code {
     private string errorMessage;
     private bool isAuthenticated;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-
         if (firstRender)
         {
-            isAuthenticated = await authServices.IsAuthenticated();
-
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
             StateHasChanged();
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
-
+        // Inicialización adicional si es necesario
     }
-
 }
 
 @if (isAuthenticated)
 {
-    <div class="container mx-auto p-6">
+    <div class="container mx-auto p-4 sm:p-6">
         <div class="rounded-lg border bg-white shadow-md">
-            <div class="p-6 flex flex-col gap-6">
+            <div class="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
+                <!-- Título -->
                 <div class="flex items-center justify-between">
-                    <h1 class="text-4xl font-bold">Gestión Principal</h1>
+                    <h1 class="text-2xl sm:text-4xl font-bold">Gestión Principal</h1>
                 </div>
 
-                <!-- Dashboard Stats -->
+                <!-- Estadísticas del Dashboard -->
                 <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Clientes Activos</h2>
-                        <p class="text-4xl font-bold">2,543</p>
+                        <p class="text-3xl sm:text-4xl font-bold">2,543</p>
                     </div>
                     <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Préstamos Activos</h2>
-                        <p class="text-4xl font-bold">$1,024,000</p>
+                        <p class="text-3xl sm:text-4xl font-bold">$1,000</p>
                     </div>
                     <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Pagos Atrasados</h2>
-                        <p class="text-4xl font-bold">34</p>
+                        <p class="text-3xl sm:text-4xl font-bold">34</p>
                     </div>
                     <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Tasa de Morosidad</h2>
-                        <p class="text-4xl font-bold">2.4%</p>
+                        <p class="text-3xl sm:text-4xl font-bold">2.4%</p>
                     </div>
                 </section>
 
                 <!-- Barra de búsqueda y filtrado por fecha -->
-                <div class="flex items-center gap-4">
-                    <div class="relative flex-1">
-                        <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2 top-2.5 h-4 w-4 text-gray-400">
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="relative flex-1 w-full sm:w-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2 top-2.5 h-4 w-4 text-gray-400">
                             <circle cx="11" cy="11" r="8"></circle>
                             <path d="m21 21-4.3-4.3"></path>
                         </svg>
-                        <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar...">
+                        <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar...">
                     </div>
-                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
-                        <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
+                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-full sm:w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
                             <path d="M8 2v4"></path>
                             <path d="M16 2v4"></path>
                             <rect width="18" height="18" x="3" y="4" rx="2"></rect>
@@ -75,52 +73,117 @@
                     </button>
                 </div>
 
+                <!-- Sección de Préstamos Recientes y Próximos Pagos -->
                 <div class="grid gap-6 md:grid-cols-2 mt-6">
                     <!-- Préstamos Recientes -->
-                    <div class="border bg-gray-50 rounded-lg shadow-md">
-                        <div class="flex flex-col space-y-1.5 p-6">
-                            <h3 class="text-2xl font-semibold leading-none">Préstamos Recientes</h3>
+                    <div class="border rounded-lg shadow-md">
+                        <div class="flex flex-col space-y-1.5 p-4 sm:p-6">
+                            <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-5 w-5">
+                                    <line x1="12" x2="12" y1="2" y2="22"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Préstamos Recientes
+                            </h3>
                         </div>
-                        <div class="p-6 space-y-4">
-                            <!-- Tarjeta de Préstamo -->
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-medium text-gray-800">Juan Pérez</p>
-                                        <p class="text-sm text-gray-600">$5,000</p>
+                        <div class="p-4 sm:p-6 space-y-4">
+                            <!-- Tarjetas de Préstamos -->
+                            <div class="flex items-center justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                            <circle cx="12" cy="8" r="5"></circle>
+                                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        </svg>
+                                        <span class="font-medium text-gray-800">Carlos Rodriguez</span>
                                     </div>
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        <span>2023-06-14</span>
+                                    </div>
                                 </div>
-                                <div class="mt-2 text-sm text-gray-500">
-                                    <p>Fecha: 2023-06-15</p>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-lg font-semibold text-gray-800">$7,200</div>
+                                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500/15 text-red-500 border-0" data-v0-t="badge">Rechazado</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Tarjeta de Préstamo -->
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-medium text-gray-800">María González</p>
-                                        <p class="text-sm text-gray-600">$3,500</p>
+                            <div class="flex items-center justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                            <circle cx="12" cy="8" r="5"></circle>
+                                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        </svg>
+                                        <span class="font-medium text-gray-800">María González</span>
                                     </div>
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        <span>2023-06-14</span>
+                                    </div>
                                 </div>
-                                <div class="mt-2 text-sm text-gray-500">
-                                    <p>Fecha: 2023-06-14</p>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-lg font-semibold text-gray-800">$3,500</div>
+                                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-yellow-500/15 text-yellow-500 border-0" data-v0-t="badge">Pendiente</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Tarjeta de Préstamo -->
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-medium text-gray-800">Carlos Rodríguez</p>
-                                        <p class="text-sm text-gray-600">$7,200</p>
+                            <div class="flex items-center justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                            <circle cx="12" cy="8" r="5"></circle>
+                                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        </svg>
+                                        <span class="font-medium text-gray-800">Juan Pérez</span>
                                     </div>
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        <span>2023-06-15</span>
+                                    </div>
                                 </div>
-                                <div class="mt-2 text-sm text-gray-500">
-                                    <p>Fecha: 2023-06-13</p>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-lg font-semibold text-gray-800">$5,000</div>
+                                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-emerald-100 text-emerald-800 border-0" data-v0-t="badge">Activo</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -131,41 +194,116 @@
                     </div>
 
                     <!-- Próximos Pagos -->
-                    <div class="border bg-gray-50 rounded-lg shadow-md">
-                        <div class="flex flex-col space-y-1.5 p-6">
-                            <h3 class="text-2xl font-semibold leading-none">Próximos Pagos</h3>
+                    <div class="border rounded-lg shadow-md">
+                        <div class="flex flex-col space-y-1.5 p-4 sm:p-6">
+                            <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-5 w-5">
+                                    <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                    <line x1="2" x2="22" y1="10" y2="10"></line>
+                                </svg>
+                                Próximos Pagos
+                            </h3>
                         </div>
-                        <div class="p-6 space-y-4">
-                            <!-- Tarjeta de Pago -->
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-medium text-gray-800">Elena Ramírez</p>
-                                        <p class="text-sm text-gray-600">$2,500</p>
+                        <div class="p-4 sm:p-6 space-y-4">
+                            <!-- Tarjetas de Pagos -->
+                            <div class="flex items-center justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                            <circle cx="12" cy="8" r="5"></circle>
+                                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        </svg>
+                                        <span class="font-medium text-gray-800">Elena Ramírez</span>
                                     </div>
-                                    <span class="text-sm text-gray-500">2023-06-20</span>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        <span>2023-06-14</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-lg font-semibold text-gray-800">$2,500</div>
+                                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500/15 text-red-500 border-0" data-v0-t="badge">En 2 días</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Tarjeta de Pago -->
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-medium text-gray-800">Roberto Gómez</p>
-                                        <p class="text-sm text-gray-600">$4,800</p>
+                            <div class="flex items-center justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                            <circle cx="12" cy="8" r="5"></circle>
+                                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        </svg>
+                                        <span class="font-medium text-gray-800">Roberto Gómez</span>
                                     </div>
-                                    <span class="text-sm text-gray-500">2023-06-22</span>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        <span>2023-06-14</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-lg font-semibold text-gray-800">$4,800</div>
+                                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-yellow-500/15 text-yellow-500 border-0" data-v0-t="badge">En 7 días</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Tarjeta de Pago -->
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-medium text-gray-800">Sofía Torres</p>
-                                        <p class="text-sm text-gray-600">$3,200</p>
+                            <div class="flex items-center justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                            <circle cx="12" cy="8" r="5"></circle>
+                                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        </svg>
+                                        <span class="font-medium text-gray-800">Sofía Torres</span>
                                     </div>
-                                    <span class="text-sm text-gray-500">2023-06-25</span>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        <span>2023-06-15</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-lg font-semibold text-gray-800">$3,500</div>
+                                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-emerald-100 text-emerald-800 border-0" data-v0-t="badge">
+                                            En 20 días
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

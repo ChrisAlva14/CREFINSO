@@ -1,4 +1,14 @@
-﻿/* DARK MODE */
+﻿@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Ubuntu:wght@400;500;700&display=swap');
+
+/* Aplicar Geist a toda la página */
+html, body {
+    font-family: 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Aplicar Ubuntu a los títulos */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
 
 
 /* Estilos para el modo oscuro */
@@ -20,7 +30,9 @@
 
 /* Texto adicional en modo oscuro */
 .dark-mode h1,
-.dark-mode a{
+.dark-mode a,
+.dark-mode span,
+.dark-mode p{
     color: #ffffff;
 }
 
@@ -76,4 +88,53 @@
 
 .dark-mode .next-payment{
 
+}
+
+.dark-mode .userWhite {
+    color: #fff;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+/* Modo Oscuro */
+.dark-mode .bg-white {
+    background-color: rgb(31 41 55); /* Fondo oscuro */
+    border-color: rgb(55 65 81); /* Borde oscuro */
+}
+
+.dark-mode .text-gray-800 {
+    color: #ffffff; /* Texto blanco */
+}
+
+.dark-mode .text-gray-500 {
+    color: #9ca3af; /* Texto gris claro */
+}
+
+.dark-mode .text-emerald-800 {
+    color: #34d399; /* Texto verde claro */
+}
+
+.dark-mode .bg-emerald-100 {
+    background-color: rgb(22 101 52 / 0.15); /* Fondo verde oscuro */
 }

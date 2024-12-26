@@ -23,7 +23,7 @@
     {
         if (firstRender)
         {
-            isAuthenticated = await authServices.IsAuthenticated();
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
             StateHasChanged();
         }
     }

@@ -19,7 +19,7 @@ namespace Crefinso.Services.Empleos
         {
             try
             {
-                var token = await _authServices.GetToken();
+                var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
@@ -65,7 +65,7 @@ namespace Crefinso.Services.Empleos
         {
             try
             {
-                var token = await _authServices.GetToken();
+                var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
@@ -91,7 +91,7 @@ namespace Crefinso.Services.Empleos
             try
             {
                 // Obtener el token de autenticación
-                var token = await _authServices.GetToken();
+                var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
@@ -130,7 +130,7 @@ namespace Crefinso.Services.Empleos
         {
             try
             {
-                var token = await _authServices.GetToken();
+                var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
@@ -178,7 +178,7 @@ namespace Crefinso.Services.Empleos
         {
             try
             {
-                var token = await _authServices.GetToken();
+                var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
