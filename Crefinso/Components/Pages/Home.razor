@@ -1,25 +1,33 @@
-﻿@page "/dashboard"
-@using Crefinso.Services
-@inject IJSRuntime JS
-@inject SweetAlertService Swal
-@inject AuthServices authServices
+﻿@page "/dashboard" 
+@using Crefinso.Services 
+@inject IJSRuntime JS 
+@inject SweetAlertService Swal 
+@inject AuthServices authServices 
+@inject DashboardServices dashboardService
 
 @code {
-    private string errorMessage;
-    private bool isAuthenticated;
+    private string errorMessage; 
+    private bool isAuthenticated; 
+    private int activeClientsCount; 
+    private decimal activeLoansCount; 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            isAuthenticated = await authServices.IsAuthenticatedAsync();
-            StateHasChanged();
-        }
+    protected override async Task OnAfterRenderAsync(bool firstRender) { 
+        if (firstRender) { 
+            isAuthenticated = await authServices.IsAuthenticatedAsync(); 
+            if (isAuthenticated) { 
+                await LoadDashboardData(); 
+            } 
+            StateHasChanged(); 
+        } 
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Inicialización adicional si es necesario
+    private async Task LoadDashboardData() { 
+        try { 
+            activeClientsCount = await dashboardService.GetActiveClientsCountAsync(); 
+            activeLoansCount = await dashboardService.GetActiveLoansCountAsync(); 
+        } catch (Exception ex) { 
+            errorMessage = $"Error loading dashboard data: {ex.Message}"; 
+        } 
     }
 }
 
@@ -37,11 +45,11 @@
                 <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Clientes Activos</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">2,543</p>
+                        <p class="text-3xl sm:text-4xl font-bold">@activeClientsCount</p>
                     </div>
                     <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Préstamos Activos</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">$1,000</p>
+                        <p class="text-3xl sm:text-4xl font-bold">@activeLoansCount</p>
                     </div>
                     <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Pagos Atrasados</h2>
@@ -52,26 +60,6 @@
                         <p class="text-3xl sm:text-4xl font-bold">2.4%</p>
                     </div>
                 </section>
-
-                <!-- Barra de búsqueda y filtrado por fecha -->
-                <div class="flex flex-col sm:flex-row items-center gap-4">
-                    <div class="relative flex-1 w-full sm:w-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2 top-2.5 h-4 w-4 text-gray-400">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.3-4.3"></path>
-                        </svg>
-                        <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar...">
-                    </div>
-                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-full sm:w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
-                            <path d="M8 2v4"></path>
-                            <path d="M16 2v4"></path>
-                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                            <path d="M3 10h18"></path>
-                        </svg>
-                        <span>Filtrar por fecha</span>
-                    </button>
-                </div>
 
                 <!-- Sección de Préstamos Recientes y Próximos Pagos -->
                 <div class="grid gap-6 md:grid-cols-2 mt-6">

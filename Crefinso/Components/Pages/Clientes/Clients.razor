@@ -8,7 +8,7 @@
 @using Crefinso.Services
 @using Crefinso.Services.Clientes
 
-@code{
+@code {
     private List<ClienteResponse> clientes;
     private UserSession userSession = new UserSession();
     private ClienteResponse editingCliente = null;
@@ -19,35 +19,45 @@
     private bool isAuthenticated;
     private bool isEditModalVisible = false;
     private bool isDetailsModalVisible = false;
+    private int clientesActivos;
+    private int clientesInactivos;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        
         if (firstRender)
         {
             isAuthenticated = await authServices.IsAuthenticatedAsync();
-
             StateHasChanged();
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
-
         try
         {
             await JS.InvokeVoidAsync("mostrarAlertaCargando");
-
             await Task.Delay(1125);
-
-            clientes = await clienteService.GetClientes();
-
+            await LoadClientes(); // Cargar clientes y calcular estadísticas
             isLoading = false;
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
         }
+    }
+
+    // Método para cargar clientes y recalcular estadísticas
+    private async Task LoadClientes()
+    {
+        clientes = await clienteService.GetClientes();
+        RecalculateStats();
+    }
+
+    // Método para recalcular estadísticas
+    private void RecalculateStats()
+    {
+        clientesActivos = clientes.Count(c => c.Estado == "Activo");
+        clientesInactivos = clientes.Count(c => c.Estado == "Inactivo");
     }
 
     //MODIFICAR CLIENTE
@@ -58,7 +68,6 @@
     }
 
     //MODIFICAR UN CLIENTE
-
     private async Task HandleEditClient()
     {
         try
@@ -66,8 +75,8 @@
             bool success = await clienteService.UpdateClient(editingCliente);
             if (success)
             {
-                clientes = await clienteService.GetClientes(); 
-                CloseEditModal(); 
+                await LoadClientes(); // Recargar clientes y recalcular estadísticas
+                CloseEditModal();
                 await Swal.FireAsync("Éxito", "Cliente actualizado correctamente", SweetAlertIcon.Success);
             }
             else
@@ -86,7 +95,6 @@
         editingCliente = null;
         isEditModalVisible = false;
     }
-
 
     //ELIMINAR USUARIO
     private async Task ConfirmDeleteClient(int clienteId)
@@ -114,7 +122,7 @@
             bool success = await clienteService.DeleteCliente(clienteId);
             if (success)
             {
-                clientes = await clienteService.GetClientes();
+                await LoadClientes(); // Recargar clientes y recalcular estadísticas
                 await Swal.FireAsync("Éxito", "Cliente eliminado correctamente", SweetAlertIcon.Success);
             }
             else
@@ -152,6 +160,17 @@
         detailsCliente = null;
         isDetailsModalVisible = false;
     }
+
+    //CAMBIO DE ESTADO
+    private MarkupString EstadoBadge(string estado)
+    {
+        return estado switch
+        {
+            "Inactivo" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-yellow-500'>Inactivo</span>"),
+            "Activo" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Activo</span>"),
+            _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>ERROR</span>")
+        };
+    }
 }
 
 @if (clientes == null)
@@ -178,15 +197,15 @@ else if(isAuthenticated)
                 <section class="flex flex-wrap justify-around">
                     <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Total de Clientes</h2>
-                        <p class="text-4xl font-bold">11</p>
+                        <p class="text-4xl font-bold">@clientes.Count</p>
                     </div>
                     <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Clientes Activos</h2>
-                        <p class="text-4xl font-bold">5</p>
+                        <p class="text-4xl font-bold">@clientesActivos</p>
                     </div>
                     <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Clientes Inactivos</h2>
-                        <p class="text-4xl font-bold">6</p>
+                        <p class="text-4xl font-bold">@clientesInactivos</p>
                     </div>
                 </section>
 
@@ -199,15 +218,6 @@ else if(isAuthenticated)
                         </svg>
                         <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar cliente...">
                     </div>
-                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
-                        <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
-                            <path d="M8 2v4"></path>
-                            <path d="M16 2v4"></path>
-                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                            <path d="M3 10h18"></path>
-                        </svg>
-                        <span>Filtrar por fecha</span>
-                    </button>
                 </div>
 
                 <div class="p-6 border bg-white rounded-lg shadow-md">
@@ -222,6 +232,7 @@ else if(isAuthenticated)
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">NIT</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Dirección</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Celular</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
                                     <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
                                 </tr>
                             </thead>
@@ -235,6 +246,9 @@ else if(isAuthenticated)
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.NIT</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.Direccion</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.TelefonoCelular</td>
+                                        <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            @EstadoBadge(cliente.Estado)
+                                        </td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
                                             <!-- VER DETALLES DEL CLIENTE -->
                                             <button class="text-green-500" @onclick="() => DetailsCliente(cliente.ClienteId)">
@@ -358,8 +372,12 @@ else if(isAuthenticated)
 
                         <div class="space-y-2">
                             <label class="text-sm font-medium flex items-center gap-2" for="Estado">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-4 h-4">
-                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                    <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                    <path d="M10 9H8"></path>
+                                    <path d="M16 13H8"></path>
+                                    <path d="M16 17H8"></path>
                                 </svg>
                                 Estado Cliente
                             </label>
@@ -471,9 +489,12 @@ else if(isAuthenticated)
 
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4">
-                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
                             </svg>
                             Estado Cliente
                         </label>
