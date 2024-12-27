@@ -91,7 +91,7 @@
     </div>
 
     <!-- Content -->
-    <div class="w-full max-w-md space-y-8 relative z-10">
+    <div class="w-full max-w-lg space-y-8 relative z-10">
         <!-- Logo -->
         <div class="flex flex-col items-center space-y-4">
             <img alt="CREFINSO"
@@ -102,7 +102,7 @@
         <!-- Form Container -->
         <div class="bg-[#212936]/95 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-gray-800">
             <!-- Title -->
-            <h1 class="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h1>
+            <h1 class="text-4xl font-bold text-white focus:outline-none mb-6 text-center">Iniciar Sesión</h1>
 
             <!-- Form -->
             <EditForm class="space-y-6" Model="userSession" OnValidSubmit="Login">
@@ -114,6 +114,7 @@
                     <InputText @bind-Value="userSession.UserName" id="username"
                                type="text"
                                placeholder="juanperez"
+                               autocomplete="off"
                                required
                                class="w-full h-11 rounded-lg bg-[#2a3441] border border-[#374151] text-white placeholder:text-gray-400 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
                 </div>
@@ -132,7 +133,7 @@
 
                 <!-- Submit Button -->
                 <button type="submit"
-                        class="w-full h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#212936] transition-colors">
+                        class="w-full focus:outline-none h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#212936] transition-colors">
 
                     @if (isLoading)
                     {

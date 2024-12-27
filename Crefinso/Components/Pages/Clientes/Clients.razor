@@ -22,6 +22,11 @@
     private int clientesActivos;
     private int clientesInactivos;
 
+    //PAGINACION
+    private int currentPage = 1;
+    private int pageSize = 7;
+    private int totalPages;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -50,7 +55,22 @@
     private async Task LoadClientes()
     {
         clientes = await clienteService.GetClientes();
+        totalPages = (int)Math.Ceiling((double)clientes.Count / pageSize);
         RecalculateStats();
+    }
+
+    private List<ClienteResponse> GetPaginatedClientes()
+    {
+        return clientes
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void ChangePage(int direction)
+    {
+        currentPage += direction;
+        StateHasChanged();
     }
 
     // Método para recalcular estadísticas
@@ -237,7 +257,7 @@ else if(isAuthenticated)
                                 </tr>
                             </thead>
                             <tbody class="[&_tr:last-child]:border-0">
-                                @foreach (var cliente in clientes)
+                                @foreach (var cliente in GetPaginatedClientes())
                                 {
                                     <tr class="border-b transition-colors">
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.ClienteId</td>
@@ -275,6 +295,21 @@ else if(isAuthenticated)
                                 }
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Controles de paginación -->
+                    <div class="flex justify-between items-center mt-4">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(-1)"
+                                disabled="@(currentPage == 1)">
+                            Anterior
+                        </button>
+                        <span>Página @currentPage de @totalPages</span>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(1)"
+                                disabled="@(currentPage == totalPages)">
+                            Siguiente
+                        </button>
                     </div>
                 </div>
             </div>
