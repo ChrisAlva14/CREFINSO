@@ -19,8 +19,6 @@
         public DateOnly FechaAnalisis { get; set; }
 
         public int UserID { get; set; }
-
-
     }
 
     public class SolicitudRequest

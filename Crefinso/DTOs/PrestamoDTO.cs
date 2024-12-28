@@ -32,6 +32,5 @@
         public DateOnly FechaVencimiento { get; set; }
 
         public string? Estado { get; set; }
-
     }
 }

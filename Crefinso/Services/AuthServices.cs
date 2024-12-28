@@ -1,6 +1,6 @@
-﻿using Crefinso.DTOs;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Crefinso.DTOs;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Crefinso.Services
 {

@@ -1,5 +1,5 @@
-﻿using Crefinso.DTOs;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using Crefinso.DTOs;
 
 namespace Crefinso.Services
 {
@@ -21,11 +21,18 @@ namespace Crefinso.Services
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o invalido. Iniciar sesion.");
+                    throw new InvalidOperationException(
+                        "El token es nulo o invalido. Iniciar sesion."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
+                    "api/clientes"
+                );
 
                 // Contar la cantidad de clientes en la lista y devolver ese valor
                 return response?.Count ?? 0;
@@ -33,11 +40,17 @@ namespace Crefinso.Services
             catch (HttpRequestException ex)
             {
                 // Log the exception or handle it as needed
-                throw new ApplicationException("Error al obtener el número de clientes activos", ex);
+                throw new ApplicationException(
+                    "Error al obtener el número de clientes activos",
+                    ex
+                );
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS CLIENTES, POR FAVOR REINICIAR EL SISTEMA", ex);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS CLIENTES, POR FAVOR REINICIAR EL SISTEMA",
+                    ex
+                );
             }
         }
 
@@ -48,11 +61,18 @@ namespace Crefinso.Services
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o invalido. Iniciar sesion.");
+                    throw new InvalidOperationException(
+                        "El token es nulo o invalido. Iniciar sesion."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
+                    "api/prestamos"
+                );
 
                 // Contar la cantidad de préstamos en la lista y devolver ese valor
                 return response?.Count ?? 0;
@@ -60,11 +80,17 @@ namespace Crefinso.Services
             catch (HttpRequestException ex)
             {
                 // Log the exception or handle it as needed
-                throw new ApplicationException("Error al obtener el número de préstamos activos", ex);
+                throw new ApplicationException(
+                    "Error al obtener el número de préstamos activos",
+                    ex
+                );
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PRÉSTAMOS, POR FAVOR REINICIAR EL SISTEMA", ex);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS PRÉSTAMOS, POR FAVOR REINICIAR EL SISTEMA",
+                    ex
+                );
             }
         }
 
@@ -76,18 +102,27 @@ namespace Crefinso.Services
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o invalido. Iniciar sesion.");
+                    throw new InvalidOperationException(
+                        "El token es nulo o invalido. Iniciar sesion."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Obtener préstamos y clientes
-                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
-                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
+                    "api/prestamos"
+                );
+                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
+                    "api/clientes"
+                );
 
                 // Combinar préstamos con clientes para obtener el nombre
-                var recentLoans = prestamos?
-                    .OrderByDescending(p => p.FechaInicio)
+                var recentLoans = prestamos
+                    ?.OrderByDescending(p => p.FechaInicio)
                     .Take(3)
                     .Select(p => new PrestamoResponseWithCliente
                     {
@@ -98,7 +133,9 @@ namespace Crefinso.Services
                         FechaInicio = p.FechaInicio,
                         FechaVencimiento = p.FechaVencimiento,
                         Estado = p.Estado,
-                        ClienteNombre = clientes?.FirstOrDefault(c => c.ClienteId == p.SolicitudId)?.Nombre ?? "Desconocido"
+                        ClienteNombre =
+                            clientes?.FirstOrDefault(c => c.ClienteId == p.SolicitudId)?.Nombre
+                            ?? "Desconocido",
                     })
                     .ToList();
 
@@ -110,7 +147,10 @@ namespace Crefinso.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PRÉSTAMOS RECIENTES, POR FAVOR REINICIAR EL SISTEMA", ex);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS PRÉSTAMOS RECIENTES, POR FAVOR REINICIAR EL SISTEMA",
+                    ex
+                );
             }
         }
 
@@ -122,18 +162,25 @@ namespace Crefinso.Services
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o invalido. Iniciar sesion.");
+                    throw new InvalidOperationException(
+                        "El token es nulo o invalido. Iniciar sesion."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Obtener pagos y clientes
                 var pagos = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
-                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
+                    "api/clientes"
+                );
 
                 // Combinar pagos con clientes para obtener el nombre
-                var upcomingPayments = pagos?
-                    .Where(p => p.FechaPago >= DateOnly.FromDateTime(DateTime.Today))
+                var upcomingPayments = pagos
+                    ?.Where(p => p.FechaPago >= DateOnly.FromDateTime(DateTime.Today))
                     .OrderBy(p => p.FechaPago)
                     .Take(3)
                     .Select(p => new PagoResponseWithCliente
@@ -144,7 +191,9 @@ namespace Crefinso.Services
                         MontoPagado = p.MontoPagado,
                         SaldoAcumulado = p.SaldoAcumulado,
                         Estado = p.Estado,
-                        ClienteNombre = clientes?.FirstOrDefault(c => c.ClienteId == p.PrestamoId)?.Nombre ?? "Desconocido"
+                        ClienteNombre =
+                            clientes?.FirstOrDefault(c => c.ClienteId == p.PrestamoId)?.Nombre
+                            ?? "Desconocido",
                     })
                     .ToList();
 
@@ -156,7 +205,10 @@ namespace Crefinso.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PRÓXIMOS PAGOS, POR FAVOR REINICIAR EL SISTEMA", ex);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS PRÓXIMOS PAGOS, POR FAVOR REINICIAR EL SISTEMA",
+                    ex
+                );
             }
         }
     }

@@ -1,5 +1,5 @@
-﻿using Crefinso.DTOs;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using Crefinso.DTOs;
 
 namespace Crefinso.Services.Prestamos
 {
@@ -22,24 +22,30 @@ namespace Crefinso.Services.Prestamos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o invalido.Iniciar sesion");
+                    throw new InvalidOperationException(
+                        "El token es nulo o invalido.Iniciar sesion"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
+                    "api/prestamos"
+                );
 
                 return response;
             }
-
             catch (HttpRequestException ex)
             {
-
                 throw;
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PRESTAMOS, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS PRESTAMOS, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
-
         }
 
         // OBTENER PRÉSTAMO POR ID
@@ -50,10 +56,17 @@ namespace Crefinso.Services.Prestamos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<PrestamoResponse>($"api/prestamos/{loanId}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<PrestamoResponse>(
+                    $"api/prestamos/{loanId}"
+                );
 
                 return response;
             }
@@ -63,7 +76,9 @@ namespace Crefinso.Services.Prestamos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
         }
 
@@ -76,11 +91,16 @@ namespace Crefinso.Services.Prestamos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
                 // Agregar el token al encabezado de autorización
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Enviar la solicitud POST con los datos del nuevo préstamo
                 var response = await _httpClient.PostAsJsonAsync("api/prestamos", newLoan);
@@ -94,7 +114,9 @@ namespace Crefinso.Services.Prestamos
                 {
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al crear el Préstamo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al crear el Préstamo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -103,7 +125,10 @@ namespace Crefinso.Services.Prestamos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL CREAR EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -115,10 +140,15 @@ namespace Crefinso.Services.Prestamos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Construir el contenido a enviar en la solicitud
                 var data = new
@@ -129,10 +159,13 @@ namespace Crefinso.Services.Prestamos
                     loan.TasaInteres,
                     loan.FechaInicio,
                     loan.FechaVencimiento,
-                    loan.Estado
+                    loan.Estado,
                 };
 
-                var response = await _httpClient.PutAsJsonAsync($"api/prestamos/{loan.PrestamoId}", data);
+                var response = await _httpClient.PutAsJsonAsync(
+                    $"api/prestamos/{loan.PrestamoId}",
+                    data
+                );
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -141,7 +174,9 @@ namespace Crefinso.Services.Prestamos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al actualizar el Préstamo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al actualizar el Préstamo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -150,7 +185,10 @@ namespace Crefinso.Services.Prestamos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -162,9 +200,14 @@ namespace Crefinso.Services.Prestamos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.DeleteAsync($"api/prestamos/{loanId}");
 
                 if (response.IsSuccessStatusCode)
@@ -174,7 +217,9 @@ namespace Crefinso.Services.Prestamos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al eliminar el préstamo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al eliminar el préstamo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -183,7 +228,10 @@ namespace Crefinso.Services.Prestamos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
     }

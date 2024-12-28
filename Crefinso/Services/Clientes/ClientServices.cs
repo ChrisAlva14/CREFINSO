@@ -1,5 +1,5 @@
-﻿using Crefinso.DTOs;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using Crefinso.DTOs;
 
 namespace Crefinso.Services.Clientes
 {
@@ -22,24 +22,30 @@ namespace Crefinso.Services.Clientes
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o invalido.Iniciar sesion");
+                    throw new InvalidOperationException(
+                        "El token es nulo o invalido.Iniciar sesion"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
+                    "api/clientes"
+                );
 
                 return response;
             }
-
             catch (HttpRequestException ex)
             {
-
                 throw;
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS CLIENTES, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS CLIENTES, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
-
         }
 
         //OBETENER CLIENTE POR ID POR ID
@@ -50,10 +56,17 @@ namespace Crefinso.Services.Clientes
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<ClienteResponse>($"api/clientes/{clienteId}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<ClienteResponse>(
+                    $"api/clientes/{clienteId}"
+                );
 
                 return response;
             }
@@ -63,7 +76,9 @@ namespace Crefinso.Services.Clientes
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
         }
 
@@ -76,11 +91,16 @@ namespace Crefinso.Services.Clientes
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
                 // Agregar el token al encabezado de autorización
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Enviar la solicitud POST con los datos del nuevo usuario
                 var response = await _httpClient.PostAsJsonAsync("api/clientes", newClient);
@@ -94,7 +114,9 @@ namespace Crefinso.Services.Clientes
                 {
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al crear el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al crear el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -103,7 +125,10 @@ namespace Crefinso.Services.Clientes
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL CREAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -115,10 +140,15 @@ namespace Crefinso.Services.Clientes
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Construir el contenido a enviar en la solicitud
                 var data = new
@@ -132,10 +162,13 @@ namespace Crefinso.Services.Clientes
                     client.TelefonoCelular,
                     client.TelefonoFijo,
                     client.UserID,
-                    client.Estado
+                    client.Estado,
                 };
 
-                var response = await _httpClient.PutAsJsonAsync($"api/clientes/{client.ClienteId}", data);
+                var response = await _httpClient.PutAsJsonAsync(
+                    $"api/clientes/{client.ClienteId}",
+                    data
+                );
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -144,7 +177,9 @@ namespace Crefinso.Services.Clientes
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al actualizar el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al actualizar el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -153,7 +188,10 @@ namespace Crefinso.Services.Clientes
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -165,9 +203,14 @@ namespace Crefinso.Services.Clientes
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.DeleteAsync($"api/clientes/{clienteId}");
 
                 if (response.IsSuccessStatusCode)
@@ -177,7 +220,9 @@ namespace Crefinso.Services.Clientes
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al eliminar el cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al eliminar el cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -186,7 +231,10 @@ namespace Crefinso.Services.Clientes
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
     }
