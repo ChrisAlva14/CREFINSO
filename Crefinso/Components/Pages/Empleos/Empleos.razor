@@ -19,6 +19,11 @@
     private bool isEditModalVisible = false;
     private bool isDetailsModalVisible = false;
 
+    // Variables de paginación
+    private int currentPage = 1;
+    private int pageSize = 7; // Número de elementos por página
+    private int totalPages;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -36,6 +41,7 @@
             await Task.Delay(1125);
 
             empleos = await jobService.GetJobs();
+            CalculateTotalPages(); // Calcular el total de páginas
 
             isLoading = false;
         }
@@ -43,6 +49,29 @@
         {
             errorMessage = ex.Message;
         }
+    }
+
+    // Método para obtener los empleos paginados
+    private List<EmpleoResponse> GetPaginatedEmpleos()
+    {
+        return empleos
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    // Método para cambiar de página
+    private void ChangePage(int direction)
+    {
+        currentPage += direction;
+        StateHasChanged();
+    }
+
+    // Método para calcular el total de páginas
+    private void CalculateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling((double)empleos.Count / pageSize);
+        if (totalPages < 1) totalPages = 1; // Asegurar que haya al menos una página
     }
 
     // MODIFICAR EMPLEO
@@ -60,6 +89,7 @@
             if (success)
             {
                 empleos = await jobService.GetJobs();
+                CalculateTotalPages(); // Recalcular el total de páginas
                 CloseEditModal();
                 await Swal.FireAsync("Éxito", "Empleo actualizado correctamente", SweetAlertIcon.Success);
             }
@@ -107,6 +137,7 @@
             if (success)
             {
                 empleos = await jobService.GetJobs();
+                CalculateTotalPages(); // Recalcular el total de páginas
                 await Swal.FireAsync("Éxito", "Empleo eliminado correctamente", SweetAlertIcon.Success);
             }
             else
@@ -141,10 +172,40 @@
         detailsJob = null;
         isDetailsModalVisible = false;
     }
+
+    //ESTADISTICAS
+    private decimal CalcularSueldoPromedio()
+    {
+        if (empleos == null || empleos.Count == 0)
+            return 0;
+
+        decimal totalSueldos = empleos.Sum(job =>
+            decimal.TryParse(job.SueldoBase, out decimal sueldo) ? sueldo : 0);
+        return totalSueldos / empleos.Count;
+    }
+
+    private decimal ObtenerMayorSueldo()
+    {
+        if (empleos == null || empleos.Count == 0)
+            return 0;
+
+        return empleos.Max(job =>
+            decimal.TryParse(job.SueldoBase, out decimal sueldo) ? sueldo : 0);
+    }
+
+    private decimal ObtenerMenorSueldo()
+    {
+        if (empleos == null || empleos.Count == 0)
+            return 0;
+
+        return empleos.Min(job =>
+            decimal.TryParse(job.SueldoBase, out decimal sueldo) ? sueldo : decimal.MaxValue);
+    }
 }
 
 @if (empleos == null)
 {
+    <p>Cargando...</p>
 }
 else if (isAuthenticated)
 {
@@ -171,15 +232,15 @@ else if (isAuthenticated)
                     </div>
                     <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
                         <h2 class="text-gray-700 text-lg font-semibold">Sueldo Promedio</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">$1,000</p>
+                        <p class="text-3xl sm:text-4xl font-bold">$@CalcularSueldoPromedio().ToString("N2")</p>
                     </div>
                     <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md">
-                        <h2 class="text-gray-700 text-lg font-semibold">Mayor Sueldo</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">34</p>
+                        <h2 class="text-gray-700 text-lg font-semibold">Sueldo Mayor</h2>
+                        <p class="text-3xl sm:text-4xl font-bold">$@ObtenerMayorSueldo().ToString("N2")</p>
                     </div>
                     <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md">
-                        <h2 class="text-gray-700 text-lg font-semibold">Menor Sueldo</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">2.4%</p>
+                        <h2 class="text-gray-700 text-lg font-semibold">Sueldo Menor</h2>
+                        <p class="text-3xl sm:text-4xl font-bold">$@ObtenerMenorSueldo().ToString("N2")</p>
                     </div>
                 </section>
 
@@ -195,12 +256,12 @@ else if (isAuthenticated)
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Sueldo Base</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha Ingreso</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Teléfono</th>
-                                    
+
                                     <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="[&_tr:last-child]:border-0">
-                                @foreach (var job in empleos)
+                                @foreach (var job in GetPaginatedEmpleos())
                                 {
                                     <tr class="border-b transition-colors">
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@job.EmpleoId</td>
@@ -210,7 +271,7 @@ else if (isAuthenticated)
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@job.SueldoBase</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@job.FechaIngreso.ToShortDateString()</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@job.TelefonoTrabajo</td>
-                                        
+
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
                                             <!-- VER DETALLES DEL EMPLEO -->
                                             <button class="text-green-500" @onclick="() => DetailsJob(job.EmpleoId)">
@@ -238,12 +299,26 @@ else if (isAuthenticated)
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Controles de paginación -->
+                    <div class="flex justify-between items-center mt-4">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(-1)"
+                                disabled="@(currentPage == 1)">
+                            Anterior
+                        </button>
+                        <span>Página @currentPage de @totalPages</span>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(1)"
+                                disabled="@(currentPage == totalPages)">
+                            Siguiente
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 }
-
 @* EDITAR UN EMPLEO *@
 @if (isEditModalVisible && editingJob != null)
 {

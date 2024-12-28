@@ -20,6 +20,15 @@
     private bool isEditModalVisible = false;
     private bool isDetailsModalVisible = false;
 
+    // Variables de paginación
+    private int currentPage = 1;
+    private int pageSize = 7; // Número de elementos por página
+    private int totalPages;
+
+    // Variables para estadísticas
+    private int pagosRealizados;
+    private int pagosPendientes;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -35,14 +44,51 @@
         {
             await JS.InvokeVoidAsync("mostrarAlertaCargando");
             await Task.Delay(1125);
-
-            pagos = await paymentService.GetPayments();
+            await LoadPagos(); // Cargar pagos y calcular estadísticas
             isLoading = false;
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
         }
+    }
+
+    // Método para cargar pagos y recalcular estadísticas
+    private async Task LoadPagos()
+    {
+        pagos = await paymentService.GetPayments();
+        CalculateTotalPages(); // Calcular el total de páginas
+        RecalculateStats(); // Recalcular estadísticas
+    }
+
+    // Método para obtener los pagos paginados
+    private List<PagoResponse> GetPaginatedPagos()
+    {
+        return pagos
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    // Método para calcular el total de páginas
+    private void CalculateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling((double)pagos.Count / pageSize);
+        if (totalPages < 1) totalPages = 1; // Asegurar que haya al menos una página
+    }
+
+    // Método para cambiar de página
+    private void ChangePage(int direction)
+    {
+        currentPage += direction;
+        StateHasChanged();
+    }
+
+    // Método para recalcular estadísticas
+    private void RecalculateStats()
+    {
+        pagosRealizados = pagos.Count(p => p.Estado == "Realizado");
+        pagosPendientes = pagos.Count(p => p.Estado == "Pendiente");
     }
 
     // MODIFICAR PAGO
@@ -59,7 +105,7 @@
             bool success = await paymentService.UpdatePayment(editingPago);
             if (success)
             {
-                pagos = await paymentService.GetPayments();
+                await LoadPagos(); // Recargar pagos y recalcular estadísticas
                 CloseEditModal();
                 await Swal.FireAsync("Éxito", "Pago actualizado correctamente", SweetAlertIcon.Success);
             }
@@ -106,7 +152,7 @@
             bool success = await paymentService.DeletePayment(pagoId);
             if (success)
             {
-                pagos = await paymentService.GetPayments();
+                await LoadPagos(); // Recargar pagos y recalcular estadísticas
                 await Swal.FireAsync("Éxito", "Pago eliminado correctamente", SweetAlertIcon.Success);
             }
             else
@@ -156,6 +202,7 @@
 
 @if (pagos == null)
 {
+    <p>Cargando...</p>
 }
 else if (isAuthenticated)
 {
@@ -182,11 +229,11 @@ else if (isAuthenticated)
                     </div>
                     <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Pagos Realizados</h2>
-                        <p class="text-4xl font-bold">2</p>
+                        <p class="text-4xl font-bold">@pagosRealizados</p>
                     </div>
                     <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Pagos Pendientes</h2>
-                        <p class="text-4xl font-bold">2</p>
+                        <p class="text-4xl font-bold">@pagosPendientes</p>
                     </div>
                 </section>
 
@@ -199,15 +246,6 @@ else if (isAuthenticated)
                         </svg>
                         <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar pago...">
                     </div>
-                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
-                            <path d="M8 2v4"></path>
-                            <path d="M16 2v4"></path>
-                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                            <path d="M3 10h18"></path>
-                        </svg>
-                        <span>Filtrar por fecha</span>
-                    </button>
                 </div>
 
                 <div class="p-6 border bg-white rounded-lg shadow-md">
@@ -226,7 +264,7 @@ else if (isAuthenticated)
                                 </tr>
                             </thead>
                             <tbody class="[&_tr:last-child]:border-0">
-                                @foreach (var pago in pagos)
+                                @foreach (var pago in GetPaginatedPagos())
                                 {
                                     <tr class="border-b transition-colors">
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PagoId</td>
@@ -236,8 +274,7 @@ else if (isAuthenticated)
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.SaldoAcumulado</td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                                             @EstadoBadge(pago.Estado)
-                                            </td>
-
+                                        </td>
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
                                             <!-- VER DETALLES DEL PAGO -->
                                             <button class="text-green-500" @onclick="() => DetailsPago(pago.PagoId)">
@@ -264,6 +301,21 @@ else if (isAuthenticated)
                                 }
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Controles de paginación -->
+                    <div class="flex justify-between items-center mt-4">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(-1)"
+                                disabled="@(currentPage == 1)">
+                            Anterior
+                        </button>
+                        <span>Página @currentPage de @totalPages</span>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(1)"
+                                disabled="@(currentPage == totalPages)">
+                            Siguiente
+                        </button>
                     </div>
                 </div>
             </div>
