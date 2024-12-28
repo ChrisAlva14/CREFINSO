@@ -26,6 +26,7 @@
 
         public string UserRole { get; set; } = null!;
     }
+
     public class UserRequest
     {
         public string UserName { get; set; } = null!;

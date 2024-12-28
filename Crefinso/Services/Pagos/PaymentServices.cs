@@ -1,5 +1,5 @@
-﻿using Crefinso.DTOs;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using Crefinso.DTOs;
 
 namespace Crefinso.Services.Pagos
 {
@@ -22,9 +22,14 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
+                    throw new InvalidOperationException(
+                        "El token es nulo o inválido. Iniciar sesión"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
 
                 return response;
@@ -35,7 +40,9 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
         }
 
@@ -47,10 +54,17 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<PagoResponse>($"api/pagos/{paymentId}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<PagoResponse>(
+                    $"api/pagos/{paymentId}"
+                );
 
                 return response;
             }
@@ -60,7 +74,9 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL PAGO, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER EL PAGO, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
         }
 
@@ -73,11 +89,16 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
                 // Agregar el token al encabezado de autorización
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Enviar la solicitud POST con los datos del nuevo pago
                 var response = await _httpClient.PostAsJsonAsync("api/pagos", newPayment);
@@ -91,7 +112,9 @@ namespace Crefinso.Services.Pagos
                 {
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al crear el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al crear el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -100,7 +123,10 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL CREAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -112,10 +138,15 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Construir el contenido a enviar en la solicitud
                 var data = new
@@ -125,10 +156,13 @@ namespace Crefinso.Services.Pagos
                     payment.FechaPago,
                     payment.MontoPagado,
                     payment.SaldoAcumulado,
-                    payment.Estado
+                    payment.Estado,
                 };
 
-                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{payment.PagoId}", data);
+                var response = await _httpClient.PutAsJsonAsync(
+                    $"api/pagos/{payment.PagoId}",
+                    data
+                );
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -137,7 +171,9 @@ namespace Crefinso.Services.Pagos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al actualizar el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al actualizar el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -146,7 +182,10 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -158,9 +197,14 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.DeleteAsync($"api/pagos/{paymentId}");
 
                 if (response.IsSuccessStatusCode)
@@ -170,7 +214,9 @@ namespace Crefinso.Services.Pagos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al eliminar el pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al eliminar el pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -179,7 +225,10 @@ namespace Crefinso.Services.Pagos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
     }

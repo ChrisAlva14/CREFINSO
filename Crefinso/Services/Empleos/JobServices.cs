@@ -1,5 +1,5 @@
-﻿using Crefinso.DTOs;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using Crefinso.DTOs;
 
 namespace Crefinso.Services.Empleos
 {
@@ -22,10 +22,17 @@ namespace Crefinso.Services.Empleos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
+                    throw new InvalidOperationException(
+                        "El token es nulo o inválido. Iniciar sesión"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<EmpleoResponse>>("api/empleos");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<EmpleoResponse>>(
+                    "api/empleos"
+                );
 
                 // SE LLAMA AL NOMBRE DEL CLIENTE PARA CADA EMPLEO
                 foreach (var empleo in response)
@@ -41,7 +48,9 @@ namespace Crefinso.Services.Empleos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS EMPLEOS, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS EMPLEOS, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
         }
 
@@ -50,7 +59,9 @@ namespace Crefinso.Services.Empleos
         {
             try
             {
-                var cliente = await _httpClient.GetFromJsonAsync<ClienteResponse>($"api/clientes/{clienteID}");
+                var cliente = await _httpClient.GetFromJsonAsync<ClienteResponse>(
+                    $"api/clientes/{clienteID}"
+                );
                 return cliente?.Nombre ?? "Desconocido";
             }
             catch (Exception ex)
@@ -68,10 +79,17 @@ namespace Crefinso.Services.Empleos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<EmpleoResponse>($"api/empleos/{jobId}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<EmpleoResponse>(
+                    $"api/empleos/{jobId}"
+                );
 
                 return response;
             }
@@ -81,7 +99,9 @@ namespace Crefinso.Services.Empleos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA");
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA"
+                );
             }
         }
 
@@ -94,11 +114,16 @@ namespace Crefinso.Services.Empleos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
                 // Agregar el token al encabezado de autorización
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Enviar la solicitud POST con los datos del nuevo empleo
                 var response = await _httpClient.PostAsJsonAsync("api/empleos", newJob);
@@ -112,7 +137,9 @@ namespace Crefinso.Services.Empleos
                 {
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al crear el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al crear el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -121,7 +148,10 @@ namespace Crefinso.Services.Empleos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL CREAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL CREAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -133,10 +163,15 @@ namespace Crefinso.Services.Empleos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
 
                 // Construir el contenido a enviar en la solicitud
                 var data = new
@@ -148,10 +183,13 @@ namespace Crefinso.Services.Empleos
                     job.SueldoBase,
                     job.FechaIngreso,
                     job.TelefonoTrabajo,
-                    job.DireccionTrabajo
+                    job.DireccionTrabajo,
                 };
 
-                var response = await _httpClient.PutAsJsonAsync($"api/empleos/{job.EmpleoId}", data);
+                var response = await _httpClient.PutAsJsonAsync(
+                    $"api/empleos/{job.EmpleoId}",
+                    data
+                );
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -160,7 +198,9 @@ namespace Crefinso.Services.Empleos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al actualizar el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al actualizar el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -169,7 +209,10 @@ namespace Crefinso.Services.Empleos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
 
@@ -181,9 +224,14 @@ namespace Crefinso.Services.Empleos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.DeleteAsync($"api/empleos/{jobId}");
 
                 if (response.IsSuccessStatusCode)
@@ -193,7 +241,9 @@ namespace Crefinso.Services.Empleos
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al eliminar el empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}");
+                    throw new Exception(
+                        $"Error al eliminar el empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                    );
                 }
             }
             catch (HttpRequestException ex)
@@ -202,7 +252,10 @@ namespace Crefinso.Services.Empleos
             }
             catch (Exception ex)
             {
-                throw new Exception("HA OCURRIDO UN ERROR AL DESHABILITAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: " + ex.Message);
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                        + ex.Message
+                );
             }
         }
     }
