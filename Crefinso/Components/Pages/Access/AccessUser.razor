@@ -36,9 +36,9 @@
 
         try
         {
-            var token = await authServices.LoginAsync(userSession);
+            var loginResponse = await authServices.LoginAsync(userSession);
 
-            if (string.IsNullOrEmpty(token))
+            if (loginResponse == null || string.IsNullOrEmpty(loginResponse.Token))
             {
                 await Swal.FireAsync(new SweetAlertOptions
                     {
@@ -57,7 +57,10 @@
                         ConfirmButtonText = "OK"
                     });
 
-                await authServices.SetTokenAsync(token);
+                await authServices.SetTokenAsync(loginResponse.Token);
+                await authServices.SetUsernameAsync(loginResponse.Username);
+                await authServices.SetRoleAsync(loginResponse.Role);
+
                 navigationManager.NavigateTo("/dashboard", true);
             }
         }
