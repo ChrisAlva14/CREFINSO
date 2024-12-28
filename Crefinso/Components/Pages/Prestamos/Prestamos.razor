@@ -20,6 +20,15 @@
     private bool isEditModalVisible = false;
     private bool isDetailsModalVisible = false;
 
+    // Variables de paginación
+    private int currentPage = 1;
+    private int pageSize = 7; // Número de elementos por página
+    private int totalPages;
+
+    // Variables para estadísticas
+    private int prestamosActivos;
+    private int prestamosInactivos;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -35,14 +44,51 @@
         {
             await JS.InvokeVoidAsync("mostrarAlertaCargando");
             await Task.Delay(1125);
-
-            loans = await loanService.GetLoans();
+            await LoadLoans(); // Cargar préstamos y calcular estadísticas
             isLoading = false;
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
         }
+    }
+
+    // Método para cargar préstamos y recalcular estadísticas
+    private async Task LoadLoans()
+    {
+        loans = await loanService.GetLoans();
+        CalculateTotalPages(); // Calcular el total de páginas
+        RecalculateStats(); // Recalcular estadísticas
+    }
+
+    // Método para obtener los préstamos paginados
+    private List<PrestamoResponse> GetPaginatedLoans()
+    {
+        return loans
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    // Método para calcular el total de páginas
+    private void CalculateTotalPages()
+    {
+        totalPages = (int)Math.Ceiling((double)loans.Count / pageSize);
+        if (totalPages < 1) totalPages = 1; // Asegurar que haya al menos una página
+    }
+
+    // Método para cambiar de página
+    private void ChangePage(int direction)
+    {
+        currentPage += direction;
+        StateHasChanged();
+    }
+
+    // Método para recalcular estadísticas
+    private void RecalculateStats()
+    {
+        prestamosActivos = loans.Count(l => l.Estado == "Activo");
+        prestamosInactivos = loans.Count(l => l.Estado == "Inactivo");
     }
 
     // MODIFICAR PRÉSTAMO
@@ -59,7 +105,7 @@
             bool success = await loanService.UpdateLoan(editingLoan);
             if (success)
             {
-                loans = await loanService.GetLoans();
+                await LoadLoans(); // Recargar préstamos y recalcular estadísticas
                 CloseEditModal();
                 await Swal.FireAsync("Éxito", "Préstamo actualizado correctamente", SweetAlertIcon.Success);
             }
@@ -106,7 +152,7 @@
             bool success = await loanService.DeleteLoan(loanId);
             if (success)
             {
-                loans = await loanService.GetLoans();
+                await LoadLoans(); // Recargar préstamos y recalcular estadísticas
                 await Swal.FireAsync("Éxito", "Préstamo eliminado correctamente", SweetAlertIcon.Success);
             }
             else
@@ -156,6 +202,7 @@
 
 @if (loans == null)
 {
+    <p>Cargando...</p>
 }
 else if (isAuthenticated)
 {
@@ -178,15 +225,15 @@ else if (isAuthenticated)
                 <section class="flex flex-wrap justify-around">
                     <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Total de Préstamos</h2>
-                        <p class="text-4xl font-bold">11</p>
+                        <p class="text-4xl font-bold">@loans.Count</p>
                     </div>
                     <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Préstamos Activos</h2>
-                        <p class="text-4xl font-bold">5</p>
+                        <p class="text-4xl font-bold">@prestamosActivos</p>
                     </div>
                     <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Préstamos Inactivos</h2>
-                        <p class="text-4xl font-bold">6</p>
+                        <p class="text-4xl font-bold">@prestamosInactivos</p>
                     </div>
                 </section>
 
@@ -199,15 +246,6 @@ else if (isAuthenticated)
                         </svg>
                         <input class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8" placeholder="Buscar préstamo...">
                     </div>
-                    <button class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-600 h-10 px-4 py-2 w-[240px] justify-start text-left font-normal text-gray-500" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r0:" data-state="closed">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4">
-                            <path d="M8 2v4"></path>
-                            <path d="M16 2v4"></path>
-                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                            <path d="M3 10h18"></path>
-                        </svg>
-                        <span>Filtrar por fecha</span>
-                    </button>
                 </div>
 
                 <div class="p-6 border bg-white rounded-lg shadow-md">
@@ -227,7 +265,7 @@ else if (isAuthenticated)
                                 </tr>
                             </thead>
                             <tbody class="[&_tr:last-child]:border-0">
-                                @foreach (var loan in loans)
+                                @foreach (var loan in GetPaginatedLoans())
                                 {
                                     <tr class="border-b transition-colors">
                                         <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.PrestamoId</td>
@@ -265,6 +303,21 @@ else if (isAuthenticated)
                                 }
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Controles de paginación -->
+                    <div class="flex justify-between items-center mt-4">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(-1)"
+                                disabled="@(currentPage == 1)">
+                            Anterior
+                        </button>
+                        <span>Página @currentPage de @totalPages</span>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+                                @onclick="() => ChangePage(1)"
+                                disabled="@(currentPage == totalPages)">
+                            Siguiente
+                        </button>
                     </div>
                 </div>
             </div>
