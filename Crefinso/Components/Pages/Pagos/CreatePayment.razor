@@ -1,15 +1,25 @@
-﻿@page "/createPayment"
-
+﻿@page "/createPayment/{pagoId:int}"
 @using Crefinso.Services.Pagos
 @using Crefinso.DTOs
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
 @inject NavigationManager NavigationManager
 @inject PaymentServices paymentService
+@using Crefinso.Services.Prestamos
+@inject LoanServices loanService
 
 @code {
+    [Parameter]
+    public int PagoId { get; set; } // Captura el parámetro de la ruta
+
     private string errorMessage;
     private PagoRequest newPayment = new PagoRequest();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Puedes usar PagoId para cargar datos relacionados con el pago
+        Console.WriteLine($"PagoId recibido: {PagoId}");
+    }
 
     // Método para manejar el clic en el botón "Cancelar"
     private void HandleCancel()
@@ -22,26 +32,79 @@
     {
         try
         {
+            // Validar que el monto pagado sea un número válido
+            if (!decimal.TryParse(newPayment.MontoPagado, out decimal montoPagado))
+            {
+                await Swal.FireAsync("Error", "El monto pagado no es válido.", SweetAlertIcon.Error);
+                return;
+            }
+
+            // Registrar el pago
             bool success = await paymentService.PostPayment(newPayment);
             if (success)
             {
-                // Limpia el formulario
-                newPayment = new PagoRequest();
-                // Muestra una alerta de éxito
-                await Swal.FireAsync("Éxito", "Pago creado correctamente", SweetAlertIcon.Success);
+                // Obtener el préstamo asociado al pago
+                var prestamo = await loanService.GetLoanById(newPayment.PrestamoId);
+                if (prestamo == null)
+                {
+                    await Swal.FireAsync("Error", "No se encontró el préstamo asociado.", SweetAlertIcon.Error);
+                    return;
+                }
 
-                // Redirige a la página de pagos
+                // Convertir el MontoAprobado a decimal
+                if (!decimal.TryParse(prestamo.MontoAprobado, out decimal montoAprobado))
+                {
+                    await Swal.FireAsync("Error", "El monto aprobado no es válido.", SweetAlertIcon.Error);
+                    return;
+                }
+
+                // Calcular el plazo del préstamo en meses
+                int plazoEnMeses = (prestamo.FechaVencimiento.Year - prestamo.FechaInicio.Year) * 12 + prestamo.FechaVencimiento.Month - prestamo.FechaInicio.Month;
+
+                // Calcular el monto mensual esperado
+                decimal montoEsperado = montoAprobado / plazoEnMeses;
+
+                // Calcular la diferencia entre el monto pagado y el monto esperado
+                decimal diferencia = montoPagado - montoEsperado;
+
+                // Si hay diferencia, ajustar los pagos futuros
+                if (diferencia != 0)
+                {
+                    var pagosFuturos = await paymentService.GetPagosFuturos(newPayment.PrestamoId);
+                    if (pagosFuturos != null && pagosFuturos.Any())
+                    {
+                        foreach (var pagoFuturo in pagosFuturos)
+                        {
+                            decimal montoFuturo = decimal.Parse(pagoFuturo.MontoAPagar);
+                            montoFuturo -= (diferencia / pagosFuturos.Count);
+                            pagoFuturo.MontoAPagar = montoFuturo.ToString("F2");
+
+                            // Actualizar el pago futuro en la base de datos
+                            await paymentService.UpdatePago(pagoFuturo);
+                        }
+                    }
+                }
+
+                // Limpiar el formulario
+                newPayment = new PagoRequest();
+
+                // Mostrar una alerta de éxito
+                await Swal.FireAsync("Éxito", "Pago registrado correctamente.", SweetAlertIcon.Success);
+
+                // Redirigir a la página de pagos
+                Console.WriteLine("Redirigiendo a /payments...");
                 NavigationManager.NavigateTo("/payments");
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo crear el pago", SweetAlertIcon.Error);
+                await Swal.FireAsync("Error", "No se pudo registrar el pago.", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al crear el pago", SweetAlertIcon.Error);
+            Console.WriteLine($"Error en HandleCreatePayment: {ex.Message}");
+            await Swal.FireAsync("Error", "Hubo un error al registrar el pago.", SweetAlertIcon.Error);
         }
     }
 

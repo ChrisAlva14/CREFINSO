@@ -231,5 +231,55 @@ namespace Crefinso.Services.Pagos
                 );
             }
         }
+
+        // Obtener los pagos futuros
+
+        public async Task<List<PagoFuturoResponse>> GetPagosFuturos(int prestamoId)
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>($"api/pagos/futuros/{prestamoId}");
+                return response;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS FUTUROS, POR FAVOR REINICIAR EL SISTEMA");
+            }
+        }
+
+        public async Task UpdatePago(PagoFuturoResponse pago)
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{pago.PagoId}", pago);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA");
+            }
+        }
     }
 }
