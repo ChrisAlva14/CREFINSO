@@ -1,8 +1,121 @@
 ﻿@page "/paymentHistory/{prestamoId:int}"
 @using Crefinso.DTOs
 @using Crefinso.Services.Pagos
+@using Crefinso.Services.Prestamos
 @inject PaymentServices PaymentServices
 @inject NavigationManager NavigationManager
+@inject SweetAlertService Swal
+@inject LoanServices loanService
+
+@code {
+    [Parameter]
+    public int PrestamoId { get; set; }
+
+    private bool showModal = false;
+    private PagoFuturoResponse selectedPayment;
+    private decimal montoPagado;
+
+    private List<PagoFuturoResponse> futurePayments = new List<PagoFuturoResponse>();
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Obtener los pagos futuros desde el servicio
+            futurePayments = await PaymentServices.GetPagosFuturos(PrestamoId);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = "Error al obtener los pagos futuros. Por favor, inténtalo de nuevo más tarde.";
+            Console.WriteLine($"Error en OnInitializedAsync: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Ocurrió un error inesperado. Por favor, contacta al soporte técnico.";
+            Console.WriteLine($"Error en OnInitializedAsync: {ex.Message}");
+        }
+    }
+
+    private async Task HandleCreatePayment()
+    {
+        try
+        {
+            // Validar que el monto pagado sea un número válido
+            if (montoPagado <= 0)
+            {
+                await Swal.FireAsync("Error", "El monto pagado no es válido.", SweetAlertIcon.Error);
+                return;
+            }
+
+            // Validar que el monto a pagar sea válido
+            if (string.IsNullOrEmpty(selectedPayment.MontoAPagar))
+            {
+                await Swal.FireAsync("Error", "El monto a pagar no es válido.", SweetAlertIcon.Error);
+                return;
+            }
+
+            // Crear el objeto PagoRequest
+            var newPayment = new PagoRequest
+                {
+                    PrestamoId = selectedPayment.PrestamoId,
+                    FechaPago = selectedPayment.FechaPago,
+                    MontoAPagar = selectedPayment.MontoAPagar, // Asignar el valor de MontoAPagar
+                    MontoPagado = montoPagado.ToString("F2"), // Formatear el monto pagado
+                    SaldoAcumulado = selectedPayment.SaldoAcumulado,
+                    Estado = "Realizado" // Cambiar el estado a "Realizado"
+                };
+
+            // Registrar el pago
+            bool success = await PaymentServices.PostPayment(newPayment);
+            if (success)
+            {
+                // Mostrar una alerta de éxito
+                await Swal.FireAsync("Éxito", "Pago registrado correctamente.", SweetAlertIcon.Success);
+
+                // Cerrar el modal
+                CloseModal();
+
+                // Recargar los pagos futuros
+                await LoadFuturePayments();
+            }
+            else
+            {
+                await Swal.FireAsync("Error", "No se pudo registrar el pago.", SweetAlertIcon.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.FireAsync("Error", "Hubo un error al registrar el pago.", SweetAlertIcon.Error);
+            Console.WriteLine($"Error en HandleCreatePayment: {ex.Message}");
+        }
+    }
+
+    private async Task LoadFuturePayments()
+    {
+        try
+        {
+            futurePayments = await PaymentServices.GetPagosFuturos(PrestamoId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error al cargar los pagos futuros.";
+            Console.WriteLine($"Error en LoadFuturePayments: {ex.Message}");
+        }
+    }
+
+    private void OpenModal(PagoFuturoResponse payment)
+    {
+        selectedPayment = payment;
+        montoPagado = 0; // Reiniciar el monto pagado
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+}
 
 @if (futurePayments == null)
 {
@@ -78,64 +191,132 @@ else
                                             <span class="text-lg font-bold">@payment.SaldoAcumulado</span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium">Monto Pagado:</span>
-                                        <div class="flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4 text-green-500">
-                                                <line x1="12" x2="12" y1="2" y2="22"></line>
-                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                            </svg>
-                                            <span class="text-lg font-bold">$0.00</span> <!-- Aquí puedes agregar el monto pagado si lo tienes -->
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
                             <!-- Footer Button -->
                             <div class="flex items-center p-6 pt-0">
                                 <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus:visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-green-600 text-white hover:bg-primary/90 h-10 px-4 py-2 w-full"
-                                        @onclick="() => RedirectToCreatePayment(payment.PagoId)">
+                                        @onclick="() => OpenModal(payment)">
                                     Registrar Pago
                                 </button>
                             </div>
                         </div>
                     }
                 </div>
-
             </div>
         </div>
     </section>
-}
 
-@code {
-    [Parameter]
-    public int PrestamoId { get; set; }
-
-    private List<PagoFuturoResponse> futurePayments = new List<PagoFuturoResponse>();
-    private string errorMessage;
-
-    protected override async Task OnInitializedAsync()
+    @* MODAL DE PAGO *@
+    @if (showModal)
     {
-        try
-        {
-            // Obtener los pagos futuros desde el servicio
-            futurePayments = await PaymentServices.GetPagosFuturos(PrestamoId);
-        }
-        catch (HttpRequestException ex)
-        {
-            errorMessage = "Error al obtener los pagos futuros. Por favor, inténtalo de nuevo más tarde.";
-            Console.WriteLine($"Error en OnInitializedAsync: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            errorMessage = "Ocurrió un error inesperado. Por favor, contacta al soporte técnico.";
-            Console.WriteLine($"Error en OnInitializedAsync: {ex.Message}");
-        }
-    }
+        <section class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-6">
+            <div class="rounded-lg border bg-white text-gray-900 w-full max-w-md shadow-xl">
+                <!-- Encabezado del modal -->
+                <div class="flex flex-col p-6 space-y-1">
+                    <h2 class="text-2xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-black">Registrar Pago</h2>
+                </div>
 
-    private void RedirectToCreatePayment(int pagoId)
-    {
-        // Redirigir a la página de registro de pagos con el ID del pago
-        NavigationManager.NavigateTo($"/createPayment/{pagoId}");
+                <!-- Contenido del modal -->
+                <div class="p-6 pt-0">
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Información del préstamo y fecha -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Tarjeta de préstamo -->
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-primary/20">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center gap-2 text-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-4 w-4">
+                                            <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                            <line x1="2" x2="22" y1="10" y2="10"></line>
+                                        </svg>
+                                        <span class="text-sm font-medium">Préstamo</span>
+                                    </div>
+                                    <p class="text-xl font-bold">#@selectedPayment?.PrestamoId</p>
+                                </div>
+                            </div>
+                            <!-- Tarjeta de fecha -->
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-primary/20">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center gap-2 text-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar h-4 w-4">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                        </svg>
+                                        <span class="text-sm font-medium">Fecha</span>
+                                    </div>
+                                    <p class="text-xl font-bold">@selectedPayment?.FechaPago.ToShortDateString()</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monto a pagar y saldo acumulado -->
+                        <div class="grid gap-4">
+                            <!-- Tarjeta de monto a pagar -->
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-green-500/20">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center gap-2 text-green-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4">
+                                            <line x1="12" x2="12" y1="2" y2="22"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                        <span class="text-sm font-medium">Monto a Pagar</span>
+                                    </div>
+                                    <p class="text-xl font-bold">@selectedPayment?.MontoAPagar</p>
+                                </div>
+                            </div>
+                            <!-- Tarjeta de saldo acumulado -->
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-blue-500/20">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center gap-2 text-blue-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet h-4 w-4">
+                                            <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"></path>
+                                            <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
+                                        </svg>
+                                        <span class="text-sm font-medium">Saldo Acumulado</span>
+                                    </div>
+                                    <p class="text-xl font-bold">@selectedPayment?.SaldoAcumulado</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campo de entrada para el monto pagado -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium flex items-center gap-2 text-primary" for="montoPagado">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4">
+                                    <line x1="12" x2="12" y1="2" y2="22"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Monto Pagado
+                            </label>
+                            <InputNumber class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                         id="montoPagado"
+                                         placeholder="0.00"
+                                         type="number"
+                                         min="1"
+                                         @bind-Value="montoPagado" />
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex gap-3 pt-6">
+                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none bg-green-500 text-white hover:bg-green-600 h-10 px-4 py-2" @onclick="HandleCreatePayment">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save w-4 h-4">
+                                <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
+                                <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+                                <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+                            </svg>
+                            Guardar
+                        </button>
+                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border border-gray-300 bg-white hover:bg-gray-100 text-gray-900 h-10 px-4 py-2" @onclick="CloseModal">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
     }
 }

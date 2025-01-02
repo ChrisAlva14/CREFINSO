@@ -22,27 +22,20 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException(
-                        "El token es nulo o inválido. Iniciar sesión"
-                    );
+                    throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
-                var response = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
 
-                return response;
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
+                return response ?? new List<PagoResponse>();
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS, POR FAVOR REINICIAR EL SISTEMA"
-                );
+                throw new Exception("Error al obtener los pagos. Detalle: " + ex.Message);
             }
         }
 
@@ -54,29 +47,20 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException(
-                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
-                    );
+                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
                 }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
-                var response = await _httpClient.GetFromJsonAsync<PagoResponse>(
-                    $"api/pagos/{paymentId}"
-                );
 
-                return response;
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetFromJsonAsync<PagoResponse>($"api/pagos/{paymentId}");
+                return response ?? throw new Exception("Pago no encontrado.");
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER EL PAGO, POR FAVOR REINICIAR EL SISTEMA"
-                );
+                throw new Exception("Error al obtener el pago. Detalle: " + ex.Message);
             }
         }
 
@@ -85,50 +69,39 @@ namespace Crefinso.Services.Pagos
         {
             try
             {
-                // Obtener el token de autenticación
+                // Validate that MontoAPagar is not null
+                if (newPayment.MontoAPagar == null)
+                {
+                    throw new ArgumentException("MontoAPagar cannot be null.");
+                }
+
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException(
-                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
-                    );
+                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
                 }
 
-                // Agregar el token al encabezado de autorización
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
-
-                // Enviar la solicitud POST con los datos del nuevo pago
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PostAsJsonAsync("api/pagos", newPayment);
 
-                // Verificar si la respuesta fue exitosa
                 if (response.IsSuccessStatusCode)
                 {
-                    return true; // Indica que la creación fue exitosa
+                    return true;
                 }
-                else
-                {
-                    // Manejar errores de la respuesta
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception(
-                        $"Error al crear el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
-                    );
-                }
+
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al crear el pago: {errorMessage}");
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                throw new Exception("ERROR EN LA SOLICITUD HTTP: " + ex.Message);
+                throw;
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL CREAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
-                        + ex.Message
-                );
+                throw new Exception("Error al crear el pago. Detalle: " + ex.Message);
             }
         }
+
 
         // MODIFICAR UN PAGO
         public async Task<bool> UpdatePayment(PagoResponse payment)
@@ -138,54 +111,82 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException(
-                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
-                    );
+                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
-
-                // Construir el contenido a enviar en la solicitud
-                var data = new
-                {
-                    payment.PagoId,
-                    payment.PrestamoId,
-                    payment.FechaPago,
-                    payment.MontoPagado,
-                    payment.SaldoAcumulado,
-                    payment.Estado,
-                };
-
-                var response = await _httpClient.PutAsJsonAsync(
-                    $"api/pagos/{payment.PagoId}",
-                    data
-                );
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{payment.PagoId}", payment);
 
                 if (response.IsSuccessStatusCode)
                 {
                     return true;
                 }
-                else
-                {
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception(
-                        $"Error al actualizar el Pago. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
-                    );
-                }
+
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al actualizar el pago: {errorMessage}");
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                throw new Exception("ERROR EN LA SOLICITUD HTTP: " + ex.Message);
+                throw;
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
-                        + ex.Message
-                );
+                throw new Exception("Error al actualizar el pago. Detalle: " + ex.Message);
+            }
+        }
+
+        // OBTENER PAGOS FUTUROS
+        public async Task<List<PagoFuturoResponse>> GetPagosFuturos(int prestamoId)
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>($"api/pagos/futuros/{prestamoId}");
+
+                return response ?? new List<PagoFuturoResponse>();
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener los pagos futuros. Detalle: " + ex.Message);
+            }
+        }
+
+        // ACTUALIZAR PAGO
+        public async Task UpdatePago(PagoFuturoResponse pago)
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{pago.PagoId}", pago);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Error al actualizar el pago. Código: {response.StatusCode}");
+                }
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al actualizar el pago. Detalle: " + ex.Message);
             }
         }
 
@@ -229,56 +230,6 @@ namespace Crefinso.Services.Pagos
                     "HA OCURRIDO UN ERROR AL DESHABILITAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
                         + ex.Message
                 );
-            }
-        }
-
-        // Obtener los pagos futuros
-
-        public async Task<List<PagoFuturoResponse>> GetPagosFuturos(int prestamoId)
-        {
-            try
-            {
-                var token = await _authServices.GetTokenAsync();
-                if (string.IsNullOrEmpty(token))
-                {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
-                }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                var response = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>($"api/pagos/futuros/{prestamoId}");
-                return response;
-            }
-            catch (HttpRequestException ex)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS FUTUROS, POR FAVOR REINICIAR EL SISTEMA");
-            }
-        }
-
-        public async Task UpdatePago(PagoFuturoResponse pago)
-        {
-            try
-            {
-                var token = await _authServices.GetTokenAsync();
-                if (string.IsNullOrEmpty(token))
-                {
-                    throw new InvalidOperationException("TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN");
-                }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{pago.PagoId}", pago);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("HA OCURRIDO UN ERROR AL ACTUALIZAR EL PAGO, POR FAVOR REINICIAR EL SISTEMA");
             }
         }
     }
