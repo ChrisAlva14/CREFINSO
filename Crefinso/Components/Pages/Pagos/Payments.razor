@@ -193,7 +193,7 @@
     {
         return estado switch
         {
-            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800'>Pendiente</span>"),
+            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-yellow-500'>Pendiente</span>"),
             "Realizado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Realizado</span>"),
             _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>ERROR!</span>")
         };
