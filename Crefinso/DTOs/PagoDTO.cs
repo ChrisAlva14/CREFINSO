@@ -8,11 +8,11 @@
 
         public DateOnly FechaPago { get; set; }
 
-        public string MontoAPagar { get; set; }
+        public decimal MontoAPagar { get; set; }
 
-        public string MontoPagado { get; set; }
+        public decimal MontoPagado { get; set; }
 
-        public string SaldoAcumulado { get; set; }
+        public decimal SaldoAcumulado { get; set; }
 
         public string Estado { get; set; }
 
@@ -27,11 +27,11 @@
 
         public DateOnly FechaPago { get; set; }
 
-        public string MontoAPagar { get; set; } = "0.00";
+        public decimal MontoAPagar { get; set; }
 
-        public string MontoPagado { get; set; }
+        public decimal MontoPagado { get; set; }
 
-        public string SaldoAcumulado { get; set; }
+        public decimal SaldoAcumulado { get; set; }
 
         public string Estado { get; set; }
     }
@@ -44,9 +44,9 @@
 
         public DateOnly FechaPago { get; set; }
 
-        public string MontoAPagar { get; set; } = "0.00"; // Monto a pagar en el futuro
+        public decimal MontoAPagar { get; set; } // Monto a pagar en el futuro
 
-        public string SaldoAcumulado { get; set; } // Saldo acumulado
+        public decimal SaldoAcumulado { get; set; } // Saldo acumulado
 
         public string Estado { get; set; }
 

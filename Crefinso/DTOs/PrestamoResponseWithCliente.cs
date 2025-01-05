@@ -2,6 +2,6 @@
 {
     public class PrestamoResponseWithCliente : PrestamoResponse
     {
-        public string? ClienteNombre { get; set; }
+        public string ClienteNombre { get; set; }
     }
 }

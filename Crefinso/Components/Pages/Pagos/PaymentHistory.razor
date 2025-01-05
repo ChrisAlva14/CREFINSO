@@ -48,11 +48,12 @@
                 return;
             }
 
-            // Validar que el monto a pagar sea válido
-            if (string.IsNullOrEmpty(selectedPayment.MontoAPagar))
+            // Calcular el excedente si el monto pagado es mayor al monto a pagar
+            var excedente = montoPagado - selectedPayment.MontoAPagar;
+            if (excedente > 0)
             {
-                await Swal.FireAsync("Error", "El monto a pagar no es válido.", SweetAlertIcon.Error);
-                return;
+                // Aplicar el excedente al saldo acumulado
+                selectedPayment.SaldoAcumulado -= excedente;
             }
 
             // Crear el objeto PagoRequest
@@ -60,10 +61,10 @@
                 {
                     PrestamoId = selectedPayment.PrestamoId,
                     FechaPago = selectedPayment.FechaPago,
-                    MontoAPagar = selectedPayment.MontoAPagar, // Asignar el valor de MontoAPagar
-                    MontoPagado = montoPagado.ToString("F2"), // Formatear el monto pagado
+                    MontoAPagar = selectedPayment.MontoAPagar,
+                    MontoPagado = montoPagado,
                     SaldoAcumulado = selectedPayment.SaldoAcumulado,
-                    Estado = "Realizado" // Cambiar el estado a "Realizado"
+                    Estado = "Realizado"
                 };
 
             // Registrar el pago

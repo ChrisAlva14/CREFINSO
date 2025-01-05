@@ -131,7 +131,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "¿Estás seguro?",
+                Title = "<span style='color: #000;'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -347,7 +347,7 @@ else if (isAuthenticated)
                                 </svg>
                                 Monto Pagado
                             </label>
-                            <InputText @bind-Value="editingPago.MontoPagado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="MontoPagado" required name="MontoPagado" />
+                            <InputNumber @bind-Value="editingPago.MontoPagado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" typeof="number" id="MontoPagado" required name="MontoPagado" />
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium flex items-center gap-2" for="SaldoAcumulado">
@@ -357,7 +357,7 @@ else if (isAuthenticated)
                                 </svg>
                                 Saldo Acumulado
                             </label>
-                            <InputText @bind-Value="editingPago.SaldoAcumulado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SaldoAcumulado" required name="SaldoAcumulado" />
+                            <InputNumber @bind-Value="editingPago.SaldoAcumulado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SaldoAcumulado" required name="SaldoAcumulado" />
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium flex items-center gap-2" for="Estado">

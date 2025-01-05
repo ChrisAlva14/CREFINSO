@@ -69,11 +69,6 @@ namespace Crefinso.Services.Pagos
         {
             try
             {
-                // Validate that MontoAPagar is not null
-                if (newPayment.MontoAPagar == null)
-                {
-                    throw new ArgumentException("MontoAPagar cannot be null.");
-                }
 
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
@@ -158,35 +153,6 @@ namespace Crefinso.Services.Pagos
             catch (Exception ex)
             {
                 throw new Exception("Error al obtener los pagos futuros. Detalle: " + ex.Message);
-            }
-        }
-
-        // ACTUALIZAR PAGO
-        public async Task UpdatePago(PagoFuturoResponse pago)
-        {
-            try
-            {
-                var token = await _authServices.GetTokenAsync();
-                if (string.IsNullOrEmpty(token))
-                {
-                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
-                }
-
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{pago.PagoId}", pago);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Error al actualizar el pago. Código: {response.StatusCode}");
-                }
-            }
-            catch (HttpRequestException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al actualizar el pago. Detalle: " + ex.Message);
             }
         }
 

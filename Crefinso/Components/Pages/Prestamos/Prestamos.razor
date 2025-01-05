@@ -352,7 +352,7 @@ else if (isAuthenticated)
                                 </svg>
                                 Monto Aprobado
                             </label>
-                            <InputText @bind-Value="editingLoan.MontoAprobado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="MontoAprobado" required name="MontoAprobado" />
+                            <InputNumber @bind-Value="editingLoan.MontoAprobado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="MontoAprobado" required name="MontoAprobado" />
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium flex items-center gap-2" for="TasaInteres">
@@ -363,7 +363,7 @@ else if (isAuthenticated)
                                 </svg>
                                 Tasa de Interés
                             </label>
-                            <InputText @bind-Value="editingLoan.TasaInteres" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="TasaInteres" required name="TasaInteres" />
+                            <InputNumber @bind-Value="editingLoan.TasaInteres" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="TasaInteres" required name="TasaInteres" />
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium flex items-center gap-2" for="FechaInicio">

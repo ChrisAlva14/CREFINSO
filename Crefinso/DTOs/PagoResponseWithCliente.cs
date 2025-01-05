@@ -2,6 +2,6 @@
 {
     public class PagoResponseWithCliente : PagoResponse
     {
-        public string? ClienteNombre { get; set; }
+        public string ClienteNombre { get; set; }
     }
 }
