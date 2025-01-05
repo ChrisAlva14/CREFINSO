@@ -22,10 +22,15 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión");
+                    throw new InvalidOperationException(
+                        "El token es nulo o inválido. Iniciar sesión"
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
                 return response ?? new List<PagoResponse>();
             }
@@ -47,11 +52,18 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
+                    throw new InvalidOperationException(
+                        "Token inválido o nulo. Por favor, iniciar sesión."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<PagoResponse>($"api/pagos/{paymentId}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<PagoResponse>(
+                    $"api/pagos/{paymentId}"
+                );
                 return response ?? throw new Exception("Pago no encontrado.");
             }
             catch (HttpRequestException)
@@ -69,14 +81,18 @@ namespace Crefinso.Services.Pagos
         {
             try
             {
-
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
+                    throw new InvalidOperationException(
+                        "Token inválido o nulo. Por favor, iniciar sesión."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
                 var response = await _httpClient.PostAsJsonAsync("api/pagos", newPayment);
 
                 if (response.IsSuccessStatusCode)
@@ -97,7 +113,6 @@ namespace Crefinso.Services.Pagos
             }
         }
 
-
         // MODIFICAR UN PAGO
         public async Task<bool> UpdatePayment(PagoResponse payment)
         {
@@ -106,11 +121,19 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
+                    throw new InvalidOperationException(
+                        "Token inválido o nulo. Por favor, iniciar sesión."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.PutAsJsonAsync($"api/pagos/{payment.PagoId}", payment);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.PutAsJsonAsync(
+                    $"api/pagos/{payment.PagoId}",
+                    payment
+                );
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -138,11 +161,18 @@ namespace Crefinso.Services.Pagos
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException("Token inválido o nulo. Por favor, iniciar sesión.");
+                    throw new InvalidOperationException(
+                        "Token inválido o nulo. Por favor, iniciar sesión."
+                    );
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>($"api/pagos/futuros/{prestamoId}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>(
+                    $"api/pagos/futuros/{prestamoId}"
+                );
 
                 return response ?? new List<PagoFuturoResponse>();
             }
