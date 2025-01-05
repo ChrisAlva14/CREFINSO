@@ -112,15 +112,18 @@ namespace Crefinso.Services
                     token
                 );
 
-                // Obtener préstamos y clientes
+                // Obtener préstamos y solicitudes
                 var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
                     "api/prestamos"
+                );
+                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>(
+                    "api/solicitudes"
                 );
                 var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
                     "api/clientes"
                 );
 
-                // Combinar préstamos con clientes para obtener el nombre
+                // Combinar préstamos con solicitudes y clientes para obtener el nombre
                 var recentLoans = prestamos
                     ?.OrderByDescending(p => p.FechaInicio)
                     .Take(3)
@@ -134,8 +137,14 @@ namespace Crefinso.Services
                         FechaVencimiento = p.FechaVencimiento,
                         Estado = p.Estado,
                         ClienteNombre =
-                            clientes?.FirstOrDefault(c => c.ClienteId == p.SolicitudId)?.Nombre
-                            ?? "Desconocido",
+                            clientes
+                                ?.FirstOrDefault(c =>
+                                    c.ClienteId
+                                    == solicitudes
+                                        ?.FirstOrDefault(s => s.SolicitudId == p.SolicitudId)
+                                        ?.ClienteID
+                                )
+                                ?.Nombre ?? "Desconocido",
                     })
                     .ToList();
 
@@ -163,7 +172,7 @@ namespace Crefinso.Services
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException(
-                        "El token es nulo o invalido. Iniciar sesion."
+                        "El token es nulo o inválido. Iniciar sesión."
                     );
                 }
 
@@ -172,32 +181,65 @@ namespace Crefinso.Services
                     token
                 );
 
-                // Obtener pagos y clientes
-                var pagos = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
+                // Obtener préstamos activos
+                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
+                    "api/prestamos"
+                );
+
+                // Obtener solicitudes y clientes
+                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>(
+                    "api/solicitudes"
+                );
                 var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
                     "api/clientes"
                 );
 
-                // Combinar pagos con clientes para obtener el nombre
-                var upcomingPayments = pagos
-                    ?.Where(p => p.FechaPago >= DateOnly.FromDateTime(DateTime.Today))
-                    .OrderBy(p => p.FechaPago)
-                    .Take(3)
-                    .Select(p => new PagoResponseWithCliente
-                    {
-                        PagoId = p.PagoId,
-                        PrestamoId = p.PrestamoId,
-                        FechaPago = p.FechaPago,
-                        MontoPagado = p.MontoPagado,
-                        SaldoAcumulado = p.SaldoAcumulado,
-                        Estado = p.Estado,
-                        ClienteNombre =
-                            clientes?.FirstOrDefault(c => c.ClienteId == p.PrestamoId)?.Nombre
-                            ?? "Desconocido",
-                    })
-                    .ToList();
+                // Lista para almacenar los próximos pagos
+                var upcomingPayments = new List<PagoResponseWithCliente>();
 
-                return upcomingPayments ?? new List<PagoResponseWithCliente>();
+                // Recorrer los préstamos activos
+                foreach (var prestamo in prestamos)
+                {
+                    // Obtener los pagos futuros para cada préstamo
+                    var pagosFuturos = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>(
+                        $"api/pagos/futuros/{prestamo.PrestamoId}"
+                    );
+
+                    if (pagosFuturos != null && pagosFuturos.Any())
+                    {
+                        // Obtener el nombre del cliente asociado al préstamo
+                        var clienteNombre =
+                            clientes
+                                ?.FirstOrDefault(c =>
+                                    c.ClienteId
+                                    == solicitudes
+                                        ?.FirstOrDefault(s => s.SolicitudId == prestamo.SolicitudId)
+                                        ?.ClienteID
+                                )
+                                ?.Nombre ?? "Desconocido";
+
+                        // Convertir PagoFuturoResponse a PagoResponseWithCliente
+                        foreach (var pago in pagosFuturos)
+                        {
+                            upcomingPayments.Add(
+                                new PagoResponseWithCliente
+                                {
+                                    PagoId = pago.PagoId,
+                                    PrestamoId = pago.PrestamoId,
+                                    FechaPago = pago.FechaPago,
+                                    MontoAPagar = pago.MontoAPagar, // Asignar MontoAPagar a MontoAPagar
+                                    MontoPagado = pago.MontoPagado, // Asignar MontoPagado a MontoPagado
+                                    SaldoAcumulado = pago.SaldoAcumulado,
+                                    Estado = pago.Estado,
+                                    ClienteNombre = clienteNombre,
+                                }
+                            );
+                        }
+                    }
+                }
+
+                // Ordenar los pagos por fecha y tomar los 3 más cercanos
+                return upcomingPayments.OrderBy(p => p.FechaPago).Take(3).ToList();
             }
             catch (HttpRequestException ex)
             {
