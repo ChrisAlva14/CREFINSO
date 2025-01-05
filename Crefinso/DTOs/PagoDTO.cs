@@ -51,5 +51,7 @@
         public string Estado { get; set; }
 
         public decimal MontoPagado { get; set; } // Campo temporal para el formulario
+
+        public string ClienteNombre { get; set; }
     }
 }
