@@ -64,13 +64,17 @@
                 </div>
 
                 <!-- Estadísticas del Dashboard -->
-                <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md">
+                <section class="flex flex-wrap justify-around">
+                    <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Total de Clientes</h2>
                         <p class="text-3xl sm:text-4xl font-bold">@activeClientsCount</p>
                     </div>
-                    <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
+                    <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
                         <h2 class="text-gray-700 text-lg font-semibold">Total de Préstamos</h2>
+                        <p class="text-3xl sm:text-4xl font-bold">@activeLoansCount</p>
+                    </div>
+                    <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md w-72 m-4">
+                        <h2 class="text-gray-700 text-lg font-semibold">Tasa de Morosidad</h2>
                         <p class="text-3xl sm:text-4xl font-bold">@activeLoansCount</p>
                     </div>
                 </section>

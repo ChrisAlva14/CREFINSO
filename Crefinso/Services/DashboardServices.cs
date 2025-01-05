@@ -112,15 +112,18 @@ namespace Crefinso.Services
                     token
                 );
 
-                // Obtener préstamos y clientes
+                // Obtener préstamos y solicitudes
                 var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
                     "api/prestamos"
+                );
+                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>(
+                    "api/solicitudes"
                 );
                 var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
                     "api/clientes"
                 );
 
-                // Combinar préstamos con clientes para obtener el nombre
+                // Combinar préstamos con solicitudes y clientes para obtener el nombre
                 var recentLoans = prestamos
                     ?.OrderByDescending(p => p.FechaInicio)
                     .Take(3)
@@ -134,8 +137,14 @@ namespace Crefinso.Services
                         FechaVencimiento = p.FechaVencimiento,
                         Estado = p.Estado,
                         ClienteNombre =
-                            clientes?.FirstOrDefault(c => c.ClienteId == p.SolicitudId)?.Nombre
-                            ?? "Desconocido",
+                            clientes
+                                ?.FirstOrDefault(c =>
+                                    c.ClienteId
+                                    == solicitudes
+                                        ?.FirstOrDefault(s => s.SolicitudId == p.SolicitudId)
+                                        ?.ClienteID
+                                )
+                                ?.Nombre ?? "Desconocido",
                     })
                     .ToList();
 
