@@ -1,7 +1,7 @@
 ﻿function mostrarAlertaCargando() {
     let timerInterval;
     Swal.fire({
-        title: "Cargando datos...",
+        title: "<span style='color: #000;'>Cargando datos...</span>",
         html: "Esta alerta se cerrará en <b></b> milisegundos.",
         timer: 1000,
         timerProgressBar: true,

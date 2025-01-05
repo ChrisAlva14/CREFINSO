@@ -42,7 +42,7 @@
             {
                 await Swal.FireAsync(new SweetAlertOptions
                     {
-                        Title = "ACCESO AL SISTEMA",
+                        Title = "<span style='color: #000;'>ACCESO AL SISTEMA</span>",
                         Text = "CREDENCIALES INCORRECTAS!",
                         Icon = "error",
                         ConfirmButtonText = "OK"
@@ -52,7 +52,8 @@
             {
                 await Swal.FireAsync(new SweetAlertOptions
                     {
-                        Title = "ACCESO CONCEDIDO",
+                        Title = "<span style='color: #000;'>ACCESO CONCEDIDO</span>",
+                        Text = "Bienvenido/a!",
                         Icon = "success",
                         ConfirmButtonText = "OK"
                     });

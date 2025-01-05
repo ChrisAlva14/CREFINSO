@@ -10,7 +10,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-
 /* Estilos para el modo oscuro */
 .dark-mode body {
     color: #ffffff;
@@ -30,9 +29,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Texto adicional en modo oscuro */
 .dark-mode h1,
+.dark-mode h2,
 .dark-mode a,
 .dark-mode span,
-.dark-mode p{
+.dark-mode p {
     color: #ffffff;
 }
 
