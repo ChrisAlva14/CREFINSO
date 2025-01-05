@@ -253,5 +253,61 @@ namespace Crefinso.Services
                 );
             }
         }
+
+        //TASA DE MOROSIDAD
+        public async Task<decimal> GetTasaMorosidadAsync()
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException(
+                        "El token es nulo o inválido. Iniciar sesión."
+                    );
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+
+                // Obtener todos los préstamos activos
+                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
+                    "api/prestamos"
+                );
+
+                if (prestamos == null || !prestamos.Any())
+                {
+                    return 0; // Si no hay préstamos, la tasa de morosidad es 0
+                }
+
+                // Obtener los pagos vencidos
+                var pagosVencidos = await _httpClient.GetFromJsonAsync<List<PagoResponse>>(
+                    "api/pagos/vencidos"
+                );
+
+                // Calcular el número de préstamos en mora
+                var prestamosEnMora = prestamos.Count(p =>
+                    pagosVencidos?.Any(pv => pv.PrestamoId == p.PrestamoId) == true
+                );
+
+                // Calcular la tasa de morosidad
+                var tasaMorosidad = (decimal)prestamosEnMora / prestamos.Count * 100;
+
+                return Math.Round(tasaMorosidad, 2); // Redondear a 2 decimales
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ApplicationException("Error al calcular la tasa de morosidad", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL CALCULAR LA TASA DE MOROSIDAD, POR FAVOR REINICIAR EL SISTEMA",
+                    ex
+                );
+            }
+        }
     }
 }
