@@ -36,11 +36,11 @@ namespace Crefinso.Services.Prestamos
 
                 return response;
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception(
                     "HA OCURRIDO UN ERROR AL OBTENER LOS PRESTAMOS, POR FAVOR REINICIAR EL SISTEMA"
@@ -70,11 +70,11 @@ namespace Crefinso.Services.Prestamos
 
                 return response;
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception(
                     "HA OCURRIDO UN ERROR AL OBTENER EL PRÉSTAMO, POR FAVOR REINICIAR EL SISTEMA"

@@ -11,9 +11,9 @@ namespace Crefinso.Services
         private const string TokenKey = "token";
         private const string UsernameKey = "username";
         private const string RoleKey = "role";
-        private string? _token;
-        private string? _username;
-        private string? _role;
+        private string _token;
+        private string _username;
+        private string _role;
 
         public AuthServices(ProtectedLocalStorage localStorage, HttpClient httpClient)
         {
@@ -21,7 +21,7 @@ namespace Crefinso.Services
             _httpClient = httpClient;
         }
 
-        public async Task<LoginResponse?> LoginAsync(UserSession userSession)
+        public async Task<LoginResponse> LoginAsync(UserSession userSession)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace Crefinso.Services
 
                 return loginResponse;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Manejar el error (registro, reintento, etc.)
                 return null;
@@ -51,7 +51,7 @@ namespace Crefinso.Services
             await _localStorage.SetAsync(TokenKey, _token);
         }
 
-        public async Task<string?> GetTokenAsync()
+        public async Task<string> GetTokenAsync()
         {
             if (string.IsNullOrEmpty(_token))
             {
@@ -73,7 +73,7 @@ namespace Crefinso.Services
             await _localStorage.SetAsync(UsernameKey, _username);
         }
 
-        public async Task<string?> GetUsernameAsync()
+        public async Task<string> GetUsernameAsync()
         {
             if (string.IsNullOrEmpty(_username))
             {
@@ -95,7 +95,7 @@ namespace Crefinso.Services
             await _localStorage.SetAsync(RoleKey, _role);
         }
 
-        public async Task<string?> GetRoleAsync()
+        public async Task<string> GetRoleAsync()
         {
             if (string.IsNullOrEmpty(_role))
             {

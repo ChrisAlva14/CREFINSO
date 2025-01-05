@@ -33,11 +33,11 @@ namespace Crefinso.Services.Usuarios
 
                 return response;
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception(
                     "HA OCURRIDO UN ERROR AL OBTENER LOS USUARIOS, POR FAVOR REINICIAR EL SISTEMA"
@@ -67,11 +67,11 @@ namespace Crefinso.Services.Usuarios
 
                 return response;
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception(
                     "HA OCURRIDO UN ERROR AL OBTENER EL USUARIO, POR FAVOR REINICIAR EL SISTEMA"
