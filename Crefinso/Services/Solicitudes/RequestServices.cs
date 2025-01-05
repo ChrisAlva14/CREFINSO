@@ -42,11 +42,11 @@ namespace Crefinso.Services.Solicitudes
 
                 return response;
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception(
                     "HA OCURRIDO UN ERROR AL OBTENER LAS SOLICITUDES, POR FAVOR REINICIAR EL SISTEMA"
