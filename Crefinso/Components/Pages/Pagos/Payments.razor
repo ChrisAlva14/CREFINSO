@@ -3,6 +3,7 @@
 @inject SweetAlertService Swal
 @inject PaymentServices paymentService
 @inject AuthServices authServices
+@inject NavigationManager NavigationManager
 
 @using Crefinso.DTOs
 @using Crefinso.Services
@@ -197,6 +198,12 @@
             "Realizado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Realizado</span>"),
             _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>ERROR!</span>")
         };
+    }
+
+    //GENERAR RECIBOS
+    private void OpenReceipt(int pagoId)
+    {
+        NavigationManager.NavigateTo($"/generateReceiptPayment/{pagoId}");
     }
 }
 
@@ -471,8 +478,13 @@ else if (isAuthenticated)
                         </p>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-4 mt-6">
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border border-red-300 bg-white hover:bg-red-500 text-black-900 h-10 px-4 py-2" type="button" @onclick="() => CloseDetailsModal()">
+                <div class="flex justify-between space-x-4 mt-6">
+
+                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none bg-green-500 text-white hover:bg-green-600 h-10 px-4 py-2" type="button" @onclick="() => OpenReceipt(detailsPago.PagoId)">
+                        Generar Recibo
+                    </button>
+
+                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-red focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border border-red-300 bg-white hover:bg-red-500 text-black-900 h-10 px-4 py-2" type="button" @onclick="() => CloseDetailsModal()">
                         Cerrar
                     </button>
                 </div>

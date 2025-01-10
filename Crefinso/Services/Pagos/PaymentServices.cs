@@ -228,5 +228,46 @@ namespace Crefinso.Services.Pagos
                 );
             }
         }
+
+        //OBTENER EL PAGO COMPLETO
+        public async Task<List<PagoCompletoResponse>> GetPagosCompletos()
+        {
+            try
+            {
+                // Obtener todos los datos necesarios
+                var pagos = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
+                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
+                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>("api/solicitudes");
+                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+                var usuarios = await _httpClient.GetFromJsonAsync<List<UserResponse>>("api/users");
+
+                // Combinar los datos
+                var pagosCompletos = pagos?
+                    .Select(p => new PagoCompletoResponse
+                    {
+                        PagoId = p.PagoId,
+                        PrestamoId = p.PrestamoId,
+                        MontoPagado = p.MontoPagado,
+                        FechaPago = p.FechaPago,
+                        Estado = p.Estado,
+                        Prestamo = prestamos?.FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId),
+                        Solicitud = solicitudes?.FirstOrDefault(s => s.SolicitudId == prestamos?
+                            .FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)?.SolicitudId),
+                        Cliente = clientes?.FirstOrDefault(c => c.ClienteId == solicitudes?
+                            .FirstOrDefault(s => s.SolicitudId == prestamos?
+                                .FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)?.SolicitudId)?.ClienteID),
+                        Usuario = usuarios?.FirstOrDefault(u => u.UserId == solicitudes?
+                            .FirstOrDefault(s => s.SolicitudId == prestamos?
+                                .FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)?.SolicitudId)?.UserID)
+                    })
+                    .ToList();
+
+                return pagosCompletos ?? new List<PagoCompletoResponse>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener los pagos completos: " + ex.Message);
+            }
+        }
     }
 }
