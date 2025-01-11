@@ -6,7 +6,6 @@
 @using Crefinso.DTOs
 @using Crefinso.Services.Pagos
 
-
 @if (pagoCompleto == null)
 {
     <p>Cargando...</p>
@@ -103,19 +102,31 @@ else
                             <tbody>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">SALDO ANTERIOR</td>
-                                    <td class="py-2 text-right">$ @pagoCompleto.Prestamo?.MontoAprobado</td>
+                                    <td class="py-2 text-right">$ @pagoCompleto.Prestamo?.MontoAprobado.ToString("N2")</td>
                                 </tr>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">CAPITAL</td>
-                                    <td class="py-2 text-right">$ @pagoCompleto.Prestamo?.MontoAprobado</td>
+                                    <td class="py-2 text-right">
+                                        $ @{
+                                            decimal safePayment = CalculateSafePayment(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.MontoPagado);
+                                            @paymentService.CalculateCapital(pagoCompleto.Prestamo?.MontoAprobado ?? 0, safePayment, pagoCompleto.Prestamo?.TasaInteres ?? 0).ToString("N2")
+                                        }
+                                    </td>
                                 </tr>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">INTERES</td>
-                                    <td class="py-2 text-right">$ @pagoCompleto.Prestamo?.TasaInteres</td>
+                                    <td class="py-2 text-right">
+                                        $ @paymentService.CalculateInterest(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.Prestamo?.TasaInteres ?? 0, 1).ToString("N2")
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td class="py-2 font-medium">NUEVO SALDO</td>
-                                    <td class="py-2 text-right font-semibold">$ @(pagoCompleto.Prestamo?.MontoAprobado - pagoCompleto.MontoPagado)</td>
+                                    <td class="py-2 text-right font-semibold">
+                                        $ @{
+                                            decimal capital = paymentService.CalculateCapital(pagoCompleto.Prestamo?.MontoAprobado ?? 0, safePayment, pagoCompleto.Prestamo?.TasaInteres ?? 0);
+                                            @paymentService.CalculateNewBalance(pagoCompleto.Prestamo?.MontoAprobado ?? 0, capital).ToString("N2")
+                                        }
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -166,7 +177,6 @@ else
     </div>
 }
 
-
 @code {
     [Parameter]
     public int PagoId { get; set; }
@@ -193,6 +203,12 @@ else
         {
             Console.Error.WriteLine($"Error al cargar el pago: {ex.Message}");
         }
+    }
+
+    // Método para asegurar que el pago no exceda el saldo anterior
+    private decimal CalculateSafePayment(decimal previousBalance, decimal paymentAmount)
+    {
+        return paymentAmount > previousBalance ? previousBalance : paymentAmount;
     }
 
     private async Task ViewReceipt()
