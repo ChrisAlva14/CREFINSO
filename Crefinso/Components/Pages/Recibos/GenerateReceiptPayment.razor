@@ -5,12 +5,91 @@
 
 @using Crefinso.DTOs
 @using Crefinso.Services.Pagos
+@inject AuthServices authServices
+@using Crefinso.Services
+
+@code {
+    [Parameter]
+    public int PagoId { get; set; }
+
+    private bool isAuthenticated;
+    private PagoCompletoResponse pagoCompleto;
+    private string loggedInUsername; // Propiedad para almacenar el nombre del usuario logueado
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Obtener todos los pagos completos
+            var pagosCompletos = await paymentService.GetPagosCompletos();
+
+            // Filtrar el pago específico usando el PaymentId
+            pagoCompleto = pagosCompletos.FirstOrDefault(p => p.PagoId == PagoId);
+
+            if (pagoCompleto == null)
+            {
+                // Mostrar un mensaje de error o redirigir a una página de error
+                Console.Error.WriteLine("No se encontró el pago con el ID proporcionado.");
+            }
+
+            // Obtener el nombre del usuario logueado
+            loggedInUsername = await authServices.GetUsernameAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error al cargar el pago: {ex.Message}");
+        }
+    }
+
+    // Método para asegurar que el pago no exceda el saldo anterior
+    private decimal CalculateSafePayment(decimal previousBalance, decimal paymentAmount)
+    {
+        return paymentAmount > previousBalance ? previousBalance : paymentAmount;
+    }
+
+    private async Task ViewReceipt()
+    {
+        // Genera el PDF (aquí debes tener la lógica para generar el PDF)
+        var pdfBytes = GeneratePdf();
+
+        // Convierte el PDF a base64
+        var base64Pdf = Convert.ToBase64String(pdfBytes);
+
+        // Crea la URL del PDF
+        var pdfUrl = $"data:application/pdf;base64,{base64Pdf}";
+
+        // Abre el PDF en una nueva pestaña usando JavaScript
+        await JS.InvokeVoidAsync("openPdfInNewTab", pdfUrl);
+    }
+
+    private byte[] GeneratePdf()
+    {
+        // Aquí debes implementar la lógica para generar el PDF
+        // Por ejemplo, usando una librería como iTextSharp o cualquier otra
+        // Retorna el PDF como un array de bytes
+        return new byte[] { /* PDF bytes */ };
+    }
+
+    private async Task PrintReceipt()
+    {
+        await JS.InvokeVoidAsync("printSection", "printable-section");
+    }
+}
 
 @if (pagoCompleto == null)
 {
     <p>Cargando...</p>
 }
-else
+else if (isAuthenticated)
 {
     <div class="h-full p-4 dark-text-secondary">
         <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6">
@@ -136,7 +215,7 @@ else
                     <div class="grid grid-cols-2 gap-6 pt-8">
                         <div class="text-center">
                             <div class="border-t border-gray-300 pt-2">
-                                <p class="text-sm font-semibold">@pagoCompleto.Usuario?.UserName</p>
+                                <p class="text-sm font-semibold">@loggedInUsername</p>
                                 <p class="text-xs text-gray-500">Recibió</p>
                             </div>
                         </div>
@@ -175,67 +254,4 @@ else
             </div>
         </div>
     </div>
-}
-
-@code {
-    [Parameter]
-    public int PagoId { get; set; }
-
-    private PagoCompletoResponse pagoCompleto;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            // Obtener todos los pagos completos
-            var pagosCompletos = await paymentService.GetPagosCompletos();
-
-            // Filtrar el pago específico usando el PaymentId
-            pagoCompleto = pagosCompletos.FirstOrDefault(p => p.PagoId == PagoId);
-
-            if (pagoCompleto == null)
-            {
-                // Mostrar un mensaje de error o redirigir a una página de error
-                Console.Error.WriteLine("No se encontró el pago con el ID proporcionado.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error al cargar el pago: {ex.Message}");
-        }
-    }
-
-    // Método para asegurar que el pago no exceda el saldo anterior
-    private decimal CalculateSafePayment(decimal previousBalance, decimal paymentAmount)
-    {
-        return paymentAmount > previousBalance ? previousBalance : paymentAmount;
-    }
-
-    private async Task ViewReceipt()
-    {
-        // Genera el PDF (aquí debes tener la lógica para generar el PDF)
-        var pdfBytes = GeneratePdf();
-
-        // Convierte el PDF a base64
-        var base64Pdf = Convert.ToBase64String(pdfBytes);
-
-        // Crea la URL del PDF
-        var pdfUrl = $"data:application/pdf;base64,{base64Pdf}";
-
-        // Abre el PDF en una nueva pestaña usando JavaScript
-        await JS.InvokeVoidAsync("openPdfInNewTab", pdfUrl);
-    }
-
-    private byte[] GeneratePdf()
-    {
-        // Aquí debes implementar la lógica para generar el PDF
-        // Por ejemplo, usando una librería como iTextSharp o cualquier otra
-        // Retorna el PDF como un array de bytes
-        return new byte[] { /* PDF bytes */ };
-    }
-
-    private async Task PrintReceipt()
-    {
-        await JS.InvokeVoidAsync("printSection", "printable-section");
-    }
 }
