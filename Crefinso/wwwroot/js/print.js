@@ -21,7 +21,3 @@
         elements[i].style.visibility = 'visible';
     }
 }
-
-function openPdfInNewTab(pdfUrl) {
-    window.open(pdfUrl, "_blank");
-}

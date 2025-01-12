@@ -5,6 +5,10 @@
         <div class="p-6 flex flex-col gap-6">
             <div class="flex items-center justify-between">
                 <h1 class="text-4xl font-bold">Reportes por Financiera</h1>
+                <div class="flex gap-4">
+                    <button id="saveReport" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar Reporte</button>
+                    <button id="printReport" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Imprimir Reporte</button>
+                </div>
             </div>
 
             <!-- Filtro por financiera -->
@@ -37,7 +41,7 @@
             <!-- Tabla de reportes -->
             <div class="p-6 border bg-white rounded-lg shadow-md">
                 <div class="relative w-full overflow-auto">
-                    <table class="w-full caption-bottom text-sm">
+                    <table id="reportTable" class="w-full caption-bottom text-sm">
                         <thead class="[&_tr]:border-b">
                             <tr class="border-b transition-colors">
                                 <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Reporte ID</th>
@@ -76,3 +80,4 @@
         </div>
     </div>
 </div>
+
