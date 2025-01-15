@@ -1,5 +1,4 @@
-﻿// pdfGenerator.js
-window.generatePdf = function (elementId, fileName) {
+﻿window.generatePdf = function (elementId, fileName) {
     // Verifica si jsPDF y html2canvas están cargados
     if (typeof jspdf !== 'undefined' && typeof html2canvas !== 'undefined') {
         const element = document.getElementById(elementId);

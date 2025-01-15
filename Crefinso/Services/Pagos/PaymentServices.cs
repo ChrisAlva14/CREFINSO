@@ -23,7 +23,11 @@ namespace Crefinso.Services.Pagos
         }
 
         // Método para calcular el capital
-        public decimal CalculateCapital(decimal principal, decimal paymentAmount, decimal annualRate)
+        public decimal CalculateCapital(
+            decimal principal,
+            decimal paymentAmount,
+            decimal annualRate
+        )
         {
             decimal interest = CalculateInterest(principal, annualRate, 1);
             decimal capital = paymentAmount - interest;
@@ -259,14 +263,20 @@ namespace Crefinso.Services.Pagos
             {
                 // Obtener todos los datos necesarios
                 var pagos = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
-                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
-                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>("api/solicitudes");
-                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
+                    "api/prestamos"
+                );
+                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>(
+                    "api/solicitudes"
+                );
+                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
+                    "api/clientes"
+                );
                 var usuarios = await _httpClient.GetFromJsonAsync<List<UserResponse>>("api/users");
 
                 // Combinar los datos
-                var pagosCompletos = pagos?
-                    .Select(p => new PagoCompletoResponse
+                var pagosCompletos = pagos
+                    ?.Select(p => new PagoCompletoResponse
                     {
                         PagoId = p.PagoId,
                         PrestamoId = p.PrestamoId,
@@ -274,14 +284,34 @@ namespace Crefinso.Services.Pagos
                         FechaPago = p.FechaPago,
                         Estado = p.Estado,
                         Prestamo = prestamos?.FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId),
-                        Solicitud = solicitudes?.FirstOrDefault(s => s.SolicitudId == prestamos?
-                            .FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)?.SolicitudId),
-                        Cliente = clientes?.FirstOrDefault(c => c.ClienteId == solicitudes?
-                            .FirstOrDefault(s => s.SolicitudId == prestamos?
-                                .FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)?.SolicitudId)?.ClienteID),
-                        Usuario = usuarios?.FirstOrDefault(u => u.UserId == solicitudes?
-                            .FirstOrDefault(s => s.SolicitudId == prestamos?
-                                .FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)?.SolicitudId)?.UserID)
+                        Solicitud = solicitudes?.FirstOrDefault(s =>
+                            s.SolicitudId
+                            == prestamos
+                                ?.FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)
+                                ?.SolicitudId
+                        ),
+                        Cliente = clientes?.FirstOrDefault(c =>
+                            c.ClienteId
+                            == solicitudes
+                                ?.FirstOrDefault(s =>
+                                    s.SolicitudId
+                                    == prestamos
+                                        ?.FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)
+                                        ?.SolicitudId
+                                )
+                                ?.ClienteID
+                        ),
+                        Usuario = usuarios?.FirstOrDefault(u =>
+                            u.UserId
+                            == solicitudes
+                                ?.FirstOrDefault(s =>
+                                    s.SolicitudId
+                                    == prestamos
+                                        ?.FirstOrDefault(pr => pr.PrestamoId == p.PrestamoId)
+                                        ?.SolicitudId
+                                )
+                                ?.UserID
+                        ),
                     })
                     .ToList();
 
