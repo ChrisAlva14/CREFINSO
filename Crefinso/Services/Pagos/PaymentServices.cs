@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using ClosedXML.Excel;
 using Crefinso.DTOs;
 
 namespace Crefinso.Services.Pagos
@@ -320,6 +321,116 @@ namespace Crefinso.Services.Pagos
             catch (Exception ex)
             {
                 throw new Exception("Error al obtener los pagos completos: " + ex.Message);
+            }
+        }
+
+        public async Task<List<PagoResponse>> GetPaymentsByDateRange(
+            DateTime startDate,
+            DateTime endDate
+        )
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException(
+                        "Token inválido o nulo. Por favor, iniciar sesión."
+                    );
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<List<PagoResponse>>(
+                    $"api/pagos?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}"
+                );
+
+                return response ?? new List<PagoResponse>();
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(
+                    "Error al obtener los pagos por rango de fechas. Detalle: " + ex.Message
+                );
+            }
+        }
+
+        public async Task<ReportePagosResponse> GetWeeklyReport(DateTime weekStartDate)
+        {
+            var weekEndDate = weekStartDate.AddDays(6); // Último día de la semana
+            var payments = await GetPaymentsByDateRange(weekStartDate, weekEndDate);
+
+            return new ReportePagosResponse
+            {
+                FechaInicio = weekStartDate,
+                FechaFin = weekEndDate,
+                TotalPagos = payments.Count,
+                TotalMontoPagado = payments.Sum(p => p.MontoPagado),
+                Pagos = payments,
+            };
+        }
+
+        public async Task<ReportePagosResponse> GetMonthlyReport(int year, int month)
+        {
+            var monthStartDate = new DateTime(year, month, 1);
+            var monthEndDate = monthStartDate.AddMonths(1).AddDays(-1); // Último día del mes
+            var payments = await GetPaymentsByDateRange(monthStartDate, monthEndDate);
+
+            return new ReportePagosResponse
+            {
+                FechaInicio = monthStartDate,
+                FechaFin = monthEndDate,
+                TotalPagos = payments.Count,
+                TotalMontoPagado = payments.Sum(p => p.MontoPagado),
+                Pagos = payments,
+            };
+        }
+
+        //EXPORTAR A EXCEL
+        public byte[] GenerateExcelReport(ReportePagosResponse reporte)
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Reporte de Pagos");
+
+                // Encabezados
+                worksheet.Cell(1, 1).Value = "Fecha Inicio";
+                worksheet.Cell(1, 2).Value = reporte.FechaInicio.ToShortDateString();
+                worksheet.Cell(2, 1).Value = "Fecha Fin";
+                worksheet.Cell(2, 2).Value = reporte.FechaFin.ToShortDateString();
+                worksheet.Cell(3, 1).Value = "Total Pagos";
+                worksheet.Cell(3, 2).Value = reporte.TotalPagos;
+                worksheet.Cell(4, 1).Value = "Total Monto Pagado";
+                worksheet.Cell(4, 2).Value = reporte.TotalMontoPagado;
+
+                // Detalles de los pagos
+                worksheet.Cell(6, 1).Value = "Codigo Pago";
+                worksheet.Cell(6, 2).Value = "Monto Pagado";
+                worksheet.Cell(6, 3).Value = "Fecha Pago";
+                worksheet.Cell(6, 4).Value = "Estado";
+
+                int row = 7;
+                foreach (var pago in reporte.Pagos)
+                {
+                    worksheet.Cell(row, 1).Value = pago.PagoId;
+                    worksheet.Cell(row, 2).Value = pago.MontoPagado;
+                    worksheet.Cell(row, 3).Value = pago.FechaPago.ToShortDateString();
+                    worksheet.Cell(row, 4).Value = pago.Estado;
+                    row++;
+                }
+
+                // Guardar en un MemoryStream
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    return stream.ToArray();
+                }
             }
         }
     }

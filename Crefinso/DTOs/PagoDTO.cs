@@ -54,4 +54,17 @@
 
         public string ClienteNombre { get; set; }
     }
+
+    public class ReportePagosResponse
+    {
+        public DateTime FechaInicio { get; set; }
+
+        public DateTime FechaFin { get; set; }
+
+        public int TotalPagos { get; set; }
+
+        public decimal TotalMontoPagado { get; set; }
+
+        public List<PagoResponse> Pagos { get; set; }
+    }
 }

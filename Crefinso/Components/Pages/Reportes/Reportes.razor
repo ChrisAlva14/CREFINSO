@@ -1,8 +1,40 @@
 ﻿@page "/reports"
+@using Crefinso.DTOs
+@using Crefinso.Services
+@using Crefinso.Services.Pagos
 @inject NavigationManager Navigation
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JS
+@inject PaymentServices PaymentService
+@inject AuthServices authServices
 
 @code {
+    private bool isMonthly = true; // Por defecto, mostrar reportes mensuales
+    private bool isAuthenticated;
+    private string errorMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("mostrarAlertaCargando");
+            await Task.Delay(1125);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+
     // Diccionario para mapear nombres de archivos a sus rutas
     private Dictionary<string, string> archivos = new Dictionary<string, string>
     {
@@ -24,149 +56,215 @@
             Console.WriteLine("Archivo no encontrado.");
         }
     }
+
+    private void SetActiveTab(bool isMonthlyTab)
+    {
+        isMonthly = isMonthlyTab;
+    }
+
+    private async Task DownloadReport()
+    {
+        ReportePagosResponse reporte;
+
+        if (isMonthly)
+        {
+            // Obtener el reporte mensual
+            reporte = await PaymentService.GetMonthlyReport(DateTime.Now.Year, DateTime.Now.Month);
+        }
+        else
+        {
+            // Obtener el reporte semanal
+            var weekStartDate = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek); // Inicio de la semana
+            reporte = await PaymentService.GetWeeklyReport(weekStartDate);
+        }
+
+        // Generar el Excel
+        var excelBytes = PaymentService.GenerateExcelReport(reporte);
+
+        // Descargar el archivo
+        await JS.InvokeVoidAsync("downloadFile", $"Reporte_{(isMonthly ? "Mensual" : "Semanal")}.xlsx", excelBytes);
+    }
 }
 
-
-<section class="container mx-auto p-6">
-    <div class="p-6 flex flex-col gap-6 rounded-lg border bg-white shadow-md">
-        <section class="border-b pb-6 ">
-            <h2 class="mb-6 flex items-center text-4xl font-bold">
-                <div class="mr-3 h-6 w-1 bg-blue-500"></div>
-                Gestión de Reportes
-            </h2>
-            <div dir="ltr" data-orientation="horizontal" class="w-full">
-                <div role="tablist" aria-orientation="horizontal" class="bg-muted text-muted-foreground mb-4 inline-flex h-10 items-center justify-center rounded-md p-1" tabindex="0" data-orientation="horizontal" style="outline: none;">
-                    <button type="button" role="tab" aria-selected="true" aria-controls="radix-:r0:-content-mensual" data-state="active" id="radix-:r0:-trigger-mensual" class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground flex items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm" tabindex="0" data-orientation="horizontal" data-radix-collection-item="">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar h-4 w-4">
-                            <path d="M8 2v4"></path>
-                            <path d="M16 2v4"></path>
-                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                            <path d="M3 10h18"></path>
-                        </svg>Reportes Mensuales
-                    </button>
-                    <button type="button" role="tab" aria-selected="false" aria-controls="radix-:r0:-content-semanal" data-state="inactive" id="radix-:r0:-trigger-semanal" class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground flex items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar h-4 w-4">
-                            <path d="M8 2v4"></path>
-                            <path d="M16 2v4"></path>
-                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                            <path d="M3 10h18"></path>
-                        </svg>Reportes Semanales
-                    </button>
-                </div>
-                <div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-:r0:-trigger-mensual" id="radix-:r0:-content-mensual" tabindex="0" class="ring-offset-background focus-visible:ring-ring mt-2 space-y-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style="">
-                    <div class="flex gap-4">
-                        <button class="ring-offset-background focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border-2 border-blue-600 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save mr-2 h-4 w-4">
-                                <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
-                                <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
-                                <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
-                            </svg>Guardar Reporte
-                        </button>
-                    </div>
-                </div>
-                <div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-:r0:-trigger-semanal" id="radix-:r0:-content-semanal" tabindex="0" class="ring-offset-background focus-visible:ring-ring mt-2 space-y-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" hidden=""></div>
-            </div>
-        </section>
-
-        <section>
-            <h2 class="mb-6 flex items-center text-4xl font-bold">
-                <div class="mr-3 h-6 w-1 bg-indigo-500"></div>
-                Gestión de Documentos
-            </h2>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div class="group rounded-lg border-2 p-6 transition-colors hover:border-indigo-500">
-                    <div class="mb-4 flex items-center justify-between">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-indigo-500">
-                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                            <path d="M10 9H8"></path>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                        </svg>
-                        <button @onclick="@(() => DescargarArchivo("Conoce a tu Asociado"))"
-                                class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-indigo-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" x2="12" y1="15" y2="3"></line>
+@if (isAuthenticated)
+{
+    <section class="container mx-auto p-6">
+        <div class="p-6 flex flex-col gap-6 rounded-lg border bg-white shadow-md">
+            <section class="border-b pb-6">
+                <h2 class="mb-6 flex items-center text-4xl font-bold">
+                    <div class="mr-3 h-6 w-1 bg-blue-500"></div>
+                    Gestión de Reportes
+                </h2>
+                <div class="w-full">
+                    <!-- Tabs -->
+                    <div role="tablist" class="flex bg-muted text-muted-foreground mb-4 h-10 rounded-md p-1">
+                        <button @onclick="() => SetActiveTab(true)"
+                                class="flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 @(isMonthly ? "bg-background text-foreground shadow-sm" : "")">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
                             </svg>
+                            Reportes Mensuales
                         </button>
-                    </div>
-                    <h3 class="text-lg font-medium">Conoce a tu Asociado</h3>
-                    <p class="mt-2 text-sm text-indigo-500">Click para descargar</p>
-                </div>
-
-                <!-- Botón para "Solicitud de Socio a la Cooperativa" -->
-                <div class="group rounded-lg border-2 p-6 transition-colors hover:border-purple-500">
-                    <div class="mb-4 flex items-center justify-between">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-purple-500">
-                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                            <path d="M10 9H8"></path>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                        </svg>
-                        <button @onclick="@(() => DescargarArchivo("Solicitud de Socio"))"
-                                class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" x2="12" y1="15" y2="3"></line>
+                        <button @onclick="() => SetActiveTab(false)"
+                                class="flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 @(!isMonthly ? "bg-background text-foreground shadow-sm" : "")">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
                             </svg>
+                            Reportes Semanales
                         </button>
                     </div>
-                    <h3 class="text-lg font-medium">Solicitud de Socio a la Cooperativa</h3>
-                    <p class="mt-2 text-sm text-purple-500">Click para descargar</p>
-                </div>
 
-                <!-- Botón para "Solicitud de Préstamo" -->
-                <div class="group rounded-lg border-2 p-6 transition-colors hover:border-pink-500">
-                    <div class="mb-4 flex items-center justify-between">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-pink-500">
-                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                            <path d="M10 9H8"></path>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                        </svg>
-                        <button @onclick="@(() => DescargarArchivo("Solicitud de Préstamo"))"
-                                class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-pink-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" x2="12" y1="15" y2="3"></line>
+                    <!-- Monthly Reports -->
+                    <div id="monthly-content" role="tabpanel" class="space-y-4 @(isMonthly ? "" : "hidden")">
+                        <div class="flex gap-4">
+                            <button @onclick="DownloadReport"
+                                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-white border-2 border-blue-600 rounded-md transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
+                                    <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+                                    <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+                                </svg>
+                                Descargar Reporte
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Reports -->
+                    <div id="weekly-content" role="tabpanel" class="space-y-4 @(!isMonthly ? "" : "hidden")">
+                        <div class="flex gap-4">
+                            <button @onclick="DownloadReport"
+                                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-green-600 bg-white border-2 border-green-600 rounded-md transition-colors hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
+                                    <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+                                    <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+                                </svg>
+                                Descargar Reporte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="mb-6 flex items-center text-4xl font-bold">
+                    <div class="mr-3 h-6 w-1 bg-indigo-500"></div>
+                    Gestión de Documentos
+                </h2>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="group rounded-lg border-2 p-6 transition-colors hover:border-indigo-500">
+                        <div class="mb-4 flex items-center justify-between">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-indigo-500">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
                             </svg>
-                        </button>
+                            <button @onclick="@(() => DescargarArchivo("Conoce a tu Asociado"))"
+                                    class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-indigo-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" x2="12" y1="15" y2="3"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-medium">Conoce a tu Asociado</h3>
+                        <p class="mt-2 text-sm text-indigo-500">Click para descargar</p>
                     </div>
-                    <h3 class="text-lg font-medium">Solicitud de Préstamo</h3>
-                    <p class="mt-2 text-sm text-pink-500">Click para descargar</p>
-                </div>
 
-                <!-- Botón para "Pagaré" -->
-                <div class="group rounded-lg border-2 p-6 transition-colors hover:border-blue-500">
-                    <div class="mb-4 flex items-center justify-between">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-blue-500">
-                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                            <path d="M10 9H8"></path>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                        </svg>
-                        <button @onclick="@(() => DescargarArchivo("Pagaré"))"
-                                class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" x2="12" y1="15" y2="3"></line>
+                    <!-- Botón para "Solicitud de Socio a la Cooperativa" -->
+                    <div class="group rounded-lg border-2 p-6 transition-colors hover:border-purple-500">
+                        <div class="mb-4 flex items-center justify-between">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-purple-500">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
                             </svg>
-                        </button>
+                            <button @onclick="@(() => DescargarArchivo("Solicitud de Socio"))"
+                                    class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" x2="12" y1="15" y2="3"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-medium">Solicitud de Socio a la Cooperativa</h3>
+                        <p class="mt-2 text-sm text-purple-500">Click para descargar</p>
                     </div>
-                    <h3 class="text-lg font-medium">Formulario Pagaré</h3>
-                    <p class="mt-2 text-sm text-blue-500">Click para descargar</p>
+
+                    <!-- Botón para "Solicitud de Préstamo" -->
+                    <div class="group rounded-lg border-2 p-6 transition-colors hover:border-pink-500">
+                        <div class="mb-4 flex items-center justify-between">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-pink-500">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            <button @onclick="@(() => DescargarArchivo("Solicitud de Préstamo"))"
+                                    class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-pink-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" x2="12" y1="15" y2="3"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-medium">Solicitud de Préstamo</h3>
+                        <p class="mt-2 text-sm text-pink-500">Click para descargar</p>
+                    </div>
+
+                    <!-- Botón para "Pagaré" -->
+                    <div class="group rounded-lg border-2 p-6 transition-colors hover:border-blue-500">
+                        <div class="mb-4 flex items-center justify-between">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-6 w-6 text-blue-500">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            <button @onclick="@(() => DescargarArchivo("Pagaré"))"
+                                    class="ring-offset-background focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-5 w-5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" x2="12" y1="15" y2="3"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-medium">Formulario Pagaré</h3>
+                        <p class="mt-2 text-sm text-blue-500">Click para descargar</p>
+                    </div>
+
                 </div>
+            </section>
 
-            </div>
-        </section>
+        </div>
+    </section>
 
-    </div>
-</section>
+
+    <script>
+        function downloadFile(fileName, byteArray) {
+            const blob = new Blob([byteArray], { type: "application/octet-stream" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+}
