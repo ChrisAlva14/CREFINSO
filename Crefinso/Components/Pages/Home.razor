@@ -12,6 +12,7 @@
     private int activeClientsCount;
     private int activeLoansCount;
     private decimal tasaMorosidad;
+    private bool isLoading = true;
 
     private List<PrestamoResponseWithCliente> recentLoans = new();
     private List<PagoResponseWithCliente> upcomingPayments = new();
@@ -26,6 +27,23 @@
                 await LoadDashboardData();
             }
             StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            await Task.Delay(1125); // Simular una carga de 1.125 segundos
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false; // Desactivar el estado de carga
         }
     }
 
@@ -58,144 +76,155 @@
 
 @if (isAuthenticated)
 {
-    <section class="container mx-auto p-4 sm:p-6">
-        <div class="rounded-lg border bg-white shadow-md">
-            <div class="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
-                <!-- Título -->
-                <div class="flex items-center justify-between">
-                    <h1 class="text-2xl sm:text-4xl font-bold">Gestión Principal</h1>
-                </div>
+    @if (isLoading)
+    {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900">
+                
+            </div>
+        </div>
+    }
+    else
+    {
+        <section class="container mx-auto p-4 sm:p-6">
+            <div class="rounded-lg border bg-white shadow-md">
+                <div class="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
+                    <!-- Título -->
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl sm:text-4xl font-bold">Gestión Principal</h1>
+                    </div>
 
-                <!-- Estadísticas del Dashboard -->
-                <section class="flex flex-wrap justify-around">
-                    <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
-                        <h2 class="text-gray-700 text-lg font-semibold">Total de Clientes</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">@activeClientsCount</p>
-                    </div>
-                    <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
-                        <h2 class="text-gray-700 text-lg font-semibold">Total de Préstamos</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">@activeLoansCount</p>
-                    </div>
-                    <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md w-72 m-4">
-                        <h2 class="text-gray-700 text-lg font-semibold">Tasa de Morosidad</h2>
-                        <p class="text-3xl sm:text-4xl font-bold">@tasaMorosidad%</p>
-                    </div>
-                </section>
-
-                <!-- Sección de Préstamos Recientes y Próximos Pagos -->
-                <div class="grid gap-6 md:grid-cols-2 mt-6">
-                    <!-- Préstamos Recientes -->
-                    <div class="border rounded-lg shadow-md">
-                        <div class="space-y-1.5 p-6 flex flex-row items-center gap-2">
-                            <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-5 w-5">
-                                    <line x1="12" x2="12" y1="2" y2="22"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Préstamos Recientes
-                            </h3>
+                    <!-- Estadísticas del Dashboard -->
+                    <section class="flex flex-wrap justify-around">
+                        <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md w-72 m-4">
+                            <h2 class="text-gray-700 text-lg font-semibold">Total de Clientes</h2>
+                            <p class="text-3xl sm:text-4xl font-bold">@activeClientsCount</p>
                         </div>
-                        <div class="p-6 pt-0 space-y-4">
-                            @foreach (var loan in recentLoans)
-                            {
-                                <div class="flex items-center justify-between space-x-4 rounded-lg border bg-card p-4 transition-all hover:bg-accent/50">
-                                    <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
-                                                <circle cx="12" cy="8" r="5"></circle>
-                                                <path d="M20 21a8 8 0 0 0-16 0"></path>
-                                            </svg>
-                                            <span class="font-medium text-gray-800">@loan.ClienteNombre</span>
+                        <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md w-72 m-4">
+                            <h2 class="text-gray-700 text-lg font-semibold">Total de Préstamos</h2>
+                            <p class="text-3xl sm:text-4xl font-bold">@activeLoansCount</p>
+                        </div>
+                        <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md w-72 m-4">
+                            <h2 class="text-gray-700 text-lg font-semibold">Tasa de Morosidad</h2>
+                            <p class="text-3xl sm:text-4xl font-bold">@tasaMorosidad%</p>
+                        </div>
+                    </section>
+
+                    <!-- Sección de Préstamos Recientes y Próximos Pagos -->
+                    <div class="grid gap-6 md:grid-cols-2 mt-6">
+                        <!-- Préstamos Recientes -->
+                        <div class="border rounded-lg shadow-md">
+                            <div class="space-y-1.5 p-6 flex flex-row items-center gap-2">
+                                <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-5 w-5">
+                                        <line x1="12" x2="12" y1="2" y2="22"></line>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                    </svg>
+                                    Préstamos Recientes
+                                </h3>
+                            </div>
+                            <div class="p-6 pt-0 space-y-4">
+                                @foreach (var loan in recentLoans)
+                                {
+                                    <div class="flex items-center justify-between space-x-4 rounded-lg border bg-card p-4 transition-all hover:bg-accent/50">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                                    <circle cx="12" cy="8" r="5"></circle>
+                                                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                                </svg>
+                                                <span class="font-medium text-gray-800">@loan.ClienteNombre</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                                    <path d="M8 2v4"></path>
+                                                    <path d="M16 2v4"></path>
+                                                    <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                                    <path d="M3 10h18"></path>
+                                                    <path d="M8 14h.01"></path>
+                                                    <path d="M12 14h.01"></path>
+                                                    <path d="M16 14h.01"></path>
+                                                    <path d="M8 18h.01"></path>
+                                                    <path d="M12 18h.01"></path>
+                                                    <path d="M16 18h.01"></path>
+                                                </svg>
+                                                <span>@loan.FechaInicio.ToShortDateString()</span>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center gap-2 text-sm text-gray-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
-                                                <path d="M8 2v4"></path>
-                                                <path d="M16 2v4"></path>
-                                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                                                <path d="M3 10h18"></path>
-                                                <path d="M8 14h.01"></path>
-                                                <path d="M12 14h.01"></path>
-                                                <path d="M16 14h.01"></path>
-                                                <path d="M8 18h.01"></path>
-                                                <path d="M12 18h.01"></path>
-                                                <path d="M16 18h.01"></path>
-                                            </svg>
-                                            <span>@loan.FechaInicio.ToShortDateString()</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4">
-                                        <div class="text-right">
-                                            <div class="text-lg font-semibold text-gray-800">$@loan.MontoAprobado</div>
-                                            <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-blue-500/15 text-blue-500 border-0">
-                                                @loan.Estado
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-right">
+                                                <div class="text-lg font-semibold text-gray-800">$@loan.MontoAprobado</div>
+                                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-blue-500/15 text-blue-500 border-0">
+                                                    @loan.Estado
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            }
-                            <a href="loans" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
-                                Ver todos los Préstamos
-                            </a>
+                                }
+                                <a href="loans" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
+                                    Ver todos los Préstamos
+                                </a>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Pagos Realizados -->
-                    <div class="border rounded-lg shadow-md">
-                        <div class="flex flex-col space-y-1.5 p-4 sm:p-6">
-                            <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-5 w-5">
-                                    <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                                    <line x1="2" x2="22" y1="10" y2="10"></line>
-                                </svg>
-                                Próximos Pagos
-                            </h3>
-                        </div>
-                        <div class="p-6 pt-0 space-y-4">
-                            @foreach (var payment in upcomingPayments)
-                            {
-                                <div class="flex items-center justify-between space-x-4 rounded-lg border bg-card p-4 transition-all hover:bg-accent/50">
-                                    <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
-                                                <circle cx="12" cy="8" r="5"></circle>
-                                                <path d="M20 21a8 8 0 0 0-16 0"></path>
-                                            </svg>
-                                            <span class="font-medium text-gray-800">@payment.ClienteNombre</span>
+                        <!-- Pagos Realizados -->
+                        <div class="border rounded-lg shadow-md">
+                            <div class="flex flex-col space-y-1.5 p-4 sm:p-6">
+                                <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-5 w-5">
+                                        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                        <line x1="2" x2="22" y1="10" y2="10"></line>
+                                    </svg>
+                                    Próximos Pagos
+                                </h3>
+                            </div>
+                            <div class="p-6 pt-0 space-y-4">
+                                @foreach (var payment in upcomingPayments)
+                                {
+                                    <div class="flex items-center justify-between space-x-4 rounded-lg border bg-card p-4 transition-all hover:bg-accent/50">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round h-4 w-4 text-gray-500">
+                                                    <circle cx="12" cy="8" r="5"></circle>
+                                                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                                </svg>
+                                                <span class="font-medium text-gray-800">@payment.ClienteNombre</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
+                                                    <path d="M8 2v4"></path>
+                                                    <path d="M16 2v4"></path>
+                                                    <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                                    <path d="M3 10h18"></path>
+                                                    <path d="M8 14h.01"></path>
+                                                    <path d="M12 14h.01"></path>
+                                                    <path d="M16 14h.01"></path>
+                                                    <path d="M8 18h.01"></path>
+                                                    <path d="M12 18h.01"></path>
+                                                    <path d="M16 18h.01"></path>
+                                                </svg>
+                                                <span>@payment.FechaPago.ToShortDateString()</span>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center gap-2 text-sm text-gray-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4">
-                                                <path d="M8 2v4"></path>
-                                                <path d="M16 2v4"></path>
-                                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                                                <path d="M3 10h18"></path>
-                                                <path d="M8 14h.01"></path>
-                                                <path d="M12 14h.01"></path>
-                                                <path d="M16 14h.01"></path>
-                                                <path d="M8 18h.01"></path>
-                                                <path d="M12 18h.01"></path>
-                                                <path d="M16 18h.01"></path>
-                                            </svg>
-                                            <span>@payment.FechaPago.ToShortDateString()</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4">
-                                        <div class="text-right">
-                                            <!-- Mostrar el Monto a Pagar -->
-                                            <div class="text-lg font-semibold text-gray-800">$@payment.MontoAPagar</div>
-                                            <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 @GetPaymentStatusColor(payment.FechaPago)">
-                                                En @((payment.FechaPago.ToDateTime(TimeOnly.MinValue) - DateTime.Today).Days) días
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-right">
+                                                <!-- Mostrar el Monto a Pagar -->
+                                                <div class="text-lg font-semibold text-gray-800">$@payment.MontoAPagar</div>
+                                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 @GetPaymentStatusColor(payment.FechaPago)">
+                                                    En @((payment.FechaPago.ToDateTime(TimeOnly.MinValue) - DateTime.Today).Days) días
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            }
-                            <a href="payments" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
-                                Ver todos los Pagos
-                            </a>
+                                }
+                                <a href="payments" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-4">
+                                    Ver todos los Pagos
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    }
 }
