@@ -27,7 +27,6 @@
         try
         {
             isLoading = true; // Activar el estado de carga
-            await JS.InvokeVoidAsync("mostrarAlertaCargando");
             await Task.Delay(1125); // Simular una carga de 1.125 segundos
         }
         catch (Exception ex)
