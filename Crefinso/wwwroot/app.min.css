@@ -1559,10 +1559,6 @@ video {
     display: flex;
   }
 
-  .lg\:hidden {
-    display: none;
-  }
-
   .lg\:w-48 {
     width: 12rem;
   }

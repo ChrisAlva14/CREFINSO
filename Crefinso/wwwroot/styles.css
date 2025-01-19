@@ -177,3 +177,7 @@ h1, h2, h3, h4, h5, h6 {
         width: 100%;
     }
 }
+
+.dark-mode .border-gray-900 {
+   border-color: rgb(255 255 255);
+}

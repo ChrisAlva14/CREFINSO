@@ -15,31 +15,27 @@ namespace Crefinso.Services.Pagos
             _authServices = authServices;
         }
 
-        // Método para calcular el interés
-        public decimal CalculateInterest(decimal principal, decimal annualRate, int period)
+        // Método para calcular el interés basado en el saldo actual
+        public decimal CalculateInterest(decimal currentBalance, decimal annualRate, int period)
         {
             decimal monthlyRate = annualRate / 12 / 100;
-            decimal interest = principal * monthlyRate * period;
-            return Math.Round(interest, 2); // Redondear a 2 decimales
+            decimal interest = currentBalance * monthlyRate * period;
+            return Math.Round(interest, 2, MidpointRounding.AwayFromZero); // Redondear a 2 decimales
         }
 
-        // Método para calcular el capital
-        public decimal CalculateCapital(
-            decimal principal,
-            decimal paymentAmount,
-            decimal annualRate
-        )
+        // Método para calcular el capital basado en el saldo actual
+        public decimal CalculateCapital(decimal currentBalance, decimal paymentAmount, decimal annualRate)
         {
-            decimal interest = CalculateInterest(principal, annualRate, 1);
+            decimal interest = CalculateInterest(currentBalance, annualRate, 1);
             decimal capital = paymentAmount - interest;
-            return Math.Round(capital, 2); // Redondear a 2 decimales
+            return Math.Round(capital, 2, MidpointRounding.AwayFromZero); // Redondear a 2 decimales
         }
 
         // Método para calcular el nuevo saldo
-        public decimal CalculateNewBalance(decimal previousBalance, decimal capital)
+        public decimal CalculateNewBalance(decimal currentBalance, decimal capital)
         {
-            decimal newBalance = previousBalance - capital;
-            return Math.Round(newBalance, 2); // Redondear a 2 decimales
+            decimal newBalance = currentBalance - capital;
+            return Math.Round(newBalance, 2, MidpointRounding.AwayFromZero); // Redondear a 2 decimales
         }
 
         // OBTENER TODOS LOS PAGOS

@@ -15,6 +15,8 @@
     private bool isAuthenticated;
     private PagoCompletoResponse pagoCompleto;
     private string loggedInUsername; // Propiedad para almacenar el nombre del usuario logueado
+    private decimal currentBalance; // Propiedad para almacenar el saldo actual
+    private List<PagoCompletoResponse> pagosCompletos; // Lista de todos los pagos
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -29,10 +31,10 @@
     {
         try
         {
-            // Obtener todos los pagos completos
-            var pagosCompletos = await paymentService.GetPagosCompletos();
+            // Obtener todos los pagos
+            pagosCompletos = await paymentService.GetPagosCompletos();
 
-            // Filtrar el pago específico usando el PaymentId
+            // Obtener el pago actual
             pagoCompleto = pagosCompletos.FirstOrDefault(p => p.PagoId == PagoId);
 
             if (pagoCompleto == null)
@@ -41,13 +43,36 @@
                 Console.Error.WriteLine("No se encontró el pago con el ID proporcionado.");
             }
 
-            // Obtener el nombre del usuario logueado
+            // Calcular el saldo anterior (antes del pago actual)
+            currentBalance = CalculateCurrentBalance(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.PrestamoId);
+
             loggedInUsername = await authServices.GetUsernameAsync();
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error al cargar el pago: {ex.Message}");
         }
+    }
+
+    // Método para calcular el saldo anterior (antes del pago actual)
+    private decimal CalculateCurrentBalance(decimal montoAprobado, int prestamoId)
+    {
+        // Filtrar los pagos correspondientes al préstamo actual y que sean anteriores al pago actual
+        var pagosAnteriores = pagosCompletos
+            .Where(p => p.PrestamoId == prestamoId && p.PagoId < PagoId)
+            .OrderBy(p => p.PagoId)
+            .ToList();
+
+        decimal saldoAnterior = montoAprobado;
+
+        // Calcular el saldo acumulado restando el capital de cada pago anterior
+        foreach (var pago in pagosAnteriores)
+        {
+            decimal capital = paymentService.CalculateCapital(saldoAnterior, pago.MontoPagado, pago.Prestamo?.TasaInteres ?? 0);
+            saldoAnterior = paymentService.CalculateNewBalance(saldoAnterior, capital);
+        }
+
+        return saldoAnterior;
     }
 
     // Método para asegurar que el pago no exceda el saldo anterior
@@ -69,11 +94,21 @@
         // Llama a la función JavaScript para generar el PDF
         await JS.InvokeVoidAsync("generatePdf", "printable-section", fileName);
     }
+
+    private async Task BackPage()
+    {
+        await SomeAsyncOperation();
+        Navigation.NavigateTo("/payments");
+    }
+
+    private async Task SomeAsyncOperation()
+    {
+        await Task.Delay(1000);
+    }
 }
 
 @if (pagoCompleto == null)
 {
-    <p>Cargando...</p>
 }
 else if (isAuthenticated)
 {
@@ -167,29 +202,30 @@ else if (isAuthenticated)
                             <tbody>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">SALDO ANTERIOR</td>
-                                    <td class="py-2 text-right">$ @pagoCompleto.Prestamo?.MontoAprobado.ToString("N2")</td>
+                                    <td class="py-2 text-right">$ @currentBalance.ToString("N2")</td>
                                 </tr>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">CAPITAL</td>
                                     <td class="py-2 text-right">
                                         $ @{
-                                            decimal safePayment = CalculateSafePayment(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.MontoPagado);
-                                            @paymentService.CalculateCapital(pagoCompleto.Prestamo?.MontoAprobado ?? 0, safePayment, pagoCompleto.Prestamo?.TasaInteres ?? 0).ToString("N2")
+                                            decimal safePayment = CalculateSafePayment(currentBalance, pagoCompleto.MontoPagado);
+                                            decimal capital = paymentService.CalculateCapital(currentBalance, safePayment, pagoCompleto.Prestamo?.TasaInteres ?? 0);
+                                            @capital.ToString("N2")
                                         }
                                     </td>
                                 </tr>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">INTERES</td>
                                     <td class="py-2 text-right">
-                                        $ @paymentService.CalculateInterest(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.Prestamo?.TasaInteres ?? 0, 1).ToString("N2")
+                                        $ @paymentService.CalculateInterest(currentBalance, pagoCompleto.Prestamo?.TasaInteres ?? 0, 1).ToString("N2")
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="py-2 font-medium">NUEVO SALDO</td>
                                     <td class="py-2 text-right font-semibold">
                                         $ @{
-                                            decimal capital = paymentService.CalculateCapital(pagoCompleto.Prestamo?.MontoAprobado ?? 0, safePayment, pagoCompleto.Prestamo?.TasaInteres ?? 0);
-                                            @paymentService.CalculateNewBalance(pagoCompleto.Prestamo?.MontoAprobado ?? 0, capital).ToString("N2")
+                                            decimal newBalance = paymentService.CalculateNewBalance(currentBalance, capital);
+                                            @newBalance.ToString("N2")
                                         }
                                     </td>
                                 </tr>
@@ -234,6 +270,13 @@ else if (isAuthenticated)
                                 <rect x="6" y="14" width="12" height="8" rx="1"></rect>
                             </svg>
                             Imprimir
+                        </button>
+                        <button @onclick="BackPage" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex-1 gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                            </svg>
+
+                            Volver
                         </button>
                     </div>
                 </div>
