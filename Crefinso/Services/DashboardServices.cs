@@ -229,7 +229,7 @@ namespace Crefinso.Services
                                     FechaPago = pago.FechaPago,
                                     MontoAPagar = pago.MontoAPagar, // Asignar MontoAPagar a MontoAPagar
                                     MontoPagado = pago.MontoPagado, // Asignar MontoPagado a MontoPagado
-                                    SaldoAcumulado = pago.SaldoAcumulado,
+                                    SaldoRestante = pago.SaldoRestante,
                                     Estado = pago.Estado,
                                     ClienteNombre = clienteNombre,
                                 }

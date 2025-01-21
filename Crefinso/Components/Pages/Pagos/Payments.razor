@@ -272,7 +272,9 @@ else if (isAuthenticated)
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Prestamo</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha de Pago</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Pagado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Saldo Acumulado</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Interes Pagado</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Capital Pagado</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Saldo Restante</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
                                         <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
                                     </tr>
@@ -285,7 +287,9 @@ else if (isAuthenticated)
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PrestamoId</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.FechaPago.ToShortDateString()</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.MontoPagado</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.SaldoAcumulado</td>
+                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.InteresPagado</td>
+                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.CapitalPagado</td>
+                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.SaldoRestante</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                                                 @EstadoBadge(pago.Estado)
                                             </td>
@@ -380,7 +384,7 @@ else if (isAuthenticated)
                                 </svg>
                                 Saldo Acumulado
                             </label>
-                            <InputNumber @bind-Value="editingPago.SaldoAcumulado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SaldoAcumulado" required name="SaldoAcumulado" />
+                            <InputNumber @bind-Value="editingPago.SaldoRestante" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SaldoAcumulado" required name="SaldoAcumulado" />
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium flex items-center gap-2" for="Estado">
@@ -476,7 +480,7 @@ else if (isAuthenticated)
                             </svg>
                             Saldo Acumulado
                         </label>
-                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.SaldoAcumulado</p>
+                        <p class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full">@detailsPago.SaldoRestante</p>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="Estado">

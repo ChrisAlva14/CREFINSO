@@ -53,7 +53,7 @@
             if (excedente > 0)
             {
                 // Aplicar el excedente al saldo acumulado
-                selectedPayment.SaldoAcumulado -= excedente;
+                selectedPayment.SaldoRestante -= excedente;
             }
 
             // Crear el objeto PagoRequest
@@ -63,7 +63,9 @@
                     FechaPago = selectedPayment.FechaPago,
                     MontoAPagar = selectedPayment.MontoAPagar,
                     MontoPagado = montoPagado,
-                    SaldoAcumulado = selectedPayment.SaldoAcumulado,
+                    InteresPagado = selectedPayment.InteresPagado,
+                    CapitalPagado = selectedPayment.CapitalPagado,
+                    SaldoRestante = selectedPayment.SaldoRestante,
                     Estado = "Realizado"
                 };
 
@@ -182,14 +184,34 @@ else
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium">Saldo Acumulado:</span>
+                                        <span class="text-sm font-medium">Interes a Pagar:</span>
+                                        <div class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4 text-green-500">
+                                                <line x1="12" x2="12" y1="2" y2="22"></line>
+                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            </svg>
+                                            <span class="text-lg font-bold">@payment.InteresPagado</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium">Capital a Pagar:</span>
+                                        <div class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4 text-green-500">
+                                                <line x1="12" x2="12" y1="2" y2="22"></line>
+                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            </svg>
+                                            <span class="text-lg font-bold">@payment.CapitalPagado</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium">Saldo Restante:</span>
                                         <div class="flex items-center gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert h-4 w-4 text-blue-500">
                                                 <circle cx="12" cy="12" r="10"></circle>
                                                 <line x1="12" x2="12" y1="8" y2="12"></line>
                                                 <line x1="12" x2="12.01" y1="16" y2="16"></line>
                                             </svg>
-                                            <span class="text-lg font-bold">@payment.SaldoAcumulado</span>
+                                            <span class="text-lg font-bold">@payment.SaldoRestante</span>
                                         </div>
                                     </div>
                                 </div>
@@ -219,6 +241,7 @@ else
                     <h2 class="text-2xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-black">Registrar Pago</h2>
                 </div>
 
+                <!-- Contenido del modal -->
                 <!-- Contenido del modal -->
                 <div class="p-6 pt-0">
                     <div class="grid grid-cols-1 gap-4">
@@ -277,9 +300,35 @@ else
                                             <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"></path>
                                             <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
                                         </svg>
-                                        <span class="text-sm font-medium">Saldo Acumulado</span>
+                                        <span class="text-sm font-medium">Saldo Restante</span>
                                     </div>
-                                    <p class="text-xl font-bold">@selectedPayment?.SaldoAcumulado</p>
+                                    <p class="text-xl font-bold">@selectedPayment?.SaldoRestante</p>
+                                </div>
+                            </div>
+                            <!-- Tarjeta de interés pagado -->
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-yellow-500/20">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center gap-2 text-yellow-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4">
+                                            <line x1="12" x2="12" y1="2" y2="22"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                        <span class="text-sm font-medium">Interés Pagado</span>
+                                    </div>
+                                    <p class="text-xl font-bold">@selectedPayment?.InteresPagado</p>
+                                </div>
+                            </div>
+                            <!-- Tarjeta de capital pagado -->
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm border-red-500/20">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center gap-2 text-red-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4">
+                                            <line x1="12" x2="12" y1="2" y2="22"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                        <span class="text-sm font-medium">Capital Pagado</span>
+                                    </div>
+                                    <p class="text-xl font-bold">@selectedPayment?.CapitalPagado</p>
                                 </div>
                             </div>
                         </div>
