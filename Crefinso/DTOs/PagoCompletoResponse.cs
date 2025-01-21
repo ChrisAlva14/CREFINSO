@@ -5,6 +5,9 @@
         public int PagoId { get; set; }
         public int PrestamoId { get; set; }
         public decimal MontoPagado { get; set; }
+        public decimal InteresPagado { get; set; }
+        public decimal CapitalPagado { get; set; }
+        public decimal SaldoRestante { get; set; }
         public DateOnly FechaPago { get; set; }
         public string Estado { get; set; }
         public PrestamoResponse Prestamo { get; set; }

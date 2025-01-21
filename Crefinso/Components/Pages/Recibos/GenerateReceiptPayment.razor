@@ -46,6 +46,7 @@
             // Calcular el saldo anterior (antes del pago actual)
             currentBalance = CalculateCurrentBalance(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.PrestamoId);
 
+
             loggedInUsername = await authServices.GetUsernameAsync();
         }
         catch (Exception ex)
@@ -73,12 +74,6 @@
         }
 
         return saldoAnterior;
-    }
-
-    // Método para asegurar que el pago no exceda el saldo anterior
-    private decimal CalculateSafePayment(decimal previousBalance, decimal paymentAmount)
-    {
-        return paymentAmount > previousBalance ? previousBalance : paymentAmount;
     }
 
     private async Task PrintReceipt()
@@ -207,26 +202,19 @@ else if (isAuthenticated)
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">CAPITAL</td>
                                     <td class="py-2 text-right">
-                                        $ @{
-                                            decimal safePayment = CalculateSafePayment(currentBalance, pagoCompleto.MontoPagado);
-                                            decimal capital = paymentService.CalculateCapital(currentBalance, safePayment, pagoCompleto.Prestamo?.TasaInteres ?? 0);
-                                            @capital.ToString("N2")
-                                        }
+                                        $ @pagoCompleto.CapitalPagado
                                     </td>
                                 </tr>
                                 <tr class="border-b border-gray-200">
                                     <td class="py-2 font-medium">INTERES</td>
                                     <td class="py-2 text-right">
-                                        $ @paymentService.CalculateInterest(currentBalance, pagoCompleto.Prestamo?.TasaInteres ?? 0, 1).ToString("N2")
+                                        $ @pagoCompleto.InteresPagado
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="py-2 font-medium">NUEVO SALDO</td>
                                     <td class="py-2 text-right font-semibold">
-                                        $ @{
-                                            decimal newBalance = paymentService.CalculateNewBalance(currentBalance, capital);
-                                            @newBalance.ToString("N2")
-                                        }
+                                        $ @pagoCompleto.SaldoRestante
                                     </td>
                                 </tr>
                             </tbody>
