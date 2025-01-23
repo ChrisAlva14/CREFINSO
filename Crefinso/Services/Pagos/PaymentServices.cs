@@ -24,7 +24,11 @@ namespace Crefinso.Services.Pagos
         }
 
         // Método para calcular el capital basado en el saldo actual
-        public decimal CalculateCapital(decimal currentBalance, decimal paymentAmount, decimal annualRate)
+        public decimal CalculateCapital(
+            decimal currentBalance,
+            decimal paymentAmount,
+            decimal annualRate
+        )
         {
             decimal interest = CalculateInterest(currentBalance, annualRate, 1);
             decimal capital = paymentAmount - interest;
