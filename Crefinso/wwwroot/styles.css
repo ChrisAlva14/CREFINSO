@@ -32,15 +32,14 @@ h1, h2, h3, h4, h5, h6 {
 .dark-mode h2,
 .dark-mode a,
 .dark-mode span,
-.dark-mode p {
+.dark-mode p,
+.dark-mode td {
     color: #ffffff;
 }
 
 .dark-mode a:hover {
     background-color: green;
 }
-
-
 
 .dark-mode .perfil:hover {
     color: #000000;
@@ -137,4 +136,48 @@ h1, h2, h3, h4, h5, h6 {
 
 .dark-mode .bg-emerald-100 {
     background-color: rgb(22 101 52 / 0.15); /* Fondo verde oscuro */
+}
+
+
+@media print {
+    /* Oculta el navbar */
+    .navbar, #navbar {
+        display: none !important;
+    }
+
+    /* Oculta el sidebar */
+    .sidebar, #sidebar {
+        display: none !important;
+    }
+
+    /* Oculta los botones */
+    .print-hidden {
+        display: none !important;
+    }
+
+    /* Oculta cualquier otro elemento no deseado */
+    .no-print {
+        display: none !important;
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden; /* Oculta todo el contenido de la página */
+    }
+
+    .printable-area, .printable-area * {
+        visibility: visible; /* Muestra solo el contenido dentro de .printable-area */
+    }
+
+    .printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}
+
+.dark-mode .border-gray-900 {
+   border-color: rgb(255 255 255);
 }

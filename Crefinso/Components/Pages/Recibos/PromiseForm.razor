@@ -1,0 +1,198 @@
+﻿@page "/promiseForm"
+@inject IJSRuntime JS
+@inject AuthServices authServices
+@using Crefinso.Services
+
+
+@code {
+    private bool isAuthenticated;
+
+    private async Task DescargarPdf(MouseEventArgs e)
+    {
+        // Genera el nombre del archivo con el ID del pago
+        string fileName = $"Pagaré.pdf";
+
+        // Llama a la función JavaScript para generar el PDF
+        await JS.InvokeVoidAsync("generatePdfLandscape", "printable-section", fileName);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
+            StateHasChanged();
+        }
+    }
+}
+
+@if (isAuthenticated)
+{
+    <div class="h-full p-4 dark-text-secondary">
+        <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6">
+            <!-- Contenido principal -->
+            <section id="printable-section" class="printable-area flex-1 rounded-lg border bg-white shadow-xl">
+                <div class="p-8">
+                    <div class="mb-8 flex items-center justify-between">
+                        <img alt="Crefinso Logo" loading="lazy" width="120" height="36" decoding="async" data-nimg="1" src="/logoCrefinsowhite.png" style="" />
+                        <div class="text-right">
+                            <h1 class="text-3xl font-bold text-gray-800">PAGARÉ</h1>
+                            <p class="text-sm text-gray-500">SIN PROTESTO</p>
+                        </div>
+                    </div>
+                    <div class="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
+                        <div class="col-span-2 space-y-4">
+                            <h2 class="text-lg font-semibold text-gray-700">ASOCIACIÓN COOPERATIVA DE AHORRO Y CRÉDITO</h2>
+                            <h3 class="text-md text-gray-600">CRECIMIENTO FINANCIERO DE SONSONATE DE R.L.</h3>
+                        </div>
+                        <div class="rounded-lg bg-gray-50 p-4">
+                            <label class="mb-2 flex items-center text-sm font-medium leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="amount">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign mr-2 h-4 w-4 text-gray-500">
+                                    <line x1="12" x2="12" y1="2" y2="22"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>Monto a Pagar
+                            </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-2xl font-bold text-gray-800 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="amount" placeholder="0.00" />
+                        </div>
+                    </div>
+                    <div data-orientation="horizontal" role="none" class="bg-border my-6 h-[1px] w-full shrink-0"></div>
+                    <div class="space-y-6 text-sm text-gray-600">
+                        <p>Por el presente PAGARÉ SIN PROTESTO me comprometo a pagar incondicionalmente a ASOCIACION COOPERATIVA DE AHORRO Y CREDITO CRECIMIENTO FINANCIERO DE SONSONATE, DE R.L., que se puede abreviar "CREFINSO DE R.L." la suma de <input class="bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring my-1 inline-block h-10 w-full rounded-md border border-b border-gray-300 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /></p>
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div>
+                                <label class="mb-2 flex items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-percent mr-2 h-4 w-4 text-gray-500">
+                                        <line x1="19" x2="5" y1="5" y2="19"></line>
+                                        <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                                        <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                                    </svg>
+                                    Interés convencional
+                                </label>
+                                <div class="flex items-center"><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-20 rounded-md border px-3 py-2 text-center text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /> <span class="ml-2">% mensual</span></div>
+                            </div>
+                            <div>
+                                <label class="mb-2 flex items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-percent mr-2 h-4 w-4 text-gray-500">
+                                        <line x1="19" x2="5" y1="5" y2="19"></line>
+                                        <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                                        <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                                    </svg>
+                                    Interés por mora
+                                </label>
+                                <div class="flex items-center"><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-20 rounded-md border px-3 py-2 text-center text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /> <span class="ml-2">% mensual</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="mb-2 flex items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4 text-gray-500">
+                                    <path d="M8 2v4"></path>
+                                    <path d="M16 2v4"></path>
+                                    <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                    <path d="M3 10h18"></path>
+                                </svg>
+                                Fecha de Pago
+                            </label>
+                            <div class="grid grid-cols-3 gap-2"><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Día" /><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Mes" /><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Año" /></div>
+                        </div>
+                        <p class="text-xs">En las oficinas de CREFINSO de R.L., de la ciudad de Sonzacate departamento de Sonsonate. En caso de mora en el pago de una sola cuota se dará por vencido el presente pagare sin protesto y volverá exigible la deuda en su totalidad, como plazo vencido. Es entendido que para los efectos del presente TITULO VALOR, señalo como domicilio especial la ciudad de Sonsonate a cuyos tribunales me someto, renuncio al derecho de apelar del decreto de embargo y de cualquier otra resolución apelable en el juicio que de cualquier naturaleza se promoviere en mi contra, como consecuencia de la mora en el pago de esta obligación mercantil, así como exigir cuentas o fianzas al depositario que al efecto se nombrare, el que será designado por el legítimo tenedor, siendo a mi cargo cualquier gasto que el legítimo tenedor hiciere en el cobro de este pagaré, inclusive los llamados gastos personales y aun cuando por regla general no hubiere condenación en costas.</p>
+                        <p class="text-xs">La obligación incorporada con el presente TITULO VALOR, podrá ser amortizado con pagos parciales antes del vencimiento del plazo, los cuales deberán estipularse al reverso de este Título Valor.</p>
+                    </div>
+                    <div data-orientation="horizontal" role="none" class="bg-border my-6 h-[1px] w-full shrink-0"></div>
+                    <div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user mr-2 h-4 w-4 text-gray-500">
+                                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    Nombre
+                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            </div>
+                            <div>
+                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4 text-gray-500">
+                                        <path d="M8 2v4"></path>
+                                        <path d="M16 2v4"></path>
+                                        <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                        <path d="M3 10h18"></path>
+                                    </svg>
+                                    Edad
+                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            </div>
+                            <div>
+                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase mr-2 h-4 w-4 text-gray-500">
+                                        <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                        <rect width="20" height="14" x="2" y="6" rx="2"></rect>
+                                    </svg>
+                                    Profesión
+                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-2 h-4 w-4 text-gray-500">
+                                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                    </svg>
+                                    Domicilio
+                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            </div>
+                            <div>
+                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card mr-2 h-4 w-4 text-gray-500">
+                                        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                        <line x1="2" x2="22" y1="10" y2="10"></line>
+                                    </svg>
+                                    DUI
+                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            </div>
+                            <div>
+                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hash mr-2 h-4 w-4 text-gray-500">
+                                        <line x1="4" x2="20" y1="9" y2="9"></line>
+                                        <line x1="4" x2="20" y1="15" y2="15"></line>
+                                        <line x1="10" x2="8" y1="3" y2="21"></line>
+                                        <line x1="16" x2="14" y1="3" y2="21"></line>
+                                    </svg>
+                                    NIT
+                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-6 space-y-2">
+                        <label class="flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pen-line mr-2 h-4 w-4 text-gray-500">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                            </svg>
+                            Firma
+                        </label>
+                        <div class="flex h-12 items-center justify-center border-b-2 border-gray-300"><input class="border-input ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border border-none bg-transparent px-3 py-2 text-center text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm text-gray-500">Sonsonate, <input class="bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring inline-block h-10 w-32 rounded-md border border-b border-gray-300 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" readonly /></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botones de acción -->
+            <div class="lg:w-48 print:hidden">
+                <div class="bg-white p-4 border rounded-lg shadow-lg lg:sticky lg:top-4">
+                    <div class="flex flex-row lg:flex-col gap-2">
+                        <button @onclick="DescargarPdf" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-black text-white hover:bg-primary/90 h-10 px-4 py-2 flex-1 gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-4 w-4">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" x2="12" y1="15" y2="3"></line>
+                            </svg>
+                            Descargar Pagaré
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+}

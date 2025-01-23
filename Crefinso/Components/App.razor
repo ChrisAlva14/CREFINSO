@@ -29,10 +29,16 @@
     <!-- Scripts -->
     <!-- Tailwind CSS -->
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="_framework/blazor.web.js" defer></script>
+    <script src="js/pdfGenerator.js" defer></script>
+    <script src="js/print.js" defer></script>
+    <script src="js/generatePdfLandscape.js" defer></script>
+
 
     <script>
         // Alternar el modo oscuro y cambiar el logo
@@ -91,6 +97,8 @@
 
         observer.observe(document.body, { childList: true, subtree: true });
     </script>
+
+
 </body>
 
 </html>
