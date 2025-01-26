@@ -1,21 +1,21 @@
 ﻿using System.Net.Http.Headers;
 using Crefinso.DTOs;
 
-namespace Crefinso.Services.Clientes
+namespace Crefinso.Services.Empleos
 {
-    public class ClientServices
+    public class JobServices
     {
         private readonly HttpClient _httpClient;
         private readonly AuthServices _authServices;
 
-        public ClientServices(HttpClient httpClient, AuthServices authServices)
+        public JobServices(HttpClient httpClient, AuthServices authServices)
         {
             _httpClient = httpClient;
             _authServices = authServices;
         }
 
-        //OBTENER TODOS LOS CLIENTES
-        public async Task<List<ClienteResponse>> GetClientes()
+        // OBTENER TODOS LOS EMPLEOS
+        public async Task<List<EmpleoResponse>> GetJobs()
         {
             try
             {
@@ -23,15 +23,72 @@ namespace Crefinso.Services.Clientes
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException(
-                        "El token es nulo o invalido.Iniciar sesion"
+                        "El token es nulo o inválido. Iniciar sesión"
                     );
                 }
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Bearer",
                     token
                 );
-                var response = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
-                    "api/clientes"
+                var response = await _httpClient.GetFromJsonAsync<List<EmpleoResponse>>(
+                    "api/empleos"
+                );
+
+                // SE LLAMA AL NOMBRE DEL CLIENTE PARA CADA EMPLEO
+                foreach (var empleo in response)
+                {
+                    empleo.NombreCliente = await GetClienteNombre(empleo.ClienteID);
+                }
+
+                return response;
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS EMPLEOS, POR FAVOR REINICIAR EL SISTEMA"
+                );
+            }
+        }
+
+        // METODO PARA LLAMAR AL NOMBRE DEL CLIENTE
+        private async Task<string> GetClienteNombre(int clienteID)
+        {
+            try
+            {
+                var cliente = await _httpClient.GetFromJsonAsync<ClienteResponse>(
+                    $"api/clientes/{clienteID}"
+                );
+                return cliente?.Nombre ?? "Desconocido";
+            }
+            catch (Exception)
+            {
+                // Manejo de errores al obtener el nombre del cliente
+                return "Error al obtener el nombre del cliente";
+            }
+        }
+
+        // OBTENER EMPLEO POR ID
+        public async Task<EmpleoResponse> GetJobById(int jobId)
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException(
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<EmpleoResponse>(
+                    $"api/empleos/{jobId}"
                 );
 
                 return response;
@@ -43,47 +100,13 @@ namespace Crefinso.Services.Clientes
             catch (Exception)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER LOS CLIENTES, POR FAVOR REINICIAR EL SISTEMA"
+                    "HA OCURRIDO UN ERROR AL OBTENER EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA"
                 );
             }
         }
 
-        //OBETENER CLIENTE POR ID POR ID
-        public async Task<ClienteResponse> GetClienteById(int clienteId)
-        {
-            try
-            {
-                var token = await _authServices.GetTokenAsync();
-                if (string.IsNullOrEmpty(token))
-                {
-                    throw new InvalidOperationException(
-                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
-                    );
-                }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
-                var response = await _httpClient.GetFromJsonAsync<ClienteResponse>(
-                    $"api/clientes/{clienteId}"
-                );
-
-                return response;
-            }
-            catch (HttpRequestException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA"
-                );
-            }
-        }
-
-        //CREAR NUEVO CLIENTE
-        public async Task<bool> PostClient(ClienteRequest newClient)
+        // CREAR NUEVO EMPLEO
+        public async Task<bool> PostJob(EmpleoRequest newJob)
         {
             try
             {
@@ -92,7 +115,7 @@ namespace Crefinso.Services.Clientes
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException(
-                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
                     );
                 }
 
@@ -102,8 +125,8 @@ namespace Crefinso.Services.Clientes
                     token
                 );
 
-                // Enviar la solicitud POST con los datos del nuevo usuario
-                var response = await _httpClient.PostAsJsonAsync("api/clientes", newClient);
+                // Enviar la solicitud POST con los datos del nuevo empleo
+                var response = await _httpClient.PostAsJsonAsync("api/empleos", newJob);
 
                 // Verificar si la respuesta fue exitosa
                 if (response.IsSuccessStatusCode)
@@ -115,7 +138,7 @@ namespace Crefinso.Services.Clientes
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     throw new Exception(
-                        $"Error al crear el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                        $"Error al crear el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
                     );
                 }
             }
@@ -126,14 +149,14 @@ namespace Crefinso.Services.Clientes
             catch (Exception ex)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL CREAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                    "HA OCURRIDO UN ERROR AL CREAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
                         + ex.Message
                 );
             }
         }
 
-        //MODIFICAR UN CLIENTE
-        public async Task<bool> UpdateClient(ClienteResponse client)
+        // MODIFICAR UN EMPLEO
+        public async Task<bool> UpdateJob(EmpleoResponse job)
         {
             try
             {
@@ -141,7 +164,7 @@ namespace Crefinso.Services.Clientes
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException(
-                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
                     );
                 }
 
@@ -153,20 +176,18 @@ namespace Crefinso.Services.Clientes
                 // Construir el contenido a enviar en la solicitud
                 var data = new
                 {
-                    client.ClienteId,
-                    client.Nombre,
-                    client.FechaNacimiento,
-                    client.DUI,
-                    client.NIT,
-                    client.Direccion,
-                    client.TelefonoCelular,
-                    client.TelefonoFijo,
-                    client.UserID,
-                    client.Estado,
+                    job.EmpleoId,
+                    job.ClienteID,
+                    job.LugarTrabajo,
+                    job.Cargo,
+                    job.SueldoBase,
+                    job.FechaIngreso,
+                    job.TelefonoTrabajo,
+                    job.DireccionTrabajo,
                 };
 
                 var response = await _httpClient.PutAsJsonAsync(
-                    $"api/clientes/{client.ClienteId}",
+                    $"api/empleos/{job.EmpleoId}",
                     data
                 );
 
@@ -178,7 +199,7 @@ namespace Crefinso.Services.Clientes
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     throw new Exception(
-                        $"Error al actualizar el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                        $"Error al actualizar el Empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
                     );
                 }
             }
@@ -189,14 +210,14 @@ namespace Crefinso.Services.Clientes
             catch (Exception ex)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
                         + ex.Message
                 );
             }
         }
 
-        //ELIMINAR UN CLIENTE
-        public async Task<bool> DeleteCliente(int clienteId)
+        // ELIMINAR UN EMPLEO
+        public async Task<bool> DeleteJob(int jobId)
         {
             try
             {
@@ -204,14 +225,14 @@ namespace Crefinso.Services.Clientes
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new InvalidOperationException(
-                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                        "TOKEN INVÁLIDO O NULO, POR FAVOR, INICIAR SESIÓN"
                     );
                 }
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Bearer",
                     token
                 );
-                var response = await _httpClient.DeleteAsync($"api/clientes/{clienteId}");
+                var response = await _httpClient.DeleteAsync($"api/empleos/{jobId}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -221,7 +242,7 @@ namespace Crefinso.Services.Clientes
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     throw new Exception(
-                        $"Error al eliminar el cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                        $"Error al eliminar el empleo. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
                     );
                 }
             }
@@ -232,7 +253,7 @@ namespace Crefinso.Services.Clientes
             catch (Exception ex)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL EMPLEO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
                         + ex.Message
                 );
             }

@@ -1,0 +1,183 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Ubuntu:wght@400;500;700&display=swap');
+
+/* Aplicar Geist a toda la página */
+html, body {
+    font-family: 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Aplicar Ubuntu a los títulos */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Estilos para el modo oscuro */
+.dark-mode body {
+    color: #ffffff;
+}
+.dark-mode .bg-gray-100 {
+    background-color: rgb(17 24 39);
+}
+
+.dark-mode header,
+.dark-mode aside,
+.dark-mode nav,
+.dark-mode .bg-white {
+    background-color: rgb(31 41 55);
+    /* Fondo de elementos oscuros */
+    color: #ffffff;
+}
+
+/* Texto adicional en modo oscuro */
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode a,
+.dark-mode span,
+.dark-mode p,
+.dark-mode td {
+    color: #ffffff;
+}
+
+.dark-mode a:hover {
+    background-color: green;
+}
+
+.dark-mode .perfil:hover {
+    color: #000000;
+}
+
+/* Estilos del panel lateral (menú) */
+.dark-mode aside {
+    color: #7b8592;
+    /* Gris claro para texto en el panel lateral */
+}
+
+.dark-mode .stat-card h2 {
+    color: #fff;
+}
+
+.dark-mode .bg-blue-100 {
+    background-color: rgb(30 64 175);
+}
+
+.dark-mode .bg-green-100 {
+    background-color: rgb(22 101 52);
+}
+
+.dark-mode .bg-yellow-100 {
+    background-color: rgb(133 77 14);
+}
+.dark-mode .bg-red-100 {
+    background-color: rgb(153 27 27);
+}
+
+.dark-mode .text-green-800,
+.dark-mode .text-yellow-800,
+.dark-mode .text-red-800 {
+    color: white;
+}
+
+.dark-mode .bg-black{
+    background-color:rgb(255,255,255);
+    color: #000;
+}
+
+.dark-mode .userWhite {
+    color: #fff;
+}
+
+.dark-mode .next-payment{
+
+}
+
+.dark-mode .userWhite {
+    color: #fff;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+/* Modo Oscuro */
+.dark-mode .bg-white {
+    background-color: rgb(31 41 55); /* Fondo oscuro */
+    border-color: rgb(55 65 81); /* Borde oscuro */
+}
+
+.dark-mode .text-gray-800 {
+    color: #ffffff; /* Texto blanco */
+}
+
+.dark-mode .text-gray-500 {
+    color: #9ca3af; /* Texto gris claro */
+}
+
+.dark-mode .text-emerald-800 {
+    color: #34d399; /* Texto verde claro */
+}
+
+.dark-mode .bg-emerald-100 {
+    background-color: rgb(22 101 52 / 0.15); /* Fondo verde oscuro */
+}
+
+
+@media print {
+    /* Oculta el navbar */
+    .navbar, #navbar {
+        display: none !important;
+    }
+
+    /* Oculta el sidebar */
+    .sidebar, #sidebar {
+        display: none !important;
+    }
+
+    /* Oculta los botones */
+    .print-hidden {
+        display: none !important;
+    }
+
+    /* Oculta cualquier otro elemento no deseado */
+    .no-print {
+        display: none !important;
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden; /* Oculta todo el contenido de la página */
+    }
+
+    .printable-area, .printable-area * {
+        visibility: visible; /* Muestra solo el contenido dentro de .printable-area */
+    }
+
+    .printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}
+
+.dark-mode .border-gray-900 {
+   border-color: rgb(255 255 255);
+}

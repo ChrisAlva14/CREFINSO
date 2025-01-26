@@ -1,20 +1,104 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="app.css" />
+
+    <link rel="stylesheet" href="app.min.css" />
     <link rel="stylesheet" href="Crefinso.styles.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/png" href="logoCrefinsodark.png" />
+    <title> CREFINSO | SISTEMA FINANCIERO </title>
+
+    <!-- Tailwind CSS -->
+    <script src="js/site.js" defer></script>
+    <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- HeadOutlet (Blazor-specific) -->
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-<body>
-    <Routes />
-    <script src="_framework/blazor.web.js"></script>
+<body class="bg-gray-100">
+    <!-- Enrutamiento para Blazor -->
+    <Routes @rendermode="InteractiveServer" />
+
+    <!-- Scripts -->
+    <!-- Tailwind CSS -->
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="_framework/blazor.web.js" defer></script>
+    <script src="js/pdfGenerator.js" defer></script>
+    <script src="js/print.js" defer></script>
+    <script src="js/generatePdfLandscape.js" defer></script>
+
+
+    <script>
+        // Alternar el modo oscuro y cambiar el logo
+        function toggleDarkMode() {
+            const isDarkMode = document.documentElement.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+
+            // Obtener el logo y cambiar el src
+            const logo = document.getElementById('logo');
+            if (logo) {
+                if (isDarkMode) {
+                    logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                } else {
+                    logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                }
+            }
+        }
+
+        // Al cargar la página, aplicar el modo oscuro si está habilitado en localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkMode = localStorage.getItem('darkMode');
+            const logo = document.getElementById('logo');
+
+            if (darkMode === 'enabled') {
+                document.documentElement.classList.add('dark-mode');
+                if (logo) {
+                    logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                }
+            } else {
+                if (logo) {
+                    logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                }
+            }
+        });
+
+        // Observar cambios en el DOM para asegurarse de que el logo se actualice si se carga dinámicamente
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    const darkMode = localStorage.getItem('darkMode');
+                    const logo = document.getElementById('logo');
+
+                    if (darkMode === 'enabled') {
+                        document.documentElement.classList.add('dark-mode');
+                        if (logo) {
+                            logo.src = 'logoCrefinsodark.png';  // Logo con letras blancas
+                        }
+                    } else {
+                        if (logo) {
+                            logo.src = 'logoCrefinsowhite.png'; // Logo con letras negras
+                        }
+                    }
+                }
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+
+
 </body>
 
 </html>

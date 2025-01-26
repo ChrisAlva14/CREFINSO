@@ -1,55 +1,20 @@
 ﻿using System.Net.Http.Headers;
 using Crefinso.DTOs;
 
-namespace Crefinso.Services.Clientes
+namespace Crefinso.Services.Usuarios
 {
-    public class ClientServices
+    public class UserServices
     {
         private readonly HttpClient _httpClient;
         private readonly AuthServices _authServices;
 
-        public ClientServices(HttpClient httpClient, AuthServices authServices)
+        public UserServices(HttpClient httpClient, AuthServices authServices)
         {
             _httpClient = httpClient;
             _authServices = authServices;
         }
 
-        //OBTENER TODOS LOS CLIENTES
-        public async Task<List<ClienteResponse>> GetClientes()
-        {
-            try
-            {
-                var token = await _authServices.GetTokenAsync();
-                if (string.IsNullOrEmpty(token))
-                {
-                    throw new InvalidOperationException(
-                        "El token es nulo o invalido.Iniciar sesion"
-                    );
-                }
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
-                var response = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
-                    "api/clientes"
-                );
-
-                return response;
-            }
-            catch (HttpRequestException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER LOS CLIENTES, POR FAVOR REINICIAR EL SISTEMA"
-                );
-            }
-        }
-
-        //OBETENER CLIENTE POR ID POR ID
-        public async Task<ClienteResponse> GetClienteById(int clienteId)
+        public async Task<List<UserResponse>> GetUsers()
         {
             try
             {
@@ -64,8 +29,40 @@ namespace Crefinso.Services.Clientes
                     "Bearer",
                     token
                 );
-                var response = await _httpClient.GetFromJsonAsync<ClienteResponse>(
-                    $"api/clientes/{clienteId}"
+                var response = await _httpClient.GetFromJsonAsync<List<UserResponse>>("api/users");
+
+                return response;
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new Exception(
+                    "HA OCURRIDO UN ERROR AL OBTENER LOS USUARIOS, POR FAVOR REINICIAR EL SISTEMA"
+                );
+            }
+        }
+
+        //OBETENER USARIO POR ID
+        public async Task<UserResponse> GetUserById(int userId)
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException(
+                        "TOKEN INVALIDO O NULO, POR FAVOR, INICIAR SESIÓN"
+                    );
+                }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+                var response = await _httpClient.GetFromJsonAsync<UserResponse>(
+                    $"api/users/{userId}"
                 );
 
                 return response;
@@ -77,13 +74,13 @@ namespace Crefinso.Services.Clientes
             catch (Exception)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA"
+                    "HA OCURRIDO UN ERROR AL OBTENER EL USUARIO, POR FAVOR REINICIAR EL SISTEMA"
                 );
             }
         }
 
-        //CREAR NUEVO CLIENTE
-        public async Task<bool> PostClient(ClienteRequest newClient)
+        //CREAR UN USUARIO
+        public async Task<bool> PostUser(UserRequest newUser)
         {
             try
             {
@@ -103,7 +100,7 @@ namespace Crefinso.Services.Clientes
                 );
 
                 // Enviar la solicitud POST con los datos del nuevo usuario
-                var response = await _httpClient.PostAsJsonAsync("api/clientes", newClient);
+                var response = await _httpClient.PostAsJsonAsync("api/users", newUser);
 
                 // Verificar si la respuesta fue exitosa
                 if (response.IsSuccessStatusCode)
@@ -115,7 +112,7 @@ namespace Crefinso.Services.Clientes
                     // Manejar errores de la respuesta
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     throw new Exception(
-                        $"Error al crear el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                        $"Error al crear el usuario. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
                     );
                 }
             }
@@ -132,8 +129,9 @@ namespace Crefinso.Services.Clientes
             }
         }
 
-        //MODIFICAR UN CLIENTE
-        public async Task<bool> UpdateClient(ClienteResponse client)
+        //MODIFICAR UN USUARIO
+
+        public async Task<bool> UpdateUser(UserResponse user)
         {
             try
             {
@@ -153,22 +151,15 @@ namespace Crefinso.Services.Clientes
                 // Construir el contenido a enviar en la solicitud
                 var data = new
                 {
-                    client.ClienteId,
-                    client.Nombre,
-                    client.FechaNacimiento,
-                    client.DUI,
-                    client.NIT,
-                    client.Direccion,
-                    client.TelefonoCelular,
-                    client.TelefonoFijo,
-                    client.UserID,
-                    client.Estado,
+                    user.UserId,
+                    user.UserName,
+                    user.UserRole,
+                    UserPassword = string.IsNullOrEmpty(user.UserPassword)
+                        ? null
+                        : user.UserPassword,
                 };
 
-                var response = await _httpClient.PutAsJsonAsync(
-                    $"api/clientes/{client.ClienteId}",
-                    data
-                );
+                var response = await _httpClient.PutAsJsonAsync($"api/users/{user.UserId}", data);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -178,7 +169,7 @@ namespace Crefinso.Services.Clientes
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     throw new Exception(
-                        $"Error al actualizar el Cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                        $"Error al actualizar el usuario. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
                     );
                 }
             }
@@ -189,14 +180,14 @@ namespace Crefinso.Services.Clientes
             catch (Exception ex)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                    "HA OCURRIDO UN ERROR AL ACTUALIZAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
                         + ex.Message
                 );
             }
         }
 
-        //ELIMINAR UN CLIENTE
-        public async Task<bool> DeleteCliente(int clienteId)
+        //DESHABILITAR USUARIO
+        public async Task<bool> DisableUser(int userId)
         {
             try
             {
@@ -211,7 +202,7 @@ namespace Crefinso.Services.Clientes
                     "Bearer",
                     token
                 );
-                var response = await _httpClient.DeleteAsync($"api/clientes/{clienteId}");
+                var response = await _httpClient.DeleteAsync($"api/users/{userId}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -221,7 +212,7 @@ namespace Crefinso.Services.Clientes
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     throw new Exception(
-                        $"Error al eliminar el cliente. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
+                        $"Error al deshabilitar el usuario. Código de estado: {response.StatusCode}. Detalle: {errorMessage}"
                     );
                 }
             }
@@ -232,7 +223,7 @@ namespace Crefinso.Services.Clientes
             catch (Exception ex)
             {
                 throw new Exception(
-                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL CLIENTE, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
+                    "HA OCURRIDO UN ERROR AL DESHABILITAR EL USUARIO, POR FAVOR REINICIAR EL SISTEMA. Detalle: "
                         + ex.Message
                 );
             }
