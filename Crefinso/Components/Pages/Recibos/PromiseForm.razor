@@ -3,9 +3,11 @@
 @inject AuthServices authServices
 @using Crefinso.Services
 
-
 @code {
     private bool isAuthenticated;
+    private string currentDate;
+    private decimal montoAPagar;
+    private string montoEnLetras;
 
     private async Task DescargarPdf(MouseEventArgs e)
     {
@@ -21,8 +23,106 @@
         if (firstRender)
         {
             isAuthenticated = await authServices.IsAuthenticatedAsync();
+            currentDate = DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy"); // Formatea la fecha actual
             StateHasChanged();
         }
+    }
+
+    private void ActualizarMontoEnLetras(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out decimal nuevoMonto))
+        {
+            montoAPagar = nuevoMonto;
+            montoEnLetras = ConvertirNumeroALetras(nuevoMonto);
+        }
+        else
+        {
+            montoEnLetras = "";
+        }
+    }
+
+    private string ConvertirNumeroALetras(decimal numero)
+    {
+        string[] unidades = { "", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE" };
+        string[] decenas = { "", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA" };
+        string[] especiales = { "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISEIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE" };
+        string[] centenas = { "", "CIEN", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS" };
+
+        int parteEntera = (int)numero;
+        int parteDecimal = (int)((numero - parteEntera) * 100);
+
+        string resultado = "";
+
+        // Convertir la parte entera
+        if (parteEntera > 0)
+        {
+            if (parteEntera < 10)
+            {
+                resultado += unidades[parteEntera];
+            }
+            else if (parteEntera >= 11 && parteEntera <= 19)
+            {
+                resultado += especiales[parteEntera - 11];
+            }
+            else if (parteEntera >= 20 && parteEntera < 100)
+            {
+                resultado += decenas[parteEntera / 10];
+                if (parteEntera % 10 != 0)
+                {
+                    resultado += " Y " + unidades[parteEntera % 10];
+                }
+            }
+            else if (parteEntera >= 100 && parteEntera < 1000)
+            {
+                resultado += centenas[parteEntera / 100];
+                int resto = parteEntera % 100;
+                if (resto != 0)
+                {
+                    resultado += " " + ConvertirNumeroALetras(resto);
+                }
+            }
+            else if (parteEntera >= 1000)
+            {
+                resultado += ConvertirNumeroALetras(parteEntera / 1000) + " MIL";
+                int resto = parteEntera % 1000;
+                if (resto != 0)
+                {
+                    resultado += " " + ConvertirNumeroALetras(resto);
+                }
+            }
+
+            resultado += " DÓLARES";
+        }
+
+        // Convertir la parte decimal
+        if (parteDecimal > 0)
+        {
+            if (!string.IsNullOrEmpty(resultado))
+            {
+                resultado += " CON ";
+            }
+
+            if (parteDecimal < 10)
+            {
+                resultado += unidades[parteDecimal];
+            }
+            else if (parteDecimal >= 11 && parteDecimal <= 19)
+            {
+                resultado += especiales[parteDecimal - 11];
+            }
+            else
+            {
+                resultado += decenas[parteDecimal / 10];
+                if (parteDecimal % 10 != 0)
+                {
+                    resultado += " Y " + unidades[parteDecimal % 10];
+                }
+            }
+
+            resultado += " CENTAVOS";
+        }
+
+        return resultado;
     }
 }
 
@@ -31,7 +131,7 @@
     <div class="h-full p-4 dark-text-secondary">
         <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6">
             <!-- Contenido principal -->
-            <section id="printable-section" class="printable-area flex-1 rounded-lg border bg-white shadow-xl">
+            <section id="printable-section" class="printable-area flex-1 rounded-lg border bg-white shadow-xl w-full max-w-screen-md mx-auto break-words">
                 <div class="p-8">
                     <div class="mb-8 flex items-center justify-between">
                         <img alt="Crefinso Logo" loading="lazy" width="120" height="36" decoding="async" data-nimg="1" src="/logoCrefinsowhite.png" style="" />
@@ -51,12 +151,20 @@
                                     <line x1="12" x2="12" y1="2" y2="22"></line>
                                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                                 </svg>Monto a Pagar
-                            </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-2xl font-bold text-gray-800 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="amount" placeholder="0.00" />
+                            </label>
+                            <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md"
+                                   @bind="montoAPagar"
+                                   @oninput="ActualizarMontoEnLetras"
+                                   placeholder="0.00" />
                         </div>
                     </div>
-                    <div data-orientation="horizontal" role="none" class="bg-border my-6 h-[1px] w-full shrink-0"></div>
                     <div class="space-y-6 text-sm text-gray-600">
-                        <p>Por el presente PAGARÉ SIN PROTESTO me comprometo a pagar incondicionalmente a ASOCIACION COOPERATIVA DE AHORRO Y CREDITO CRECIMIENTO FINANCIERO DE SONSONATE, DE R.L., que se puede abreviar "CREFINSO DE R.L." la suma de <input class="bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring my-1 inline-block h-10 w-full rounded-md border border-b border-gray-300 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /></p>
+                        <p>
+                            Por el presente PAGARÉ SIN PROTESTO me comprometo a pagar incondicionalmente a ASOCIACION COOPERATIVA DE AHORRO Y CREDITO CRECIMIENTO FINANCIERO DE SONSONATE, DE R.L., que se puede abreviar "CREFINSO DE R.L." la suma de
+                            <input class="h-10 px-4 leading-none text-base w-full rounded-md mt-2 border-b-2"
+                                   @bind="montoEnLetras"
+                                   readonly />
+                        </p>
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label class="mb-2 flex items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -67,7 +175,10 @@
                                     </svg>
                                     Interés convencional
                                 </label>
-                                <div class="flex items-center"><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-20 rounded-md border px-3 py-2 text-center text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /> <span class="ml-2">% mensual</span></div>
+                                <div class="flex items-center">
+                                    <input class="h-10 px-4 leading-none border border-gray-300 text-base w-20 rounded-md" />
+                                    <span class="ml-2">% mensual</span>
+                                </div>
                             </div>
                             <div>
                                 <label class="mb-2 flex items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -78,7 +189,10 @@
                                     </svg>
                                     Interés por mora
                                 </label>
-                                <div class="flex items-center"><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-20 rounded-md border px-3 py-2 text-center text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /> <span class="ml-2">% mensual</span></div>
+                                <div class="flex items-center">
+                                    <input class="h-10 px-4 leading-none border border-gray-300 text-base w-20 rounded-md" />
+                                    <span class="ml-2">% mensual</span>
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -91,13 +205,16 @@
                                 </svg>
                                 Fecha de Pago
                             </label>
-                            <div class="grid grid-cols-3 gap-2"><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Día" /><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Mes" /><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Año" /></div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" placeholder="Día" />
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" placeholder="Mes" />
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" placeholder="Año" />
+                            </div>
                         </div>
                         <p class="text-xs">En las oficinas de CREFINSO de R.L., de la ciudad de Sonzacate departamento de Sonsonate. En caso de mora en el pago de una sola cuota se dará por vencido el presente pagare sin protesto y volverá exigible la deuda en su totalidad, como plazo vencido. Es entendido que para los efectos del presente TITULO VALOR, señalo como domicilio especial la ciudad de Sonsonate a cuyos tribunales me someto, renuncio al derecho de apelar del decreto de embargo y de cualquier otra resolución apelable en el juicio que de cualquier naturaleza se promoviere en mi contra, como consecuencia de la mora en el pago de esta obligación mercantil, así como exigir cuentas o fianzas al depositario que al efecto se nombrare, el que será designado por el legítimo tenedor, siendo a mi cargo cualquier gasto que el legítimo tenedor hiciere en el cobro de este pagaré, inclusive los llamados gastos personales y aun cuando por regla general no hubiere condenación en costas.</p>
                         <p class="text-xs">La obligación incorporada con el presente TITULO VALOR, podrá ser amortizado con pagos parciales antes del vencimiento del plazo, los cuales deberán estipularse al reverso de este Título Valor.</p>
                     </div>
-                    <div data-orientation="horizontal" role="none" class="bg-border my-6 h-[1px] w-full shrink-0"></div>
-                    <div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 mt-2">
                         <div class="space-y-4">
                             <div>
                                 <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -106,7 +223,8 @@
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
                                     Nombre
-                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                </label>
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" />
                             </div>
                             <div>
                                 <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -117,7 +235,8 @@
                                         <path d="M3 10h18"></path>
                                     </svg>
                                     Edad
-                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                </label>
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" />
                             </div>
                             <div>
                                 <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -126,7 +245,8 @@
                                         <rect width="20" height="14" x="2" y="6" rx="2"></rect>
                                     </svg>
                                     Profesión
-                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                </label>
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" />
                             </div>
                         </div>
                         <div class="space-y-4">
@@ -137,7 +257,8 @@
                                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                     </svg>
                                     Domicilio
-                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                </label>
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" />
                             </div>
                             <div>
                                 <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -146,18 +267,20 @@
                                         <line x1="2" x2="22" y1="10" y2="10"></line>
                                     </svg>
                                     DUI
-                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                </label>
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" />
                             </div>
                             <div>
-                                <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hash mr-2 h-4 w-4 text-gray-500">
+                                <label class="mb-1 flex items-center text-sm font-medium text-gray-600 leading-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-5 w-5 text-gray-500">
                                         <line x1="4" x2="20" y1="9" y2="9"></line>
                                         <line x1="4" x2="20" y1="15" y2="15"></line>
                                         <line x1="10" x2="8" y1="3" y2="21"></line>
                                         <line x1="16" x2="14" y1="3" y2="21"></line>
                                     </svg>
                                     NIT
-                                </label><input class="border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                </label>
+                                <input class="h-10 px-4 leading-none border border-gray-300 text-base w-full rounded-md" />
                             </div>
                         </div>
                     </div>
@@ -169,11 +292,14 @@
                             </svg>
                             Firma
                         </label>
-                        <div class="flex h-12 items-center justify-center border-b-2 border-gray-300"><input class="border-input ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border border-none bg-transparent px-3 py-2 text-center text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" /></div>
+                        <div class="flex h-5 items-center justify-center border-b-2 border-gray-300">
+
+                        </div>
+                        <div class="flex items-center justify-between mt-1">
+                            <p class="text-sm text-gray-500">Sonsonate, @currentDate</p>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm text-gray-500">Sonsonate, <input class="bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring inline-block h-10 w-32 rounded-md border border-b border-gray-300 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" readonly /></p>
-                    </div>
+                    
                 </div>
             </section>
 
@@ -181,7 +307,7 @@
             <div class="lg:w-48 print:hidden">
                 <div class="bg-white p-4 border rounded-lg shadow-lg lg:sticky lg:top-4">
                     <div class="flex flex-row lg:flex-col gap-2">
-                        <button @onclick="DescargarPdf" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-black text-white hover:bg-primary/90 h-10 px-4 py-2 flex-1 gap-2">
+                        <button @onclick="DescargarPdf" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-black text-white hover:bg-primary/90 h-12 py-2 px-4 flex-1 gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-4 w-4">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -194,5 +320,4 @@
             </div>
         </div>
     </div>
-    
 }

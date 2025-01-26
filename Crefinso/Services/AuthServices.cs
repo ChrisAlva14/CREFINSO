@@ -11,9 +11,11 @@ namespace Crefinso.Services
         private const string TokenKey = "token";
         private const string UsernameKey = "username";
         private const string RoleKey = "role";
+        private const string NameKey = "name";
         private string _token;
         private string _username;
         private string _role;
+        private string _name;
 
         public AuthServices(ProtectedLocalStorage localStorage, HttpClient httpClient)
         {
@@ -34,6 +36,7 @@ namespace Crefinso.Services
                     await SetTokenAsync(loginResponse.Token);
                     await SetUsernameAsync(loginResponse.Username);
                     await SetRoleAsync(loginResponse.Role);
+                    await SetNameAsync(loginResponse.Name);
                 }
 
                 return loginResponse;
@@ -89,6 +92,28 @@ namespace Crefinso.Services
             return _username;
         }
 
+        public async Task SetNameAsync(string name)
+        {
+            _name = name;
+            await _localStorage.SetAsync(NameKey, _name);
+        }
+
+        public async Task<string> GetNameAsync()
+        {
+            if (string.IsNullOrEmpty(_name))
+            {
+                var localStorageResult = await _localStorage.GetAsync<string>(NameKey);
+                if (!localStorageResult.Success || string.IsNullOrEmpty(localStorageResult.Value))
+                {
+                    _name = null;
+                    return null;
+                }
+                _name = localStorageResult.Value;
+            }
+
+            return _name;
+        }
+
         public async Task SetRoleAsync(string role)
         {
             _role = role;
@@ -131,6 +156,7 @@ namespace Crefinso.Services
             await _localStorage.DeleteAsync(TokenKey);
             await _localStorage.DeleteAsync(UsernameKey);
             await _localStorage.DeleteAsync(RoleKey);
+            await _localStorage.DeleteAsync(NameKey);
         }
     }
 }

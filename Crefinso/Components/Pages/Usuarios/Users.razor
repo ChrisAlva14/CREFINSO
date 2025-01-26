@@ -225,7 +225,11 @@ else if (isAuthenticated)
                         <h2 class="text-2xl font-bold mb-4">Añadir Usuario</h2>
 
                         <div class="mb-4">
-                            <label for="nombre" class="block text-sm font-medium text-gray-700 userWhite">Nombre</label>
+                            <label for="nombre" class="block text-sm font-medium text-gray-700 userWhite">Nombre Completo</label>
+                            <InputText type="text" autocomplete="off" id="nombre" name="nombre" @bind-Value="newUser.Name" class="bg-white border border-black text-black text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="nombre" class="block text-sm font-medium text-gray-700 userWhite">Nombre de Usuario</label>
                             <InputText type="text" autocomplete="off" id="nombre" name="nombre" @bind-Value="newUser.UserName" class="bg-white border border-black text-black text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2" />
                         </div>
                         <div class="mb-4">
@@ -255,6 +259,11 @@ else if (isAuthenticated)
             <h2 class="text-2xl font-bold mb-4">Editar Usuario</h2>
 
             <EditForm Model="editingUser" OnValidSubmit="HandleEditUser">
+                <div class="mb-4">
+                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <InputText type="text" id="nombre" name="nombre" @bind-Value="editingUser.Name" class="bg-white border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2" />
+                </div>
+
                 <div class="mb-4">
                     <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
                     <InputText type="text" id="nombre" name="nombre" @bind-Value="editingUser.UserName" class="bg-white border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2" />
