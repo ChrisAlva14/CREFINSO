@@ -14,7 +14,7 @@
 
     private bool isAuthenticated;
     private PagoCompletoResponse pagoCompleto;
-    private string loggedInUsername; // Propiedad para almacenar el nombre del usuario logueado
+    private string loggedInName; // Propiedad para almacenar el nombre del usuario logueado
     private decimal currentBalance; // Propiedad para almacenar el saldo actual
     private List<PagoCompletoResponse> pagosCompletos; // Lista de todos los pagos
 
@@ -46,8 +46,8 @@
             // Calcular el saldo anterior (antes del pago actual)
             currentBalance = CalculateCurrentBalance(pagoCompleto.Prestamo?.MontoAprobado ?? 0, pagoCompleto.PrestamoId);
 
-
-            loggedInUsername = await authServices.GetUsernameAsync();
+            // Obtener el nombre del usuario logueado
+            loggedInName = await authServices.GetNameAsync();
         }
         catch (Exception ex)
         {
@@ -225,7 +225,7 @@ else if (isAuthenticated)
                     <div class="grid grid-cols-2 gap-6 pt-8">
                         <div class="text-center">
                             <div class="border-t border-gray-300 pt-2">
-                                <p class="text-sm font-semibold">@loggedInUsername</p>
+                                <p class="text-sm font-semibold">@loggedInName</p>
                                 <p class="text-xs text-gray-500">Recibió</p>
                             </div>
                         </div>
