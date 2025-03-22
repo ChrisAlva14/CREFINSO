@@ -20,6 +20,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await PaymentServices.ProcesarPagosAutomaticosAsync();
+
         try
         {
             // Obtener los pagos futuros desde el servicio
@@ -372,7 +374,7 @@ else
                         <button class="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
                                 @onclick="CloseModal">
                             Cerrar
-                        </button>
+                        </button>   
                         <button class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                                 @onclick="HandleCreatePayment">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save">
