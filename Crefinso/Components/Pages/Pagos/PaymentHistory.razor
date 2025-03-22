@@ -1,4 +1,4 @@
-﻿@page "/paymentHistory/{prestamoId:int}"
+@page "/paymentHistory/{prestamoId:int}"
 @using Crefinso.DTOs
 @using Crefinso.Services.Pagos
 @using Crefinso.Services.Prestamos
@@ -24,6 +24,7 @@
         {
             // Obtener los pagos futuros desde el servicio
             futurePayments = await PaymentServices.GetPagosFuturos(PrestamoId);
+            futurePayments = futurePayments.Where(p => p.Estado != "Realizado" || p.FechaPago <= DateOnly.FromDateTime(DateTime.Today)).ToList();
         }
         catch (HttpRequestException ex)
         {
@@ -48,6 +49,14 @@
                 return;
             }
 
+            // Verificar si el pago ya fue realizado
+            var existingPayment = await PaymentServices.GetPaymentById(selectedPayment.PagoId);
+            if (existingPayment != null && existingPayment.Estado == "Realizado")
+            {
+                await Swal.FireAsync("Error", "Este pago ya fue realizado.", SweetAlertIcon.Error);
+                return;
+            }
+
             // Calcular el excedente si el monto pagado es mayor al monto a pagar
             var excedente = montoPagado - selectedPayment.MontoAPagar;
             if (excedente > 0)
@@ -58,16 +67,16 @@
 
             // Crear el objeto PagoRequest
             var newPayment = new PagoRequest
-                {
-                    PrestamoId = selectedPayment.PrestamoId,
-                    FechaPago = selectedPayment.FechaPago,
-                    MontoAPagar = selectedPayment.MontoAPagar,
-                    MontoPagado = montoPagado,
-                    InteresPagado = selectedPayment.InteresPagado,
-                    CapitalPagado = selectedPayment.CapitalPagado,
-                    SaldoRestante = selectedPayment.SaldoRestante,
-                    Estado = "Realizado"
-                };
+            {
+                PrestamoId = selectedPayment.PrestamoId,
+                FechaPago = selectedPayment.FechaPago,
+                MontoAPagar = selectedPayment.MontoAPagar,
+                MontoPagado = montoPagado,
+                InteresPagado = selectedPayment.InteresPagado,
+                CapitalPagado = selectedPayment.CapitalPagado,
+                SaldoRestante = selectedPayment.SaldoRestante,
+                Estado = "Realizado"
+            };
 
             // Registrar el pago
             bool success = await PaymentServices.PostPayment(newPayment);
@@ -99,6 +108,7 @@
         try
         {
             futurePayments = await PaymentServices.GetPagosFuturos(PrestamoId);
+            futurePayments = futurePayments.Where(p => p.Estado != "Realizado" || p.FechaPago <= DateOnly.FromDateTime(DateTime.Today)).ToList();
         }
         catch (Exception ex)
         {
@@ -180,7 +190,7 @@ else
                                         <span class="text-sm font-medium text-gray-500">Monto a Pagar</span>
                                         <div class="flex items-center gap-1 mt-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
-                                                <line x1="12" x2="12" y1="2" y2="22"></line>
+                                                <line x1="12" y1="2" x2="12" y2="22"></line>
                                                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                                             </svg>
                                             <span class="text-lg font-bold text-gray-800">@payment.MontoAPagar</span>

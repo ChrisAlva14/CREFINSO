@@ -1,4 +1,4 @@
-﻿@page "/payments"
+@page "/payments"
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
 @inject PaymentServices paymentService
@@ -181,6 +181,11 @@
         try
         {
             detailsPago = await paymentService.GetPaymentById(pagoId);
+            if (detailsPago is null || (detailsPago.Estado == "Realizado" && detailsPago.FechaPago > DateOnly.FromDateTime(DateTime.Today)))
+            {
+                await Swal.FireAsync("Error", "No se puede acceder a este pago.", SweetAlertIcon.Error);
+                return;
+            }
             isDetailsModalVisible = true;
         }
         catch (Exception ex)
@@ -201,7 +206,7 @@
     {
         return estado switch
         {
-            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-yellow-500'>Pendiente</span>"),
+            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-yellow-800'>Pendiente</span>"),
             "Realizado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>Realizado</span>"),
             _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'>ERROR!</span>")
         };
@@ -261,8 +266,6 @@ else if (isAuthenticated)
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Prestamo</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha de Pago</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Pagado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Interes Pagado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Capital Pagado</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Saldo Restante</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
                                         <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
@@ -276,8 +279,6 @@ else if (isAuthenticated)
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PrestamoId</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.FechaPago.ToShortDateString()</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.MontoPagado</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.InteresPagado</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.CapitalPagado</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.SaldoRestante</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                                                 @EstadoBadge(pago.Estado)

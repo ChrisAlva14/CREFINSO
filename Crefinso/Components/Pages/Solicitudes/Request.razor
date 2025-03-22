@@ -272,7 +272,6 @@ else if (isAuthenticated)
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Cantidad Solicitada</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Destino Préstamo</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha Análisis</th>
                                         <th class="h-12 px-4 align-middle font-medium text-gray-500 text-right">Acciones</th>
                                     </tr>
                                 </thead>
@@ -288,7 +287,6 @@ else if (isAuthenticated)
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                                                 @EstadoBadge(solicitud.Estado)
                                             </td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.FechaAnalisis</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
                                                 <!-- VER DETALLES SOLICITUD -->
                                                 <button class="text-green-500" @onclick="() => DetailsSolicitud(solicitud.SolicitudId)">

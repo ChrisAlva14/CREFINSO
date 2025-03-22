@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
@@ -24,15 +24,12 @@
             {
                 navigationManager.NavigateTo("/dashboard");
             }
-
-            StateHasChanged();
         }
     }
 
     private async Task Login()
     {
         isLoading = true;
-        StateHasChanged();
 
         try
         {
@@ -41,44 +38,42 @@
             if (loginResponse == null || string.IsNullOrEmpty(loginResponse.Token))
             {
                 await Swal.FireAsync(new SweetAlertOptions
-                    {
-                        Title = "<span style='color: #000;'>ACCESO AL SISTEMA</span>",
-                        Text = "CREDENCIALES INCORRECTAS!",
-                        Icon = "error",
-                        ConfirmButtonText = "OK"
-                    });
+                {
+                    Title = "<span style='color: #000;'>ACCESO AL SISTEMA</span>",
+                    Text = "CREDENCIALES INCORRECTAS!",
+                    Icon = "error",
+                    ConfirmButtonText = "OK"
+                });
+                return;
             }
-            else
+
+            await Swal.FireAsync(new SweetAlertOptions
             {
-                await Swal.FireAsync(new SweetAlertOptions
-                    {
-                        Title = "<span style='color: #000;'>ACCESO CONCEDIDO</span>",
-                        Text = "Bienvenido/a!",
-                        Icon = "success",
-                        ConfirmButtonText = "OK"
-                    });
+                Title = "<span style='color: #000;'>ACCESO CONCEDIDO</span>",
+                Text = "Bienvenido/a!",
+                Icon = "success",
+                ConfirmButtonText = "OK"
+            });
 
-                await authServices.SetTokenAsync(loginResponse.Token);
-                await authServices.SetUsernameAsync(loginResponse.Username);
-                await authServices.SetRoleAsync(loginResponse.Role);
+            await authServices.SetTokenAsync(loginResponse.Token);
+            await authServices.SetUsernameAsync(loginResponse.Username);
+            await authServices.SetRoleAsync(loginResponse.Role);
 
-                navigationManager.NavigateTo("/dashboard", true);
-            }
+            navigationManager.NavigateTo("/dashboard", true);
         }
         catch (Exception ex)
         {
             await Swal.FireAsync(new SweetAlertOptions
-                {
-                    Title = "ERROR",
-                    Text = ex.Message,
-                    Icon = "error",
-                    ConfirmButtonText = "OK"
-                });
+            {
+                Title = "ERROR",
+                Text = ex.Message,
+                Icon = "error",
+                ConfirmButtonText = "OK"
+            });
         }
         finally
         {
             isLoading = false;
-            StateHasChanged();
         }
     }
 }

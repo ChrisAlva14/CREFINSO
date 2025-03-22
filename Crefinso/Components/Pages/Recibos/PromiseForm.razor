@@ -1,4 +1,4 @@
-﻿@page "/promiseForm"
+@page "/promiseForm"
 @inject IJSRuntime JS
 @inject AuthServices authServices
 @using Crefinso.Services
@@ -8,6 +8,16 @@
     private string currentDate;
     private decimal montoAPagar;
     private string montoEnLetras;
+
+    private string[] unidades = { "", "UNO", "DOS", "TRES", "CUATRO", "CINCO", 
+                             "SEIS", "SIETE", "OCHO", "NUEVE" };
+    private string[] decenas = { "", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", 
+                            "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA" };
+    private string[] especiales = { "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", 
+                              "DIECISÉIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE" };
+    private string[] centenas = { "", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", 
+                             "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", 
+                             "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS" };
 
     private async Task DescargarPdf(MouseEventArgs e)
     {
@@ -43,86 +53,82 @@
 
     private string ConvertirNumeroALetras(decimal numero)
     {
-        string[] unidades = { "", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE" };
-        string[] decenas = { "", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA" };
-        string[] especiales = { "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISEIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE" };
-        string[] centenas = { "", "CIEN", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS" };
+        if (numero == 0)
+            return "CERO DÓLARES";
 
         int parteEntera = (int)numero;
-        int parteDecimal = (int)((numero - parteEntera) * 100);
-
-        string resultado = "";
-
-        // Convertir la parte entera
-        if (parteEntera > 0)
-        {
-            if (parteEntera < 10)
-            {
-                resultado += unidades[parteEntera];
-            }
-            else if (parteEntera >= 11 && parteEntera <= 19)
-            {
-                resultado += especiales[parteEntera - 11];
-            }
-            else if (parteEntera >= 20 && parteEntera < 100)
-            {
-                resultado += decenas[parteEntera / 10];
-                if (parteEntera % 10 != 0)
-                {
-                    resultado += " Y " + unidades[parteEntera % 10];
-                }
-            }
-            else if (parteEntera >= 100 && parteEntera < 1000)
-            {
-                resultado += centenas[parteEntera / 100];
-                int resto = parteEntera % 100;
-                if (resto != 0)
-                {
-                    resultado += " " + ConvertirNumeroALetras(resto);
-                }
-            }
-            else if (parteEntera >= 1000)
-            {
-                resultado += ConvertirNumeroALetras(parteEntera / 1000) + " MIL";
-                int resto = parteEntera % 1000;
-                if (resto != 0)
-                {
-                    resultado += " " + ConvertirNumeroALetras(resto);
-                }
-            }
-
-            resultado += " DÓLARES";
-        }
-
-        // Convertir la parte decimal
+        int parteDecimal = (int)Math.Round((numero - parteEntera) * 100);
+        
+        string resultado = ConvertirParteEntera(parteEntera) + " DÓLARES";
+        
         if (parteDecimal > 0)
         {
-            if (!string.IsNullOrEmpty(resultado))
-            {
-                resultado += " CON ";
-            }
-
-            if (parteDecimal < 10)
-            {
-                resultado += unidades[parteDecimal];
-            }
-            else if (parteDecimal >= 11 && parteDecimal <= 19)
-            {
-                resultado += especiales[parteDecimal - 11];
-            }
-            else
-            {
-                resultado += decenas[parteDecimal / 10];
-                if (parteDecimal % 10 != 0)
-                {
-                    resultado += " Y " + unidades[parteDecimal % 10];
-                }
-            }
-
-            resultado += " CENTAVOS";
+            resultado += " CON " + ConvertirParteEntera(parteDecimal) + " CENTAVOS";
         }
 
         return resultado;
+    }
+
+    private string ConvertirParteEntera(int numero)
+    {
+        if (numero == 0)
+            return "";
+
+        if (numero < 10)
+            return unidades[numero];
+            
+        if (numero >= 11 && numero <= 19)
+            return especiales[numero - 11];
+            
+        if (numero < 100)
+        {
+            string res = decenas[numero / 10];
+            if (numero % 10 != 0)
+                res += " Y " + unidades[numero % 10];
+            return res;
+        }
+
+        if (numero < 1000)
+        {
+            string res = centenas[numero / 100];
+            if (numero % 100 != 0)
+                res += " " + ConvertirParteEntera(numero % 100);
+            return res;
+        }
+
+        if (numero < 1000000)
+        {
+            string miles = ConvertirParteEntera(numero / 1000);
+            string resto = ConvertirParteEntera(numero % 1000);
+            
+            if (miles == "UNO")
+                miles = "UN";
+                
+            miles += " MIL";
+            
+            if (!string.IsNullOrEmpty(resto))
+                miles += " " + resto;
+                
+            return miles;
+        }
+
+        if (numero < 1000000000)
+        {
+            string millones = ConvertirParteEntera(numero / 1000000);
+            string resto = ConvertirParteEntera(numero % 1000000);
+            
+            if (millones == "UNO")
+                millones = "UN";
+                
+            millones += " MILLONES";
+            
+            if (!string.IsNullOrEmpty(resto))
+                millones += " " + resto;
+                
+            return millones;
+        }
+
+        return "NÚMERO DEMASIADO GRANDE";
     }
 }
 
@@ -196,7 +202,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="mb-2 flex items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <label class="mb-2 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4 text-gray-500">
                                     <path d="M8 2v4"></path>
                                     <path d="M16 2v4"></path>
@@ -253,7 +259,7 @@
                             <div>
                                 <label class="mb-1 flex items-center text-sm font-medium leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-2 h-4 w-4 text-gray-500">
-                                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <path d="M3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                     </svg>
                                     Domicilio

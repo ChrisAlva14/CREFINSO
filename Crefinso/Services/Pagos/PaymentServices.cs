@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using ClosedXML.Excel;
 using Crefinso.DTOs;
 
@@ -92,7 +92,9 @@ namespace Crefinso.Services.Pagos
                 var response = await _httpClient.GetFromJsonAsync<PagoResponse>(
                     $"api/pagos/{paymentId}"
                 );
-                return response ?? throw new Exception("Pago no encontrado.");
+                if (response is null || (response.Estado == "Realizado" && response.FechaPago > DateOnly.FromDateTime(DateTime.Today)))
+                    return null;
+                return response;
             }
             catch (HttpRequestException)
             {
@@ -121,6 +123,14 @@ namespace Crefinso.Services.Pagos
                     "Bearer",
                     token
                 );
+
+                // Verificar si el pago ya fue realizado
+                var existingPayment = await _httpClient.GetFromJsonAsync<PagoResponse>($"api/pagos/{newPayment.PagoId}");
+                if (existingPayment != null && existingPayment.Estado == "Realizado")
+                {
+                    throw new InvalidOperationException("Este pago ya fue realizado.");
+                }
+
                 var response = await _httpClient.PostAsJsonAsync("api/pagos", newPayment);
 
                 if (response.IsSuccessStatusCode)

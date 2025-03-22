@@ -284,8 +284,6 @@ else if (isAuthenticated)
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Solicitud</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Aprobado</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Tasa de Interés</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha Inicio</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha Vencimiento</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
                                         <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
                                     </tr>
@@ -298,8 +296,6 @@ else if (isAuthenticated)
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.SolicitudId</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.MontoAprobado</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.TasaInteres</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.FechaInicio.ToShortDateString()</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.FechaVencimiento.ToShortDateString()</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                                                 @EstadoBadge(loan.Estado)
                                             </td>
