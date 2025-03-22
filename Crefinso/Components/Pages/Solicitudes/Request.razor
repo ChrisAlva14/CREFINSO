@@ -111,7 +111,7 @@
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles de la solicitud", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al obtener los detalles de la solicitud", SweetAlertIcon.Error);
         }
     }
 
@@ -138,16 +138,16 @@
             {
                 await LoadSolicitudes(); // Recargar solicitudes y recalcular estadísticas
                 CloseEditModal();
-                await Swal.FireAsync("Éxito", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:red'>Éxito</span>", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo actualizar la solicitud", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo actualizar la solicitud", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error al actualizar la solicitud: {ex.Message}", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", $"Hubo un error al actualizar la solicitud: {ex.Message}", SweetAlertIcon.Error);
         }
     }
 
@@ -184,17 +184,17 @@
             if (success)
             {
                 await LoadSolicitudes(); // Recargar solicitudes y recalcular estadísticas
-                await Swal.FireAsync("Éxito", "Solicitud eliminada correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:red'>Éxito</span>", "Solicitud eliminada correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo eliminar la solicitud", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo eliminar la solicitud", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al eliminar la solicitud", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al eliminar la solicitud", SweetAlertIcon.Error);
         }
     }
 
@@ -279,12 +279,12 @@ else if (isAuthenticated)
                                     @foreach (var solicitud in GetPaginatedSolicitudes())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.SolicitudId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.NombreCliente</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.FechaSolicitud</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.CantidadSolicitada</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.DestinoPrestamo</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            <td class="p-4 align-middle">@solicitud.SolicitudId</td>
+                                            <td class="p-4 align-middle">@solicitud.NombreCliente</td>
+                                            <td class="p-4 align-middle">@solicitud.FechaSolicitud</td>
+                                            <td class="p-4 align-middle">@solicitud.CantidadSolicitada</td>
+                                            <td class="p-4 align-middle">@solicitud.DestinoPrestamo</td>
+                                            <td class="p-4 align-middle">
                                                 @EstadoBadge(solicitud.Estado)
                                             </td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">

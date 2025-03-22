@@ -47,20 +47,20 @@
                 // Limpia el formulario
                 newSolicitud = new SolicitudRequest();
                 // Muestra una alerta de éxito
-                await Swal.FireAsync("Éxito", "Solicitud creada correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Solicitud creada correctamente", SweetAlertIcon.Success);
 
                 // Redirige a la página de clientes
                 NavigationManager.NavigateTo("/request");
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo crear la solicitud", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo crear la solicitud", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al crear la solicitud", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al crear la solicitud", SweetAlertIcon.Error);
         }
     }
 

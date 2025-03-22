@@ -42,20 +42,20 @@
                 // Limpia el formulario
                 newLoan = new PrestamoRequest();
                 // Muestra una alerta de éxito
-                await Swal.FireAsync("Éxito", "Préstamo creado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Préstamo creado correctamente", SweetAlertIcon.Success);
 
                 // Redirige a la página de préstamos
                 NavigationManager.NavigateTo("/loans");
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo crear el préstamo", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo crear el préstamo", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al crear el préstamo", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al crear el préstamo", SweetAlertIcon.Error);
         }
     }
 }

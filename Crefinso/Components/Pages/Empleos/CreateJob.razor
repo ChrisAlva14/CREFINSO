@@ -40,20 +40,20 @@
                 // Limpia el formulario
                 newJob = new EmpleoRequest();
                 // Muestra una alerta de éxito
-                await Swal.FireAsync("Éxito", "Empleo creado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Empleo creado correctamente", SweetAlertIcon.Success);
 
                 // Redirige a la página de empleos
                 NavigationManager.NavigateTo("/jobs");
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo crear el empleo", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo crear el empleo", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al crear el empleo", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al crear el empleo", SweetAlertIcon.Error);
         }
     }
 }

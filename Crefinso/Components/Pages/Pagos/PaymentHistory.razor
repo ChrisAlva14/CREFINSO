@@ -45,7 +45,7 @@
             // Validar que el monto pagado sea un número válido
             if (montoPagado <= 0)
             {
-                await Swal.FireAsync("Error", "El monto pagado no es válido.", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "El monto pagado no es válido.", SweetAlertIcon.Error);
                 return;
             }
 
@@ -53,7 +53,7 @@
             var existingPayment = await PaymentServices.GetPaymentById(selectedPayment.PagoId);
             if (existingPayment != null && existingPayment.Estado == "Realizado")
             {
-                await Swal.FireAsync("Error", "Este pago ya fue realizado.", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "Este pago ya fue realizado.", SweetAlertIcon.Error);
                 return;
             }
 
@@ -83,7 +83,7 @@
             if (success)
             {
                 // Mostrar una alerta de éxito
-                await Swal.FireAsync("Éxito", "Pago registrado correctamente.", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:red'>Éxito</span>", "Pago registrado correctamente.", SweetAlertIcon.Success);
 
                 // Cerrar el modal
                 CloseModal();
@@ -93,12 +93,12 @@
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo registrar el pago.", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo registrar el pago.", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", "Hubo un error al registrar el pago.", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al registrar el pago.", SweetAlertIcon.Error);
             Console.WriteLine($"Error en HandleCreatePayment: {ex.Message}");
         }
     }

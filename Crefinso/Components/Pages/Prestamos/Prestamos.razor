@@ -115,16 +115,16 @@
             {
                 await LoadLoans(); // Recargar préstamos y recalcular estadísticas
                 CloseEditModal();
-                await Swal.FireAsync("Éxito", "Préstamo actualizado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Préstamo actualizado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo actualizar el préstamo", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo actualizar el préstamo", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error al actualizar el préstamo: {ex.Message}", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", $"Hubo un error al actualizar el préstamo: {ex.Message}", SweetAlertIcon.Error);
         }
     }
 
@@ -161,17 +161,17 @@
             if (success)
             {
                 await LoadLoans(); // Recargar préstamos y recalcular estadísticas
-                await Swal.FireAsync("Éxito", "Préstamo eliminado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Préstamo eliminado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo eliminar el préstamo", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo eliminar el préstamo", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al eliminar el préstamo", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al eliminar el préstamo", SweetAlertIcon.Error);
         }
     }
 
@@ -186,7 +186,7 @@
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles del préstamo", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al obtener los detalles del préstamo", SweetAlertIcon.Error);
         }
     }
 
@@ -280,23 +280,23 @@ else if (isAuthenticated)
                             <table class="w-full caption-bottom text-sm">
                                 <thead class="[&_tr]:border-b">
                                     <tr class="border-b transition-colors">
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Solicitud</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Aprobado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Tasa de Interés</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
-                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Código</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Código de Solicitud</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Monto Aprobado</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Tasa de Interés</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
+                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="[&_tr:last-child]:border-0">
                                     @foreach (var loan in GetPaginatedLoans())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.PrestamoId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.SolicitudId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.MontoAprobado</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@loan.TasaInteres</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            <td class="p-4 align-middle">@loan.PrestamoId</td>
+                                            <td class="p-4 align-middle">@loan.SolicitudId</td>
+                                            <td class="p-4 align-middle">@loan.MontoAprobado</td>
+                                            <td class="p-4 align-middle">@loan.TasaInteres</td>
+                                            <td class="p-4 align-middle">
                                                 @EstadoBadge(loan.Estado)
                                             </td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">

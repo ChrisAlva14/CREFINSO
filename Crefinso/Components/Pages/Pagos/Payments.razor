@@ -115,16 +115,16 @@
             {
                 await LoadPagos(); // Recargar pagos y recalcular estadísticas
                 CloseEditModal();
-                await Swal.FireAsync("Éxito", "Pago actualizado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Pago actualizado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo actualizar el pago", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo actualizar el pago", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error al actualizar el pago: {ex.Message}", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", $"Hubo un error al actualizar el pago: {ex.Message}", SweetAlertIcon.Error);
         }
     }
 
@@ -161,17 +161,17 @@
             if (success)
             {
                 await LoadPagos(); // Recargar pagos y recalcular estadísticas
-                await Swal.FireAsync("Éxito", "Pago eliminado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Pago eliminado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo eliminar el pago", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo eliminar el pago", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al eliminar el pago", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al eliminar el pago", SweetAlertIcon.Error);
         }
     }
 
@@ -183,7 +183,7 @@
             detailsPago = await paymentService.GetPaymentById(pagoId);
             if (detailsPago is null || (detailsPago.Estado == "Realizado" && detailsPago.FechaPago > DateOnly.FromDateTime(DateTime.Today)))
             {
-                await Swal.FireAsync("Error", "No se puede acceder a este pago.", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se puede acceder a este pago.", SweetAlertIcon.Error);
                 return;
             }
             isDetailsModalVisible = true;
@@ -191,7 +191,7 @@
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles del pago", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al obtener los detalles del pago", SweetAlertIcon.Error);
         }
     }
 
@@ -262,28 +262,28 @@ else if (isAuthenticated)
                             <table class="w-full caption-bottom text-sm">
                                 <thead class="[&_tr]:border-b">
                                     <tr class="border-b transition-colors">
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código de Prestamo</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Fecha de Pago</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Monto Pagado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Saldo Restante</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
-                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Código</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Código de Prestamo</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha de Pago</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Monto Pagado</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Saldo Restante</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
+                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="[&_tr:last-child]:border-0">
                                     @foreach (var pago in GetPaginatedPagos())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PagoId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.PrestamoId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.FechaPago.ToShortDateString()</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.MontoPagado</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@pago.SaldoRestante</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            <td class="p-4 align-middle">@pago.PagoId</td>
+                                            <td class="p-4 align-middle">@pago.PrestamoId</td>
+                                            <td class="p-4 align-middle">@pago.FechaPago.ToShortDateString()</td>
+                                            <td class="p-4 align-middle">@pago.MontoPagado</td>
+                                            <td class="p-4 align-middle">@pago.SaldoRestante</td>
+                                            <td class="p-4 align-middle">
                                                 @EstadoBadge(pago.Estado)
                                             </td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                                            <td class="p-4 align-middle text-right">
                                                 <!-- VER DETALLES DEL PAGO -->
                                                 <button class="text-green-500" @onclick="() => DetailsPago(pago.PagoId)">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
