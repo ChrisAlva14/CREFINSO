@@ -1,14 +1,30 @@
 ﻿@page "/createJob"
+@using Crefinso.Services.Clientes
 @using Crefinso.Services.Empleos
 @using Crefinso.DTOs
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
 @inject NavigationManager NavigationManager
 @inject JobServices jobService
+@inject ClientServices clientService
 
 @code {
     private string errorMessage;
     private EmpleoRequest newJob = new EmpleoRequest();
+    private List<ClienteResponse> clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            clientes = await clientService.GetClientes();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudieron cargar los clientes", SweetAlertIcon.Error);
+        }
+    }
 
     // Propiedad auxiliar para la conversión de ClienteID a string
     private string ClienteIDString
@@ -73,9 +89,18 @@
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            Cliente ID
+                            Código del Cliente
                         </label>
-                        <InputText @bind-Value="ClienteIDString" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="ClienteID" required type="number" min="1" name="ClienteID" placeholder="Ingrese el ID del cliente..." />
+                        <select @bind="ClienteIDString" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="UserID" required name="UserID">
+                            <option value="">Seleccione un usuario</option>
+                            @if (clientes != null)
+                            {
+                                @foreach (var cliente in clientes)
+                                {
+                                    <option value="@cliente.ClienteId">@cliente.Nombre</option>
+                                }
+                            }
+                        </select>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="LugarTrabajo">

@@ -139,7 +139,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "<span style='color: #000;'>¿Estás seguro?</span>",
+                Title = "<span style='color:black;'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -275,12 +275,12 @@ else if (isAuthenticated)
                                     @foreach (var pago in GetPaginatedPagos())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle">@pago.PagoId</td>
-                                            <td class="p-4 align-middle">@pago.PrestamoId</td>
-                                            <td class="p-4 align-middle">@pago.FechaPago.ToShortDateString()</td>
-                                            <td class="p-4 align-middle">@pago.MontoPagado</td>
-                                            <td class="p-4 align-middle">@pago.SaldoRestante</td>
-                                            <td class="p-4 align-middle">
+                                            <td class="p-4 align-middle text-md text-nowrap">@pago.PagoId</td>
+                                            <td class="p-4 align-middle text-md text-nowrap">@pago.PrestamoId</td>
+                                            <td class="p-4 align-middle text-md text-nowrap">@pago.FechaPago.ToShortDateString()</td>
+                                            <td class="p-4 align-middle text-md text-nowrap">@pago.MontoPagado</td>
+                                            <td class="p-4 align-middle text-md text-nowrap">@pago.SaldoRestante</td>
+                                            <td class="p-4 align-middle text-md text-nowrap">
                                                 @EstadoBadge(pago.Estado)
                                             </td>
                                             <td class="p-4 align-middle text-right">

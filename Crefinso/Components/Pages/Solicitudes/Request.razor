@@ -138,7 +138,7 @@
             {
                 await LoadSolicitudes(); // Recargar solicitudes y recalcular estadísticas
                 CloseEditModal();
-                await Swal.FireAsync("<span style='color:red'>Éxito</span>", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:green'>Éxito</span>", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
             }
             else
             {
@@ -162,7 +162,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "¿Estás seguro?",
+                Title = "<span style='color:black'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -243,19 +243,19 @@ else if (isAuthenticated)
                     <!-- Dashboard Stats -->
                     <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Total de Solicitudes</h2>
+                            <h2 class="text-gray-700 font-semibold">Total de Solicitudes</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudes.Count</p>
                         </div>
                         <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Aprobadas</h2>
+                            <h2 class="text-gray-700 font-semibold">Solicitudes Aprobadas</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudesAprobadas</p>
                         </div>
                         <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Pendientes</h2>
+                            <h2 class="text-gray-700 font-semibold">Solicitudes Pendientes</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudesPendientes</p>
                         </div>
                         <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Rechazadas</h2>
+                            <h2 class="text-gray-700 font-semibold">Solicitudes Rechazadas</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudesRechazadas</p>
                         </div>
                     </section>
@@ -279,12 +279,12 @@ else if (isAuthenticated)
                                     @foreach (var solicitud in GetPaginatedSolicitudes())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle">@solicitud.SolicitudId</td>
-                                            <td class="p-4 align-middle">@solicitud.NombreCliente</td>
-                                            <td class="p-4 align-middle">@solicitud.FechaSolicitud</td>
-                                            <td class="p-4 align-middle">@solicitud.CantidadSolicitada</td>
-                                            <td class="p-4 align-middle">@solicitud.DestinoPrestamo</td>
-                                            <td class="p-4 align-middle">
+                                            <td class="p-4 text-md text-nowrap">@solicitud.SolicitudId</td>
+                                            <td class="p-4 text-md text-nowrap">@solicitud.NombreCliente</td>
+                                            <td class="p-4 text-md text-nowrap">@solicitud.FechaSolicitud</td>
+                                            <td class="p-4 text-md text-nowrap">@solicitud.CantidadSolicitada</td>
+                                            <td class="p-4 text-md text-nowrap">@solicitud.DestinoPrestamo</td>
+                                            <td class="p-4 text-md text-nowrap">
                                                 @EstadoBadge(solicitud.Estado)
                                             </td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">

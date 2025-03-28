@@ -2,15 +2,37 @@
 
 @using Crefinso.Services.Prestamos
 @using Crefinso.DTOs
+@using Crefinso.Services.Solicitudes
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
 @inject NavigationManager NavigationManager
 @inject LoanServices loanService
+@inject RequestServices requestServices
 
 @code {
     private string errorMessage;
     private List<string> estados = new List<string> { "Activo", "Inactivo" };
     private PrestamoRequest newLoan = new PrestamoRequest();
+    private List<SolicitudResponse> solicitudesAprobadas = new List<SolicitudResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Cargar solicitudes aprobadas al inicializar
+            await LoadSolicitudesAprobadas();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Error al cargar las solicitudes aprobadas", SweetAlertIcon.Error);
+        }
+    }
+
+    private async Task LoadSolicitudesAprobadas()
+    {
+        solicitudesAprobadas = await requestServices.GetSolicitudesAprobadas();
+    }
 
     // Propiedad auxiliar para la conversión de SolicitudId a string
     private string SolicitudIdString
@@ -125,7 +147,22 @@
                             </svg>
                             ID de la Solicitud
                         </label>
-                        <InputText @bind-Value="SolicitudIdString" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SolicitudId" required type="number" min="1" name="SolicitudId" placeholder="Ingrese el ID de la solicitud..." />
+                        <select @bind="SolicitudIdString" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="SolicitudId" required name="SolicitudId">
+                            <option value="">Seleccione una solicitud aprobada</option>
+                            @if (solicitudesAprobadas != null && solicitudesAprobadas.Any())
+                            {
+                                @foreach (var solicitud in solicitudesAprobadas)
+                                {
+                                    <option value="@solicitud.SolicitudId">
+                                        #@solicitud.SolicitudId - @solicitud.NombreCliente - $@solicitud.CantidadSolicitada
+                                    </option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>No hay solicitudes aprobadas disponibles</option>
+                            }
+                        </select>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="Estado">
@@ -137,7 +174,6 @@
                         </label>
                         <InputSelect @bind-Value="newLoan.Estado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="Estado" required name="Estado">
                             <option value="">Seleccione un estado</option>
-                            <option value="Inactivo">Inactivo</option>
                             <option value="Activo">Activo</option>
                         </InputSelect>
                     </div>

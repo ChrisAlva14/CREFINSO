@@ -136,7 +136,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "¿Estás seguro?",
+            Title = "<span style='color:black'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -255,32 +255,32 @@ else if (isAuthenticated)
                         </div>
                     </section>
 
-                    <div class="p-6 border bg-white rounded-lg shadow-md">
+                    <div class="p-6 border bg-white rounded-lg shadow-md text-nowrap">
                         <!-- Table displaying the credit list -->
                         <div class="relative w-full overflow-auto">
                             <table class="w-full caption-bottom text-sm">
                                 <thead class="[&_tr]:border-b">
                                     <tr class="border-b transition-colors">
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-right">Código</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-right">Nombre</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-right">Dirección</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-right">Celular</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-right">Estado</th>
-                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 text-right">Acciones</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Código</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Nombre</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Dirección</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Celular</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Estado</th>
+                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="[&_tr:last-child]:border-0">
                                     @foreach (var cliente in GetPaginatedClientes())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle text-right">@cliente.ClienteId</td>
-                                            <td class="p-4 align-middle text-right">@cliente.Nombre</td>
-                                            <td class="p-4 align-middle text-right">@cliente.Direccion</td>
-                                            <td class="p-4 align-middle text-right">@cliente.TelefonoCelular</td>
-                                            <td class="p-4 align-middle text-right">
+                                            <td class="p-4 align-middle text-center">@cliente.ClienteId</td>
+                                            <td class="p-4 align-middle text-center">@cliente.Nombre</td>
+                                            <td class="p-4 align-middle text-center">@cliente.Direccion</td>
+                                            <td class="p-4 align-middle text-center">@cliente.TelefonoCelular</td>
+                                            <td class="p-4 align-middle text-center">
                                                 @EstadoBadge(cliente.Estado)
                                             </td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center">
                                                 <!-- VER DETALLES DEL CLIENTE -->
                                                 <button class="text-green-500" @onclick="() => DetailsCliente(cliente.ClienteId)">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
