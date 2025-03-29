@@ -181,11 +181,6 @@
         try
         {
             detailsPago = await paymentService.GetPaymentById(pagoId);
-            if (detailsPago is null || (detailsPago.Estado == "Realizado" && detailsPago.FechaPago > DateOnly.FromDateTime(DateTime.Today)))
-            {
-                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se puede acceder a este pago.", SweetAlertIcon.Error);
-                return;
-            }
             isDetailsModalVisible = true;
         }
         catch (Exception ex)

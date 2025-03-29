@@ -74,7 +74,6 @@ namespace Crefinso.Services.Pagos
         }
 
         // OBTENER PAGO POR ID
-        // OBTENER PAGO POR ID
         public async Task<PagoResponse> GetPaymentById(int paymentId)
         {
             try
