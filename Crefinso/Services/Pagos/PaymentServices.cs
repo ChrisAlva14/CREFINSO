@@ -437,18 +437,5 @@ namespace Crefinso.Services.Pagos
                 }
             }
         }
-
-        public async Task ProcesarPagosAutomaticosAsync()
-        {
-            try
-            {
-                var response = await _httpClient.PostAsync("api/pagos/procesar-automaticos", null);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"Error al procesar pagos automáticos: {ex.Message}");
-            }
-        }
     }
 }

@@ -65,6 +65,8 @@
         public decimal MontoPagado { get; set; }
 
         public string ClienteNombre { get; set; }
+
+        public bool PuedePagar { get; set; }
     }
 
     public class ReportePagosResponse
