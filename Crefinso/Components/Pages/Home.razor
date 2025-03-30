@@ -15,7 +15,7 @@
     private bool isLoading = true;
 
     private List<PrestamoResponseWithCliente> recentLoans = new();
-    private List<PagoResponseWithCliente> completedPayments = new(); // Cambiado a completedPayments
+    private List<PagoResponseWithCliente> completedPayments = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -61,6 +61,16 @@
         {
             errorMessage = $"Error loading dashboard data: {ex.Message}";
         }
+    }
+
+    private MarkupString GetEstadoBadge(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-yellow-800'>Pendiente</span>"),
+            "Realizado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-green-800'>Realizado</span>"),
+            _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-500/15 text-red-800'>ERROR!</span>")
+        };
     }
 }
 
@@ -155,7 +165,6 @@
                             </div>
                         </div>
 
-                        <!-- Pagos Realizados -->
                         <!-- Sección de Pagos Realizados -->
                         <div class="border rounded-lg shadow-md">
                             <div class="flex flex-col space-y-1.5 p-4 sm:p-6">
@@ -199,9 +208,8 @@
                                             <div class="text-right">
                                                 <!-- Mostrar el Monto Pagado -->
                                                 <div class="text-lg font-semibold text-gray-800">$@payment.MontoPagado</div>
-                                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500/15 text-green-500">
-                                                    @payment.Estado
-                                                </div>
+                                                <!-- Mostrar el estado con el estilo correspondiente -->
+                                                @GetEstadoBadge(payment.Estado)
                                             </div>
                                         </div>
                                     </div>

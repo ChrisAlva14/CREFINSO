@@ -112,16 +112,16 @@
             {
                 await LoadClientes(); // Recargar clientes y recalcular estadísticas
                 CloseEditModal();
-                await Swal.FireAsync("Éxito", "Cliente actualizado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Cliente actualizado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo actualizar el usuario", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo actualizar el usuario", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error al actualizar el usuario: {ex.Message}", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", $"Hubo un error al actualizar el usuario: {ex.Message}", SweetAlertIcon.Error);
         }
     }
 
@@ -136,7 +136,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "¿Estás seguro?",
+            Title = "<span style='color:black'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -158,17 +158,17 @@
             if (success)
             {
                 await LoadClientes(); // Recargar clientes y recalcular estadísticas
-                await Swal.FireAsync("Éxito", "Cliente eliminado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Cliente eliminado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo eliminar el usuario", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo eliminar el usuario", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al eliminar el usuario", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al eliminar el usuario", SweetAlertIcon.Error);
         }
     }
 
@@ -186,7 +186,7 @@
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles del cliente", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al obtener los detalles del cliente", SweetAlertIcon.Error);
         }
     }
 
@@ -255,32 +255,32 @@ else if (isAuthenticated)
                         </div>
                     </section>
 
-                    <div class="p-6 border bg-white rounded-lg shadow-md">
+                    <div class="p-6 border bg-white rounded-lg shadow-md text-nowrap">
                         <!-- Table displaying the credit list -->
                         <div class="relative w-full overflow-auto">
                             <table class="w-full caption-bottom text-sm">
                                 <thead class="[&_tr]:border-b">
                                     <tr class="border-b transition-colors">
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Código</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Nombre</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Dirección</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Celular</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0">Estado</th>
-                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0 text-right">Acciones</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Código</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Nombre</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Dirección</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Celular</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 text-center">Estado</th>
+                                        <th class="h-12 px-4 align-middle font-medium text-gray-500 text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="[&_tr:last-child]:border-0">
                                     @foreach (var cliente in GetPaginatedClientes())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.ClienteId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.Nombre</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.Direccion</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@cliente.TelefonoCelular</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            <td class="p-4 align-middle text-center">@cliente.ClienteId</td>
+                                            <td class="p-4 align-middle text-center">@cliente.Nombre</td>
+                                            <td class="p-4 align-middle text-center">@cliente.Direccion</td>
+                                            <td class="p-4 align-middle text-center">@cliente.TelefonoCelular</td>
+                                            <td class="p-4 align-middle text-center">
                                                 @EstadoBadge(cliente.Estado)
                                             </td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center">
                                                 <!-- VER DETALLES DEL CLIENTE -->
                                                 <button class="text-green-500" @onclick="() => DetailsCliente(cliente.ClienteId)">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">

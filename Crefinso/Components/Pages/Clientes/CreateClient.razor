@@ -1,14 +1,30 @@
 ﻿@page "/createClient"
 @using Crefinso.Services.Clientes
 @using Crefinso.DTOs
+@using Crefinso.Services.Usuarios
 @inject IJSRuntime JS
 @inject SweetAlertService Swal
 @inject NavigationManager NavigationManager
 @inject ClientServices clientService
+@inject UserServices userServices
 
 @code {
     private string errorMessage;
     private ClienteRequest newClient = new ClienteRequest();
+    private List<UserResponse> users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            users = await userServices.GetUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await Swal.FireAsync("Error", "No se pudieron cargar los usuarios", SweetAlertIcon.Error);
+        }
+    }
 
     // Propiedad auxiliar para la conversión de UserID a string
     private string UserIDString
@@ -40,7 +56,7 @@
                 // Limpia el formulario
                 newClient = new ClienteRequest();
                 // Muestra una alerta de éxito
-                await Swal.FireAsync("Éxito", "Cliente creado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Cliente creado correctamente", SweetAlertIcon.Success);
 
                 // Redirige a la página de clientes
                 NavigationManager.NavigateTo("/clients");
@@ -137,9 +153,18 @@
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            Código de Usuario
+                            Seleccionar Usuario
                         </label>
-                        <InputText @bind-Value="UserIDString" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="UserID" autocomplete="off" required type="number" min="1" name="UserID" />
+                        <select @bind="UserIDString" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="UserID" required name="UserID">
+                            <option value="">Seleccione un usuario</option>
+                            @if (users != null)
+                            {
+                                @foreach (var user in users)
+                                {
+                                    <option value="@user.UserId">@user.UserName</option>
+                                }
+                            }
+                        </select>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-medium flex items-center gap-2" for="Estado">
@@ -153,7 +178,7 @@
                         <InputSelect @bind-Value="newClient.Estado" class="flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full" id="Estado" required name="Estado">
                             <option value="">Seleccione un estado</option>
                             <option value="Activo">Activo</option>
-                            <option value="Inactivo">Inactivo</option>
+                            
                         </InputSelect>
                     </div>
                 </div>
