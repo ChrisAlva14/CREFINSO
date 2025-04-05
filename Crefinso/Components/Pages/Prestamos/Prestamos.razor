@@ -280,11 +280,11 @@ else if (isAuthenticated)
                                     @foreach (var loan in GetPaginatedLoans())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle text-md text-nowrap">@loan.PrestamoId</td>
-                                            <td class="p-4 align-middle text-md text-nowrap">@loan.SolicitudId</td>
-                                            <td class="p-4 align-middle text-md text-nowrap">@loan.MontoAprobado</td>
-                                            <td class="p-4 align-middle text-md text-nowrap">@loan.TasaInteres</td>
-                                            <td class="p-4 align-middle text-md text-nowrap">
+                                            <td class="p-4 align-middle text-md">@loan.PrestamoId</td>
+                                            <td class="p-4 align-middle text-md">@loan.SolicitudId</td>
+                                            <td class="p-4 align-middle text-md">@loan.MontoAprobado</td>
+                                            <td class="p-4 align-middle text-md">@loan.TasaInteres</td>
+                                            <td class="p-4 align-middle text-md">
                                                 @EstadoBadge(loan.Estado)
                                             </td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
