@@ -279,12 +279,12 @@ else if (isAuthenticated)
                                     @foreach (var solicitud in GetPaginatedSolicitudes())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 text-md text-nowrap">@solicitud.SolicitudId</td>
-                                            <td class="p-4 text-md text-nowrap">@solicitud.NombreCliente</td>
-                                            <td class="p-4 text-md text-nowrap">@solicitud.FechaSolicitud</td>
-                                            <td class="p-4 text-md text-nowrap">@solicitud.CantidadSolicitada</td>
-                                            <td class="p-4 text-md text-nowrap">@solicitud.DestinoPrestamo</td>
-                                            <td class="p-4 text-md text-nowrap">
+                                            <td class="p-4 text-md ">@solicitud.SolicitudId</td>
+                                            <td class="p-4 text-md ">@solicitud.NombreCliente</td>
+                                            <td class="p-4 text-md ">@solicitud.FechaSolicitud</td>
+                                            <td class="p-4 text-md ">@solicitud.CantidadSolicitada</td>
+                                            <td class="p-4 text-md ">@solicitud.DestinoPrestamo</td>
+                                            <td class="p-4 text-md ">
                                                 @EstadoBadge(solicitud.Estado)
                                             </td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
