@@ -244,5 +244,42 @@ namespace Crefinso.Services.Solicitudes
                 );
             }
         }
+
+        // En tu RequestServices.cs, añade este nuevo método
+        public async Task<List<SolicitudResponse>> GetSolicitudesAprobadas()
+        {
+            try
+            {
+                var token = await _authServices.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException("El token es nulo o invalido. Iniciar sesion");
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Obtener todas las solicitudes
+                var response = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>("api/solicitudes");
+
+                // Filtrar solo las aprobadas
+                var solicitudesAprobadas = response.Where(s => s.Estado == "Aprobado").ToList();
+
+                // Obtener nombres de clientes para las solicitudes aprobadas
+                foreach (var solicitud in solicitudesAprobadas)
+                {
+                    solicitud.NombreCliente = await GetClienteNombre(solicitud.ClienteID);
+                }
+
+                return solicitudesAprobadas;
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LAS SOLICITUDES APROBADAS");
+            }
+        }
     }
 }

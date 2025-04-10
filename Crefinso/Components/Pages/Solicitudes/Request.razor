@@ -111,7 +111,7 @@
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al obtener los detalles de la solicitud", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al obtener los detalles de la solicitud", SweetAlertIcon.Error);
         }
     }
 
@@ -138,16 +138,16 @@
             {
                 await LoadSolicitudes(); // Recargar solicitudes y recalcular estadísticas
                 CloseEditModal();
-                await Swal.FireAsync("Éxito", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:green'>Éxito</span>", "Solicitud actualizada correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo actualizar la solicitud", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo actualizar la solicitud", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error al actualizar la solicitud: {ex.Message}", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", $"Hubo un error al actualizar la solicitud: {ex.Message}", SweetAlertIcon.Error);
         }
     }
 
@@ -162,7 +162,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "¿Estás seguro?",
+                Title = "<span style='color:black'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -184,17 +184,17 @@
             if (success)
             {
                 await LoadSolicitudes(); // Recargar solicitudes y recalcular estadísticas
-                await Swal.FireAsync("Éxito", "Solicitud eliminada correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:red'>Éxito</span>", "Solicitud eliminada correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo eliminar la solicitud", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo eliminar la solicitud", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al eliminar la solicitud", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al eliminar la solicitud", SweetAlertIcon.Error);
         }
     }
 
@@ -243,19 +243,19 @@ else if (isAuthenticated)
                     <!-- Dashboard Stats -->
                     <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="stat-card bg-blue-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Total de Solicitudes</h2>
+                            <h2 class="text-gray-700 font-semibold">Total de Solicitudes</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudes.Count</p>
                         </div>
                         <div class="stat-card bg-green-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Aprobadas</h2>
+                            <h2 class="text-gray-700 font-semibold">Solicitudes Aprobadas</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudesAprobadas</p>
                         </div>
                         <div class="stat-card bg-yellow-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Pendientes</h2>
+                            <h2 class="text-gray-700 font-semibold">Solicitudes Pendientes</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudesPendientes</p>
                         </div>
                         <div class="stat-card bg-red-100 rounded-lg p-4 shadow-md">
-                            <h2 class="text-gray-700 text-lg font-semibold">Solicitudes Rechazadas</h2>
+                            <h2 class="text-gray-700 font-semibold">Solicitudes Rechazadas</h2>
                             <p class="text-3xl sm:text-4xl font-bold">@solicitudesRechazadas</p>
                         </div>
                     </section>
@@ -272,7 +272,6 @@ else if (isAuthenticated)
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Cantidad Solicitada</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Destino Préstamo</th>
                                         <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
-                                        <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha Análisis</th>
                                         <th class="h-12 px-4 align-middle font-medium text-gray-500 text-right">Acciones</th>
                                     </tr>
                                 </thead>
@@ -280,15 +279,14 @@ else if (isAuthenticated)
                                     @foreach (var solicitud in GetPaginatedSolicitudes())
                                     {
                                         <tr class="border-b transition-colors">
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.SolicitudId</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.NombreCliente</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.FechaSolicitud</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.CantidadSolicitada</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.DestinoPrestamo</td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                                            <td class="p-4 text-md ">@solicitud.SolicitudId</td>
+                                            <td class="p-4 text-md ">@solicitud.NombreCliente</td>
+                                            <td class="p-4 text-md ">@solicitud.FechaSolicitud</td>
+                                            <td class="p-4 text-md ">@solicitud.CantidadSolicitada</td>
+                                            <td class="p-4 text-md ">@solicitud.DestinoPrestamo</td>
+                                            <td class="p-4 text-md ">
                                                 @EstadoBadge(solicitud.Estado)
                                             </td>
-                                            <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">@solicitud.FechaAnalisis</td>
                                             <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
                                                 <!-- VER DETALLES SOLICITUD -->
                                                 <button class="text-green-500" @onclick="() => DetailsSolicitud(solicitud.SolicitudId)">

@@ -5,7 +5,6 @@
 @using Crefinso.Services
 @using Crefinso.Services.Usuarios
 
-
 @inject AuthServices authServices
 @inject UserServices userService
 
@@ -67,17 +66,17 @@
                 // Limpia el formulario
                 newUser = new UserRequest();
                 // Muestra una alerta de éxito
-                await Swal.FireAsync("Éxito", "Usuario creado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Usuario creado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo crear el usuario", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo crear el usuario", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al crear el usuario", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al crear el usuario", SweetAlertIcon.Error);
         }
     }
 
@@ -97,16 +96,16 @@
             {
                 users = await userService.GetUsers(); // Actualizar la lista de usuarios
                 CloseEditModal(); // Cerrar el modal
-                await Swal.FireAsync("Éxito", "Usuario actualizado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Usuario actualizado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo actualizar el usuario", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo actualizar el usuario", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Error", $"Hubo un error al actualizar el usuario: {ex.Message}", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", $"Hubo un error al actualizar el usuario: {ex.Message}", SweetAlertIcon.Error);
         }
     }
 
@@ -122,7 +121,7 @@
     {
         var result = await Swal.FireAsync(new SweetAlertOptions
             {
-                Title = "¿Estás seguro?",
+                Title = "<span style='color:black'>¿Estás seguro?</span>",
                 Text = "Esta acción no se puede deshacer",
                 Icon = SweetAlertIcon.Warning,
                 ShowCancelButton = true,
@@ -144,17 +143,17 @@
             if (success)
             {
                 users = await userService.GetUsers(); // Actualiza la lista
-                await Swal.FireAsync("Éxito", "Usuario eliminado correctamente", SweetAlertIcon.Success);
+                await Swal.FireAsync("<span style='color:black'>Éxito</span>", "Usuario eliminado correctamente", SweetAlertIcon.Success);
             }
             else
             {
-                await Swal.FireAsync("Error", "No se pudo eliminar el usuario", SweetAlertIcon.Error);
+                await Swal.FireAsync("<span style='color:red'>Error</span>", "No se pudo eliminar el usuario", SweetAlertIcon.Error);
             }
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-            await Swal.FireAsync("Error", "Hubo un error al eliminar el usuario", SweetAlertIcon.Error);
+            await Swal.FireAsync("<span style='color:red'>Error</span>", "Hubo un error al eliminar el usuario", SweetAlertIcon.Error);
         }
     }
 }

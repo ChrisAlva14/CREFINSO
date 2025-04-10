@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using ClosedXML.Excel;
 using Crefinso.DTOs;
+using Microsoft.EntityFrameworkCore; 
 
 namespace Crefinso.Services.Pagos
 {
@@ -20,7 +21,7 @@ namespace Crefinso.Services.Pagos
         {
             decimal monthlyRate = annualRate / 12 / 100;
             decimal interest = currentBalance * monthlyRate * period;
-            return Math.Round(interest, 2, MidpointRounding.AwayFromZero); // Redondear a 2 decimales
+            return Math.Round(interest, 2, MidpointRounding.AwayFromZero); 
         }
 
         // Método para calcular el capital basado en el saldo actual
@@ -32,14 +33,14 @@ namespace Crefinso.Services.Pagos
         {
             decimal interest = CalculateInterest(currentBalance, annualRate, 1);
             decimal capital = paymentAmount - interest;
-            return Math.Round(capital, 2, MidpointRounding.AwayFromZero); // Redondear a 2 decimales
+            return Math.Round(capital, 2, MidpointRounding.AwayFromZero); 
         }
 
         // Método para calcular el nuevo saldo
         public decimal CalculateNewBalance(decimal currentBalance, decimal capital)
         {
             decimal newBalance = currentBalance - capital;
-            return Math.Round(newBalance, 2, MidpointRounding.AwayFromZero); // Redondear a 2 decimales
+            return Math.Round(newBalance, 2, MidpointRounding.AwayFromZero); 
         }
 
         // OBTENER TODOS LOS PAGOS
@@ -366,7 +367,7 @@ namespace Crefinso.Services.Pagos
 
         public async Task<ReportePagosResponse> GetWeeklyReport(DateTime weekStartDate)
         {
-            var weekEndDate = weekStartDate.AddDays(6); // Último día de la semana
+            var weekEndDate = weekStartDate.AddDays(6); 
             var payments = await GetPaymentsByDateRange(weekStartDate, weekEndDate);
 
             return new ReportePagosResponse
@@ -382,7 +383,7 @@ namespace Crefinso.Services.Pagos
         public async Task<ReportePagosResponse> GetMonthlyReport(int year, int month)
         {
             var monthStartDate = new DateTime(year, month, 1);
-            var monthEndDate = monthStartDate.AddMonths(1).AddDays(-1); // Último día del mes
+            var monthEndDate = monthStartDate.AddMonths(1).AddDays(-1); 
             var payments = await GetPaymentsByDateRange(monthStartDate, monthEndDate);
 
             return new ReportePagosResponse

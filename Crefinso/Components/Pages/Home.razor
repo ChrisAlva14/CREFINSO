@@ -15,7 +15,7 @@
     private bool isLoading = true;
 
     private List<PrestamoResponseWithCliente> recentLoans = new();
-    private List<PagoResponseWithCliente> upcomingPayments = new();
+    private List<PagoResponseWithCliente> completedPayments = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -54,7 +54,7 @@
             activeClientsCount = await dashboardService.GetActiveClientsCountAsync();
             activeLoansCount = await dashboardService.GetActiveLoansCountAsync();
             recentLoans = await dashboardService.GetRecentLoansAsync();
-            upcomingPayments = await dashboardService.GetUpcomingPaymentsAsync();
+            completedPayments = await dashboardService.GetCompletedPaymentsAsync(); // Cambiado a GetCompletedPaymentsAsync
             tasaMorosidad = await dashboardService.GetTasaMorosidadAsync(); // Calcular la tasa de morosidad
         }
         catch (Exception ex)
@@ -63,14 +63,14 @@
         }
     }
 
-    // Método para determinar el color del estado según la fecha de pago
-    private string GetPaymentStatusColor(DateOnly paymentDate)
+    private MarkupString GetEstadoBadge(string estado)
     {
-        var daysUntilPayment = (paymentDate.ToDateTime(TimeOnly.MinValue) - DateTime.Today).Days;
-
-        if (daysUntilPayment <= 2) return "bg-red-500/15 text-red-500"; // Rojo
-        if (daysUntilPayment <= 7) return "bg-yellow-500/15 text-yellow-500"; // Amarillo
-        return "bg-green-500/15 text-green-500"; // Verde
+        return estado switch
+        {
+            "Pendiente" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-yellow-800'>Pendiente</span>"),
+            "Realizado" => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-green-800'>Realizado</span>"),
+            _ => new MarkupString("<span class='px-2 py-1 text-xs font-semibold rounded-full bg-red-500/15 text-red-800'>ERROR!</span>")
+        };
     }
 }
 
@@ -79,9 +79,7 @@
     @if (isLoading)
     {
         <div class="flex justify-center items-center h-64">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900">
-                
-            </div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
         </div>
     }
     else
@@ -110,7 +108,7 @@
                         </div>
                     </section>
 
-                    <!-- Sección de Préstamos Recientes y Próximos Pagos -->
+                    <!-- Sección de Préstamos Recientes y Pagos Realizados -->
                     <div class="grid gap-6 md:grid-cols-2 mt-6">
                         <!-- Préstamos Recientes -->
                         <div class="border rounded-lg shadow-md">
@@ -167,7 +165,7 @@
                             </div>
                         </div>
 
-                        <!-- Pagos Realizados -->
+                        <!-- Sección de Pagos Realizados -->
                         <div class="border rounded-lg shadow-md">
                             <div class="flex flex-col space-y-1.5 p-4 sm:p-6">
                                 <h3 class="text-xl sm:text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
@@ -175,11 +173,11 @@
                                         <rect width="20" height="14" x="2" y="5" rx="2"></rect>
                                         <line x1="2" x2="22" y1="10" y2="10"></line>
                                     </svg>
-                                    Próximos Pagos
+                                    Pagos Realizados
                                 </h3>
                             </div>
                             <div class="p-6 pt-0 space-y-4">
-                                @foreach (var payment in upcomingPayments)
+                                @foreach (var payment in completedPayments)
                                 {
                                     <div class="flex items-center justify-between space-x-4 rounded-lg border bg-card p-4 transition-all hover:bg-accent/50">
                                         <div class="flex flex-col gap-1">
@@ -208,11 +206,10 @@
                                         </div>
                                         <div class="flex items-center gap-4">
                                             <div class="text-right">
-                                                <!-- Mostrar el Monto a Pagar -->
-                                                <div class="text-lg font-semibold text-gray-800">$@payment.MontoAPagar</div>
-                                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 @GetPaymentStatusColor(payment.FechaPago)">
-                                                    En @((payment.FechaPago.ToDateTime(TimeOnly.MinValue) - DateTime.Today).Days) días
-                                                </div>
+                                                <!-- Mostrar el Monto Pagado -->
+                                                <div class="text-lg font-semibold text-gray-800">$@payment.MontoPagado</div>
+                                                <!-- Mostrar el estado con el estilo correspondiente -->
+                                                @GetEstadoBadge(payment.Estado)
                                             </div>
                                         </div>
                                     </div>

@@ -163,94 +163,73 @@ namespace Crefinso.Services
             }
         }
 
-        // Método para obtener próximos pagos con el nombre del cliente
-        public async Task<List<PagoResponseWithCliente>> GetUpcomingPaymentsAsync()
+        // Método para obtener pagos realizados con el nombre del cliente
+        public async Task<List<PagoResponseWithCliente>> GetCompletedPaymentsAsync()
         {
             try
             {
                 var token = await _authServices.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidOperationException(
-                        "El token es nulo o inválido. Iniciar sesión."
-                    );
+                    throw new InvalidOperationException("El token es nulo o inválido. Iniciar sesión.");
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                // Obtener préstamos activos
-                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>(
-                    "api/prestamos"
-                );
+                // Obtener todos los pagos desde la API
+                var pagos = await _httpClient.GetFromJsonAsync<List<PagoResponse>>("api/pagos");
 
-                // Obtener solicitudes y clientes
-                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>(
-                    "api/solicitudes"
-                );
-                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>(
-                    "api/clientes"
-                );
-
-                // Lista para almacenar los próximos pagos
-                var upcomingPayments = new List<PagoResponseWithCliente>();
-
-                // Recorrer los préstamos activos
-                foreach (var prestamo in prestamos)
+                if (pagos == null || !pagos.Any())
                 {
-                    // Obtener los pagos futuros para cada préstamo
-                    var pagosFuturos = await _httpClient.GetFromJsonAsync<List<PagoFuturoResponse>>(
-                        $"api/pagos/futuros/{prestamo.PrestamoId}"
-                    );
-
-                    if (pagosFuturos != null && pagosFuturos.Any())
-                    {
-                        // Obtener el nombre del cliente asociado al préstamo
-                        var clienteNombre =
-                            clientes
-                                ?.FirstOrDefault(c =>
-                                    c.ClienteId
-                                    == solicitudes
-                                        ?.FirstOrDefault(s => s.SolicitudId == prestamo.SolicitudId)
-                                        ?.ClienteID
-                                )
-                                ?.Nombre ?? "Desconocido";
-
-                        // Convertir PagoFuturoResponse a PagoResponseWithCliente
-                        foreach (var pago in pagosFuturos)
-                        {
-                            upcomingPayments.Add(
-                                new PagoResponseWithCliente
-                                {
-                                    PagoId = pago.PagoId,
-                                    PrestamoId = pago.PrestamoId,
-                                    FechaPago = pago.FechaPago,
-                                    MontoAPagar = pago.MontoAPagar, // Asignar MontoAPagar a MontoAPagar
-                                    MontoPagado = pago.MontoPagado, // Asignar MontoPagado a MontoPagado
-                                    SaldoRestante = pago.SaldoRestante,
-                                    Estado = pago.Estado,
-                                    ClienteNombre = clienteNombre,
-                                }
-                            );
-                        }
-                    }
+                    return new List<PagoResponseWithCliente>(); // Si no hay pagos, retornar una lista vacía
                 }
 
-                // Ordenar los pagos por fecha y tomar los 3 más cercanos
-                return upcomingPayments.OrderBy(p => p.FechaPago).Take(3).ToList();
+                // Obtener préstamos, solicitudes y clientes para asociar los nombres
+                var prestamos = await _httpClient.GetFromJsonAsync<List<PrestamoResponse>>("api/prestamos");
+                var solicitudes = await _httpClient.GetFromJsonAsync<List<SolicitudResponse>>("api/solicitudes");
+                var clientes = await _httpClient.GetFromJsonAsync<List<ClienteResponse>>("api/clientes");
+
+                // Lista para almacenar los pagos realizados con el nombre del cliente
+                var completedPayments = new List<PagoResponseWithCliente>();
+
+                foreach (var pago in pagos)
+                {
+                    // Obtener el préstamo asociado al pago
+                    var prestamo = prestamos?.FirstOrDefault(p => p.PrestamoId == pago.PrestamoId);
+                    if (prestamo == null) continue;
+
+                    // Obtener la solicitud asociada al préstamo
+                    var solicitud = solicitudes?.FirstOrDefault(s => s.SolicitudId == prestamo.SolicitudId);
+                    if (solicitud == null) continue;
+
+                    // Obtener el cliente asociado a la solicitud
+                    var cliente = clientes?.FirstOrDefault(c => c.ClienteId == solicitud.ClienteID);
+                    var clienteNombre = cliente?.Nombre ?? "Desconocido";
+
+                    // Agregar el pago a la lista
+                    completedPayments.Add(new PagoResponseWithCliente
+                    {
+                        PagoId = pago.PagoId,
+                        PrestamoId = pago.PrestamoId,
+                        FechaPago = pago.FechaPago,
+                        MontoAPagar = pago.MontoAPagar,
+                        MontoPagado = pago.MontoPagado,
+                        SaldoRestante = pago.SaldoRestante,
+                        Estado = pago.Estado,
+                        ClienteNombre = clienteNombre,
+                    });
+                }
+
+                // Ordenar por fecha de pago (del más reciente al más antiguo) y tomar los 3 más recientes
+                return completedPayments.OrderByDescending(p => p.FechaPago).Take(3).ToList();
             }
             catch (HttpRequestException ex)
             {
-                throw new ApplicationException("Error al obtener los próximos pagos", ex);
+                throw new ApplicationException("Error al obtener los pagos realizados", ex);
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "HA OCURRIDO UN ERROR AL OBTENER LOS PRÓXIMOS PAGOS, POR FAVOR REINICIAR EL SISTEMA",
-                    ex
-                );
+                throw new Exception("HA OCURRIDO UN ERROR AL OBTENER LOS PAGOS REALIZADOS, POR FAVOR REINICIAR EL SISTEMA", ex);
             }
         }
 
