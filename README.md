@@ -22,10 +22,10 @@ El sistema permitirá:
 ### Requisitos Técnicos
 
 - **Lenguaje de Programación**: C#
-- **Framework**: ASP.NET Core 6.0
+- **Framework**: ASP.NET Core
 - **Base de Datos**: SQL Server
 - **ORM**: Entity Framework Core
-- **Frontend**: Razor Pages, Bootstrap, jQuery
+- **Frontend**: Razor Pages, Tailwind
 
 ### Requisitos de Hardware
 
@@ -47,34 +47,11 @@ El sistema utiliza **SQL Server** como gestor de base de datos. Las tablas princ
 - `Clientes`: Almacena la información básica de los clientes.
 - `Creditos`: Registra los créditos otorgados a los clientes, con los plazos, cuotas mensuales, y saldo pendiente.
 - `Pagos`: Mantiene un registro detallado de los pagos realizados y ajusta los montos pendientes y las cuotas mensuales.
-
-#### Estructura de Tablas
-
-1. **Clientes**
-   - `ClienteID`: Identificador único.
-   - `Nombre`, `Dirección`, `Teléfono`, `Email`: Datos del cliente.
-
-2. **Créditos**
-   - `CreditoID`: Identificador único.
-   - `ClienteID`: Relación con el cliente.
-   - `FechaInicio`: Fecha de inicio del crédito.
-   - `MontoTotal`, `CuotaMensual`, `MesesPlazo`: Detalles del crédito.
-   - `SaldoPendiente`: Monto pendiente ajustado según los pagos.
-
-3. **Pagos**
-   - `PagoID`: Identificador único.
-   - `CreditoID`: Relación con el crédito.
-   - `FechaPago`: Fecha del pago realizado.
-   - `MontoAbonado`: Cantidad pagada.
-   - `SaldoDespuesPago`: Saldo pendiente después del pago.
-   - `CuotaRestante`: Cuota ajustada para futuros pagos.
   
   
   ## Autores
   1. **Nombre**: Christopher Emmanuel Villalta Alvarenga
   	- **Rol:** Software Developer
   2. **Nombre**: Adilson Ariel Lainez González
-  	- **Rol:** Software Developer
-  3. **Nombre**: Erick Ernesto Zelada Olmedo
   	- **Rol:** Software Developer
 
