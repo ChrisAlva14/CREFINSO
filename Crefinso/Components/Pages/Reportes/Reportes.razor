@@ -11,6 +11,8 @@
     private bool isMonthly = true; // Por defecto, mostrar reportes mensuales
     private bool isAuthenticated;
     private string errorMessage;
+    private string username;
+    private string role;
     private bool isLoading = true; // Estado para controlar la carga
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -18,6 +20,11 @@
         if (firstRender)
         {
             isAuthenticated = await authServices.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                username = await authServices.GetUsernameAsync();
+                role = await authServices.GetRoleAsync();
+            }
             StateHasChanged();
         }
     }
@@ -91,7 +98,7 @@
     }
 }
 
-@if (isAuthenticated)
+@if (isAuthenticated && role=="Administrador")
 {
     @if (isLoading)
     {
@@ -280,4 +287,47 @@
             document.body.removeChild(link);
         }
     </script>
+}
+
+else
+{
+    <main class="h-full w-full flex flex-1 items-center justify-center px-4 py-12">
+        <div class="mx-auto w-full max-w-lg border-0 bg-white shadow-lg rounded-lg">
+            <div class="border-b border-gray-100 bg-white pb-6 px-6 pt-6">
+                <div class="flex items-center justify-center gap-2 text-blue-900">
+                    <i data-lucide="lock" class="h-6 w-6"></i>
+                    <h2 class="text-center text-2xl font-medium">ACCESO RESTRINGIDO</h2>
+                    <i data-lucide="lock" class="h-6 w-6"></i>
+                </div>
+                <p class="text-center text-gray-500 mt-2">
+                    Sistema de Gestión Financiera Corporativa
+                </p>
+            </div>
+            <div class="pt-6 px-6 p-6">
+                <div class="mb-6 flex items-center gap-3 rounded-md bg-blue-50 p-4 text-blue-900">
+                    <i data-lucide="alert-circle" class="h-5 w-5 flex-shrink-0"></i>
+                    <div>
+                        <p class="text-sm font-medium">Acceso no autorizado</p>
+                        <p class="mt-1 text-xs text-blue-700">
+                            Esta sección requiere credenciales de seguridad específicas para su acceso.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="rounded-md border border-gray-200 bg-white p-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                        <div class="text-sm text-gray-500">Estado de acceso</div>
+                        <div class="flex items-center gap-2">
+                            <div class="h-2 w-2 rounded-full bg-red-500"></div>
+                            <span class="text-sm font-medium text-gray-900">Bloqueado</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-4">
+                        <div class="text-sm text-gray-500">Tipo de contenido</div>
+                        <div class="text-sm font-medium text-gray-900">Datos financieros confidenciales</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 }

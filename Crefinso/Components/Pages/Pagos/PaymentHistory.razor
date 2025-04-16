@@ -1,25 +1,445 @@
 @page "/paymentHistory/{prestamoId:int}"
 @using Crefinso.DTOs
+@using Crefinso.Services
 @using Crefinso.Services.Pagos
 @using Crefinso.Services.Prestamos
+
 @inject PaymentServices PaymentServices
 @inject NavigationManager NavigationManager
 @inject SweetAlertService Swal
 @inject LoanServices loanService
+@inject AuthServices authServices
+
+@if (loanInfo == null || futurePayments == null || paymentHistory == null)
+{
+}
+else if (isAuthenticated)
+{
+    @if (isLoading)
+    {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900">
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="container p-6 mx-auto">
+            <div class="rounded-lg border bg-white shadow-md p-4 md:p-6">
+                <!-- Encabezado con resumen del préstamo -->
+                <div class="mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Préstamo #@loanInfo.PrestamoId</h1>
+                            <p class="text-gray-500 mt-1">Gestiona tus pagos y visualiza tu progreso</p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <span class="inline-flex items-center rounded-full bg-blue-100 text-blue-700 border border-blue-200 text-sm py-1.5 px-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-1">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                Próximo pago: @futurePayments.FirstOrDefault()?.FechaPago.ToShortDateString()
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Tarjetas de resumen -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Monto Total -->
+                        <div class="rounded-lg border bg-white shadow-sm">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Monto Total</p>
+                                        <p class="text-2xl font-bold text-gray-800">$@loanInfo.MontoAprobado.ToString("N2")</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-green-600">
+                                            <line x1="12" x2="12" y1="1" y2="23"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tasa de Interés -->
+                        <div class="rounded-lg border bg-white shadow-sm">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Tasa de Interés</p>
+                                        <p class="text-2xl font-bold text-gray-800">@loanInfo.TasaInteres.ToString("N1")%</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-yellow-600">
+                                            <line x1="19" y1="5" x2="5" y2="19"></line>
+                                            <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                                            <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagos Realizados -->
+                        <div class="rounded-lg border bg-white shadow-sm">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Pagos Realizados</p>
+                                        <p class="text-2xl font-bold text-gray-800">
+                                            @paymentHistory.Count(p => p.PrestamoId == PrestamoId) de
+                                            @(paymentHistory.Count(p => p.PrestamoId == PrestamoId) + futurePayments.Count)
+                                        </p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-blue-600">
+                                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                                            <path d="m9 12 2 2 4-4"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progreso -->
+                        <div class="rounded-lg border bg-white shadow-sm">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Progreso</p>
+                                        <p class="text-2xl font-bold text-gray-800">@CalculateProgress()%</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-purple-600">
+                                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-3">
+                                    <div class="bg-purple-600 h-2.5 rounded-full" style="width: @CalculateProgress()%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestañas para diferentes vistas -->
+                <button @onclick='() => activeTab = "payments"'
+                        class="@(activeTab == "payments" ? "bg-blue-50 text-blue-700" : "text-gray-500") px-4 py-2 text-sm font-medium rounded-t-lg">
+                    Pagos Programados
+                </button>
+                <button @onclick='() => activeTab = "history"'
+                        class="@(activeTab == "history" ? "bg-blue-50 text-blue-700" : "text-gray-500") px-4 py-2 text-sm font-medium rounded-t-lg">
+                    Historial de Pagos
+                </button>
+
+                <!-- Contenido de Pagos Programados -->
+                @if (activeTab == "payments")
+                {
+                    <div class="grid grid-cols-1 gap-6">
+
+                        <!-- Tarjeta con monto a pagar flexible -->
+                        <div class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow">
+                            <div class="p-4 flex flex-row items-center justify-between border-b">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">Pago Personalizado</h3>
+                                    <p class="text-sm text-gray-500">Ajusta el monto a pagar según tus necesidades</p>
+                                </div>
+                                <label class="inline-flex items-center rounded-full bg-green-500 text-white border border-green-200 text-xs font-semibold px-2.5 py-0.5">
+                                    Monto Flexible
+                                </label>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex flex-col gap-5">
+                                    <!-- Información del préstamo y fecha -->
+                                    <div class="flex flex-col gap-3">
+                                        <div class="flex items-center gap-2 text-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-gray-500">
+                                                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                                <line x1="2" x2="22" y1="10" y2="10"></line>
+                                            </svg>
+                                            <span>Préstamo: #@currentPayment.PrestamoId</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-gray-500">
+                                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                                <line x1="16" x2="16" y1="2" y2="6"></line>
+                                                <line x1="8" x2="8" y1="2" y2="6"></line>
+                                                <line x1="3" x2="21" y1="10" y2="10"></line>
+                                            </svg>
+                                            <span>Fecha de pago: @currentPayment.FechaPago.ToShortDateString()</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Control de monto personalizado -->
+                                    <div class="space-y-5 bg-gray-50 text-black rounded-lg p-4">
+
+                                        <div class="flex items-center gap-3">
+                                            <label class="text-sm font-medium font-bold text-gray-700 whitespace-nowrap">Monto:</label>
+                                            <div class="relative flex-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-2.5 h-4 w-4 text-gray-500">
+                                                    <line x1="12" x2="12" y1="1" y2="23"></line>
+                                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                </svg>
+                                                <input type="number"
+                                                       class="pl-9 w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 focus:ring-blue-500"
+                                                       value="@customAmount.ToString("N2")"
+                                                       @onchange="HandleAmountChange"
+                                                       min="0" step="0.01" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Detalles del pago personalizado -->
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <label class="text-sm font-medium text-black">Monto a Pagar</label>
+                                            <div class="flex items-center gap-1 mt-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-green-500">
+                                                    <line x1="12" x2="12" y1="1" y2="23"></line>
+                                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                </svg>
+                                                <label class="text-xl font-bold text-black">@customAmount.ToString("N2")</label>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <label class="text-sm font-medium text-black">Interés a Pagar</label>
+                                            <div class="flex items-center gap-1 mt-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-yellow-500">
+                                                    <line x1="19" y1="5" x2="5" y2="19"></line>
+                                                    <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                                                    <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                                                </svg>
+                                                <label class="text-xl font-bold text-black">@currentPayment.InteresPagado.ToString("N2")</label>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <label class="text-sm font-medium text-black">Capital a Pagar</label>
+                                            <div class="flex items-center gap-1 mt-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-blue-500">
+                                                    <line x1="12" x2="12" y1="1" y2="23"></line>
+                                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                </svg>
+                                                <label class="text-xl font-bold text-black">@currentPayment.CapitalPagado.ToString("N2")</label>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <label class="text-sm font-medium text-black">Saldo Restante</label>
+                                            <div class="flex items-center gap-1 mt-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-red-500">
+                                                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"></path>
+                                                    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
+                                                </svg>
+                                                <label class="text-xl font-bold text-black">@currentPayment.SaldoRestante.ToString("N2")</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 border-t">
+                                <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md"
+                                        @onclick="HandleCreatePayment">
+                                    Registrar Pago Personalizado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Contenido de Historial de Pagos -->
+                @if (activeTab == "history")
+                {
+                    <div class="rounded-lg border bg-white shadow-sm">
+                        <div class="p-4 flex flex-row items-center justify-between border-b">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800">Historial de Pagos</h3>
+                                <p class="text-sm text-gray-500">Registro de todos los pagos realizados para este préstamo</p>
+                            </div>
+                            <button @onclick="ToggleShowDetails"
+                                    class="text-gray-500 hover:text-gray-700 text-sm">
+                                @if (showDetails)
+                                {
+                                    <span class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-1">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                        Menos detalles
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-1">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                        Más detalles
+                                    </span>
+                                }
+                            </button>
+                        </div>
+                        <div class="p-0">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th class="py-3 px-4 text-left font-medium text-gray-500">ID Pago</th>
+                                            <th class="py-3 px-4 text-left font-medium text-gray-500">Fecha</th>
+                                            <th class="py-3 px-4 text-left font-medium text-gray-500">Monto Pagado</th>
+                                            @if (showDetails)
+                                            {
+                                                <th class="py-3 px-4 text-left font-medium text-gray-500">Interés</th>
+                                                <th class="py-3 px-4 text-left font-medium text-gray-500">Capital</th>
+                                            }
+                                            <th class="py-3 px-4 text-left font-medium text-gray-500">Saldo Restante</th>
+                                            <th class="py-3 px-4 text-left font-medium text-gray-500">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var payment in paymentHistory.Where(p => p.PrestamoId == PrestamoId))
+                                        {
+                                            <tr class="border-b hover:bg-gray-50">
+                                                <td class="py-3 px-4 font-medium">@payment.PrestamoId</td>
+                                                <td class="py-3 px-4">@payment.FechaPago.ToShortDateString()</td>
+                                                <td class="py-3 px-4">
+                                                    <div class="flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-green-500 mr-1">
+                                                            <line x1="12" x2="12" y1="1" y2="23"></line>
+                                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                        </svg>
+                                                        @payment.MontoPagado.ToString("N2")
+                                                    </div>
+                                                </td>
+                                                @if (showDetails)
+                                                {
+                                                    <td class="py-3 px-4">
+                                                        <div class="flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-yellow-500 mr-1">
+                                                                <line x1="19" y1="5" x2="5" y2="19"></line>
+                                                                <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                                                                <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                                                            </svg>
+                                                            @payment.InteresPagado.ToString("N2")
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-3 px-4">
+                                                        <div class="flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-blue-500 mr-1">
+                                                                <line x1="12" x2="12" y1="1" y2="23"></line>
+                                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                            </svg>
+                                                            @payment.CapitalPagado.ToString("N2")
+                                                        </div>
+                                                    </td>
+                                                }
+                                                <td class="py-3 px-4">
+                                                    <div class="flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-red-500 mr-1">
+                                                            <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"></path>
+                                                            <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
+                                                        </svg>
+                                                        @payment.SaldoRestante.ToString("N2")
+                                                    </div>
+                                                </td>
+                                                <td class="py-3 px-4">
+                                                    <span class="inline-flex items-center rounded-full bg-green-50 text-green-700 border border-green-200 text-xs font-semibold px-2.5 py-0.5">
+                                                        @payment.Estado
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+
+                                @if (!paymentHistory.Any(p => p.PrestamoId == PrestamoId))
+                                {
+                                    <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 text-gray-300 mb-4">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        <h3 class="text-lg font-medium text-gray-900">No hay pagos registrados</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Aún no se han realizado pagos para este préstamo.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
 
 @code {
     [Parameter]
     public int PrestamoId { get; set; }
 
-    private bool showModal = false;
-    private PagoFuturoResponse selectedPayment;
-    private decimal montoPagado;
+    private string activeTab = "payments";
+    private bool showDetails = false;
+    private PagoFuturoResponse currentPayment;
     private List<PagoFuturoResponse> futurePayments = new List<PagoFuturoResponse>();
+    private List<PagoResponse> paymentHistory = new List<PagoResponse>();
+    private PrestamoResponse loanInfo;
+    private bool isAuthenticated;
+    private decimal customAmount;
+    private int sliderValue = 100;
     private string errorMessage;
+    private bool isLoading = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isAuthenticated = await authServices.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                await LoadLoanInfo();
+                await LoadFuturePayments();
+                await LoadPaymentHistory();
+                if (futurePayments.Any())
+                {
+                    currentPayment = futurePayments[0];
+                    customAmount = currentPayment.MontoAPagar;
+                }
+            }
+            StateHasChanged();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadFuturePayments();
+        
+        try
+        {
+            isLoading = true;
+            await Task.Delay(1125);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false; // Desactivar el estado de carga
+        }
+    }
+
+    private async Task LoadLoanInfo()
+    {
+        try
+        {
+            loanInfo = await loanService.GetLoanById(PrestamoId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error al cargar la información del préstamo.";
+            Console.WriteLine($"Error en LoadLoanInfo: {ex.Message}");
+        }
     }
 
     private async Task LoadFuturePayments()
@@ -27,24 +447,17 @@
         try
         {
             futurePayments = await PaymentServices.GetPagosFuturos(PrestamoId);
-
             var hoy = DateOnly.FromDateTime(DateTime.Now);
 
             foreach (var payment in futurePayments)
             {
                 var daysDifference = payment.FechaPago.DayNumber - hoy.DayNumber;
 
-                // Actualizar estado y posibilidad de pago
                 if (payment.Estado != "Realizado")
                 {
-                    if (daysDifference <= 0) // Hoy o vencido
-                    {
-                        payment.PuedePagar = true;
-                    }
+                    payment.PuedePagar = daysDifference <= 0;
                 }
             }
-
-            StateHasChanged(); // Forzar actualización de la UI
         }
         catch (Exception ex)
         {
@@ -53,11 +466,68 @@
         }
     }
 
+    private async Task LoadPaymentHistory()
+    {
+        try
+        {
+            paymentHistory = await PaymentServices.GetPayments();
+            paymentHistory = paymentHistory.Where(p => p.PrestamoId == PrestamoId).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar historial de pagos: {ex.Message}");
+        }
+    }
+
+    private int CalculateProgress()
+    {
+        if (futurePayments == null || paymentHistory == null) return 0;
+
+        var totalPayments = paymentHistory.Count(p => p.PrestamoId == PrestamoId) + futurePayments.Count;
+        var completedPayments = paymentHistory.Count(p => p.PrestamoId == PrestamoId);
+
+        return totalPayments > 0 ? (int)Math.Round((double)completedPayments / totalPayments * 100) : 0;
+    }
+
+    private void ToggleShowDetails()
+    {
+        showDetails = !showDetails;
+    }
+
+    private void CalculateNewValues()
+    {
+        if (currentPayment == null) return;
+
+        var ratio = (double)(customAmount / currentPayment.MontoAPagar);
+
+        currentPayment.InteresPagado = (decimal)((double)currentPayment.InteresPagado * ratio);
+        currentPayment.CapitalPagado = customAmount - currentPayment.InteresPagado;
+        currentPayment.SaldoRestante += currentPayment.MontoAPagar - customAmount;
+    }
+
+
+    private void HandleAmountChange(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var amount) && currentPayment != null)
+        {
+            customAmount = amount;
+            sliderValue = (int)Math.Min(Math.Round((amount / currentPayment.MontoAPagar) * 100), 200);
+            CalculateNewValues();
+        }
+    }
+
+    private void HandlePaymentChange(PagoFuturoResponse payment)
+    {
+        currentPayment = payment;
+        customAmount = payment.MontoAPagar;
+        sliderValue = 100;
+    }
+
     private async Task HandleCreatePayment()
     {
         try
         {
-            if (montoPagado <= 0)
+            if (customAmount <= 0)
             {
                 await Swal.FireAsync("Error", "El monto pagado debe ser mayor a cero.", "error");
                 return;
@@ -65,13 +535,13 @@
 
             var pagoRequest = new PagoRequest
             {
-                PrestamoId = selectedPayment.PrestamoId,
-                FechaPago = selectedPayment.FechaPago,
-                MontoAPagar = selectedPayment.MontoAPagar,
-                MontoPagado = montoPagado,
-                InteresPagado = selectedPayment.InteresPagado,
-                CapitalPagado = selectedPayment.CapitalPagado,
-                SaldoRestante = selectedPayment.SaldoRestante,
+                PrestamoId = currentPayment.PrestamoId,
+                FechaPago = currentPayment.FechaPago,
+                MontoAPagar = currentPayment.MontoAPagar,
+                MontoPagado = customAmount,
+                InteresPagado = currentPayment.InteresPagado,
+                CapitalPagado = currentPayment.CapitalPagado,
+                SaldoRestante = currentPayment.SaldoRestante,
                 Estado = "Realizado"
             };
 
@@ -80,8 +550,8 @@
             if (success)
             {
                 await Swal.FireAsync("Éxito", "Pago registrado correctamente.", "success");
-                CloseModal();
                 await LoadFuturePayments();
+                await LoadPaymentHistory();
             }
             else
             {
@@ -95,345 +565,29 @@
         }
     }
 
-    private void OpenModal(PagoFuturoResponse payment)
+    private string GetStatusText(PagoFuturoResponse payment)
     {
-        selectedPayment = payment;
-        montoPagado = payment.MontoAPagar; // Establecer el monto a pagar por defecto
-        showModal = true;
+        if (payment == null) return "";
+
+        var hoy = DateOnly.FromDateTime(DateTime.Now);
+        var daysDifference = payment.FechaPago.DayNumber - hoy.DayNumber;
+
+        if (payment.Estado == "Realizado") return "Realizado";
+        if (daysDifference == 0) return "Hoy";
+        if (daysDifference < 0) return "Vencido";
+        if (daysDifference <= 7) return "Próximo";
+        return "Futuro";
     }
 
-    private void CloseModal()
+    private string GetDaysText(PagoFuturoResponse payment)
     {
-        showModal = false;
-        montoPagado = 0;
-    }
-}
+        if (payment == null) return "";
 
-@if (futurePayments == null)
-{
-    <p>Cargando...</p>
-}
-else if (errorMessage != null)
-{
-    <p class="text-red-500">Error: @errorMessage</p>
-}
-else
-{
-    <section class="container mx-auto p-6">
-        <div class="rounded-lg border bg-white shadow-md">
-            <div class="p-6 flex flex-col gap-6">
-               
-                <h1 class="text-3xl font-bold text-gray-800">Calendario de Pagos Futuros</h1>
+        var hoy = DateOnly.FromDateTime(DateTime.Now);
+        var daysDifference = payment.FechaPago.DayNumber - hoy.DayNumber;
 
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    @foreach (var payment in futurePayments)
-                    {
-                        var today = DateOnly.FromDateTime(DateTime.Now);
-                        var daysDifference = payment.FechaPago.DayNumber - today.DayNumber;
-                        var statusClass = "";
-                        var statusText = "";
-
-                        // Primero verificamos si el pago está realizado
-                        if (payment.Estado == "Realizado")
-                        {
-                            statusClass = "bg-green-100 text-green-800";
-                            statusText = "Realizado";
-                        }
-                        else
-                        {
-                            // Solo evaluamos los otros estados si el pago no está realizado
-                            if (daysDifference == 0)
-                            {
-                                statusClass = "bg-yellow-100 text-yellow-800";
-                                statusText = "Hoy";
-                                payment.PuedePagar = true; // Forzar que se pueda pagar si es hoy
-                            }
-                            else if (daysDifference < 0)
-                            {
-                                statusClass = "bg-red-100 text-red-800";
-                                statusText = "Vencido hace " + Math.Abs(daysDifference) + " días";
-                                payment.PuedePagar = true; // Permitir pagar pagos vencidos
-                            }
-                            else if (daysDifference <= 7)
-                            {
-                                statusClass = "bg-blue-100 text-blue-800";
-                                statusText = "Próximo (en " + daysDifference + " días)";
-                            }
-                            else
-                            {
-                                statusClass = "bg-gray-100 text-gray-800";
-                                statusText = "Futuro (en " + daysDifference + " días)";
-                            }
-                        }
-
-                        <div class="rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
-                            <!-- Header -->
-                            <div class="p-4 flex flex-row items-center justify-between">
-                                <h3 class="text-xl font-semibold text-gray-800">Pago #@payment.PagoId</h3>
-                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold @statusClass">
-                                    @statusText
-                                </div>
-                            </div>
-
-                            <!-- Content -->
-                            <div class="p-4 flex flex-col gap-4">
-                                <!-- Loan and Date Info -->
-                                <div class="flex flex-col gap-2 text-sm text-gray-600">
-                                    <div class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-4 w-4 text-gray-400">
-                                            <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                                            <line x1="2" x2="22" y1="10" y2="10"></line>
-                                        </svg>
-                                        <span>Préstamo: #@payment.PrestamoId</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar h-4 w-4 text-gray-400">
-                                            <path d="M8 2v4"></path>
-                                            <path d="M16 2v4"></path>
-                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                                            <path d="M3 10h18"></path>
-                                        </svg>
-                                        <span>Fecha: @payment.FechaPago.ToShortDateString()</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm">
-                                            @if (daysDifference == 0)
-                                            {
-                                                <text>Hoy</text>
-                                            }
-                                            else if (daysDifference < 0)
-                                            {
-                                                <text>Vencido hace @Math.Abs(daysDifference) días</text>
-                                            }
-                                            else
-                                            {
-                                                <text>Faltan @daysDifference días</text>
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Payment Details -->
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-gray-500">Monto a Pagar</span>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4 text-green-500">
-                                                <line x1="12" x2="12" y1="2" y2="22"></line>
-                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                            </svg>
-                                            <span class="text-lg font-bold text-gray-800">@payment.MontoAPagar</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-gray-500">Interés a Pagar</span>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-percent h-4 w-4 text-yellow-500">
-                                                <line x1="19" x2="5" y1="5" y2="19"></line>
-                                                <circle cx="6.5" cy="6.5" r="2.5"></circle>
-                                                <circle cx="17.5" cy="17.5" r="2.5"></circle>
-                                            </svg>
-                                            <span class="text-lg font-bold text-gray-800">@payment.InteresPagado</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-gray-500">Capital a Pagar</span>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-4 w-4 text-blue-500">
-                                                <line x1="12" x2="12" y1="2" y2="22"></line>
-                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                            </svg>
-                                            <span class="text-lg font-bold text-gray-800">@payment.CapitalPagado</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-gray-500">Saldo Restante</span>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet h-4 w-4 text-red-500">
-                                                <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"></path>
-                                                <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
-                                            </svg>
-                                            <span class="text-lg font-bold text-gray-800">@payment.SaldoRestante</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Footer Button -->
-                        <div class="p-4">
-                            <button class="whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 w-full
-            @((payment.Estado == "Realizado") ? "bg-green-600 hover:bg-green-700" :
-                                               (payment.PuedePagar ? "bg-green-600 hover:bg-green-700" : "bg-gray-400"))
-        text-white flex items-center justify-center gap-2"
-                                @onclick="() => OpenModal(payment)"
-                                disabled="@(payment.Estado == "Realizado")">
-
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4">
-                                        <path d="M5 12h14"></path>
-                                        <path d="M12 5v14"></path>
-                                    </svg>
-
-                            @if (payment.Estado == "Realizado")
-                                    {
-                                        <text>Pago Realizado</text>
-                                    }
-                                    else if (payment.FechaPago.DayNumber < DateOnly.FromDateTime(DateTime.Now).DayNumber)
-                                    {
-                                        <text>Pago Vencido</text>
-                                    }
-                                    else if (payment.FechaPago.DayNumber == DateOnly.FromDateTime(DateTime.Now).DayNumber)
-                                    {
-                                        <text>Registrar Pago</text>
-                                    }
-                                    else
-                                    {
-                                        <text>Programado</text>
-                                    }
-                                </button>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </section>
-
-    @* MODAL DE PAGO *@
-    @if (showModal)
-    {
-        <section class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
-            <div class="rounded-xl border bg-white w-full max-w-2xl shadow-xl">
-                <!-- Header -->
-                <div class="border-b p-6">
-                    <h2 class="text-2xl font-bold text-center">Registrar Pago</h2>
-                </div>
-
-                <!-- Content -->
-                <div class="p-6">
-                    <!-- Préstamo y Fecha de Pago -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <!-- Préstamo -->
-                        <div class="rounded-lg border p-4 bg-white">
-                            <div class="flex items-center gap-2 text-gray-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card">
-                                    <rect width="20" height="14" x="2" y="5" rx="2" />
-                                    <line x1="2" x2="22" y1="10" y2="10" />
-                                </svg>
-                                <span class="text-sm font-medium">Préstamo</span>
-                            </div>
-                            <p class="text-xl font-bold">#@selectedPayment?.PrestamoId</p>
-                        </div>
-
-                        <!-- Fecha de Pago -->
-                        <div class="rounded-lg border p-4 bg-white">
-                            <div class="flex items-center gap-2 text-gray-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar">
-                                    <rect width="18" height="18" x="3" y="4" rx="2" />
-                                    <line x1="16" y1="2" x2="16" y2="6" />
-                                    <line x1="8" y1="2" x2="8" y2="6" />
-                                    <line x1="3" y1="10" x2="21" y2="10" />
-                                </svg>
-                                <span class="text-sm font-medium">Fecha de Pago</span>
-                            </div>
-                            <p class="text-xl font-bold">@selectedPayment?.FechaPago.ToShortDateString()</p>
-                        </div>
-                    </div>
-
-                    <!-- Monto, Interés y Capital -->
-                    <div class="grid grid-cols-3 gap-4 mb-6">
-                        <!-- Monto a Pagar -->
-                        <div class="rounded-lg border p-4 bg-white">
-                            <div class="flex items-center gap-2 text-green-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign">
-                                    <line x1="12" y1="1" x2="12" y2="23" />
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                                </svg>
-                                <span class="text-sm font-medium">Monto a Pagar</span>
-                            </div>
-                            <p class="text-xl font-bold text-green-600">@selectedPayment?.MontoAPagar</p>
-                        </div>
-
-                        <!-- Interés a Pagar -->
-                        <div class="rounded-lg border p-4 bg-white">
-                            <div class="flex items-center gap-2 text-yellow-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-percent">
-                                    <line x1="19" y1="5" x2="5" y2="19" />
-                                    <circle cx="6.5" cy="6.5" r="2.5" />
-                                    <circle cx="17.5" cy="17.5" r="2.5" />
-                                </svg>
-                                <span class="text-sm font-medium">Interés a Pagar</span>
-                            </div>
-                            <p class="text-xl font-bold text-yellow-600">@selectedPayment?.InteresPagado</p>
-                        </div>
-
-                        <!-- Capital a Pagar -->
-                        <div class="rounded-lg border p-4 bg-white">
-                            <div class="flex items-center gap-2 text-red-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark">
-                                    <line x1="3" y1="22" x2="21" y2="22" />
-                                    <line x1="6" y1="18" x2="6" y2="11" />
-                                    <line x1="10" y1="18" x2="10" y2="11" />
-                                    <line x1="14" y1="18" x2="14" y2="11" />
-                                    <line x1="18" y1="18" x2="18" y2="11" />
-                                    <polygon points="12 2 20 7 4 7" />
-                                </svg>
-                                <span class="text-sm font-medium">Capital a Pagar</span>
-                            </div>
-                            <p class="text-xl font-bold text-red-600">@selectedPayment?.CapitalPagado</p>
-                        </div>
-                    </div>
-
-                    <!-- Saldo Restante -->
-                    <div class="mb-6">
-                        <div class="rounded-lg border p-4 bg-white">
-                            <div class="flex items-center gap-2 text-blue-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet">
-                                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-                                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-                                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-                                </svg>
-                                <span class="text-sm font-medium">Saldo Restante</span>
-                            </div>
-                            <p class="text-xl font-bold text-blue-600">@selectedPayment?.SaldoRestante</p>
-                        </div>
-                    </div>
-
-                    <!-- Monto Pagado Input -->
-                    <div class="mb-6">
-                        <label class="block mb-2" for="montoPagado">
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign">
-                                    <line x1="12" y1="1" x2="12" y2="23" />
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                                </svg>
-                                <span class="text-sm font-medium">Monto Pagado</span>
-                            </div>
-                        </label>
-                        <InputNumber id="montoPagado"
-                                     class="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 text-black focus:ring-green-500"
-                                     placeholder="0.00"
-                                     min="1"
-                                     @bind-Value="montoPagado" />
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex gap-4 justify-end">
-                        <button class="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
-                                @onclick="CloseModal">
-                            Cerrar
-                        </button>
-                        <button class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                                @onclick="HandleCreatePayment">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                <polyline points="17 21 17 13 7 13 7 21" />
-                                <polyline points="7 3 7 8 15 8" />
-                            </svg>
-                            Guardar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        if (daysDifference == 0) return "Hoy";
+        if (daysDifference < 0) return $"Vencido hace {Math.Abs(daysDifference)} días";
+        return $"Faltan {daysDifference} días";
     }
 }
